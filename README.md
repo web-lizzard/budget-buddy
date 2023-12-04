@@ -1,9 +1,9 @@
-#Budget Tracker App
+# Budget Tracker App
 
-##Overview
+## Overview
 The Budget Tracker App is a web-based application designed to help you track and manage your monthly budgets and expenses. It provides users with the ability to create budgets, categorize expenses, and gain insights into their financial health.
 
-##Features
+## Features
 - User Management: Register and log in securely using email and password. Use JSON Web Tokens (JWT) for session management.
 
 - Budget Management: Create, edit, and delete budgets for various expense categories. Automate monthly budget resets.
@@ -18,7 +18,7 @@ The Budget Tracker App is a web-based application designed to help you track and
 
 - Email Notifications: Receive email notifications when budget limits are exceeded.
 
-##Getting Started
+## Getting Started
 1. Prerequisites: Ensure you have Python installed.
 2. Installation:
 ```bash
@@ -30,7 +30,7 @@ pip install -r requirements.txt
 ```bash
 uvicorn main:app --reload
 ```
-##Usage
+##  Usage
 1. Register an account or log in.
 2. Create budgets and specify spending limits for categories.
 3. Record expenses, categorize them, and track your spending.
