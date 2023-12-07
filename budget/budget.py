@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from dataclasses import dataclass, field
 from monetary.money import Money
 from functools import reduce
@@ -19,11 +20,11 @@ class Expense:
 @dataclass
 class Budget:
     monthly_limit: Money
-    end_date: datetime
     categories: list[Category]
 
     expenses: list[Expense] = field(default_factory=list)
     start_date: datetime = datetime.now()
+    end_date: datetime = datetime.now() + relativedelta(month=1)
 
     @property
     def current_balance(self) -> Money:
@@ -35,6 +36,7 @@ class Budget:
 
 
 def associate_expense(expense: Expense, budgets: list[Budget]):
+    now = datetime.now()
     for budget in budgets:
-        if expense.category in budget.categories:
+        if expense.category in budget.categories and budget.end_date >= now:
             budget.expenses.append(expense)
