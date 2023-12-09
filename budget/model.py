@@ -24,7 +24,7 @@ class Budget:
 
     expenses: list[Expense] = field(default_factory=list)
     start_date: datetime = datetime.now()
-    end_date: datetime = datetime.now() + relativedelta(month=1)
+    end_date: datetime = start_date + relativedelta(month=1)
 
     @property
     def current_balance(self) -> Money:
@@ -37,6 +37,8 @@ class Budget:
 
 def associate_expense(expense: Expense, budgets: list[Budget]):
     now = datetime.now()
+
     for budget in budgets:
-        if expense.category in budget.categories and budget.end_date >= now:
+        print(budget.end_date)
+        if expense.category in budget.categories:
             budget.expenses.append(expense)

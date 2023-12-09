@@ -1,13 +1,11 @@
-from .budget import Category, Expense, Budget, associate_expense
+from .model import Category, Expense, Budget, associate_expense
 from monetary.money import Money
 from datetime import datetime
 
 
 def create_budget() -> tuple[Budget, Expense, Category]:
     category = Category(name="Meal")
-    budget = Budget(
-        monthly_limit=Money.mint(2000), end_date=datetime.now(), categories=[category]
-    )
+    budget = Budget(monthly_limit=Money.mint(2000), categories=[category])
     expense = Expense(category=category, amount=Money.mint(25.4))
 
     return (budget, expense, category)
@@ -18,7 +16,6 @@ def test_associate_expense():
     second_category = Category(name="name")
     second_budget = Budget(
         monthly_limit=Money.mint(2000),
-        end_date=datetime.now(),
         categories=[second_category],
     )
 
