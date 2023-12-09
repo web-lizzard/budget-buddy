@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from monetary.money import Money
 from functools import reduce
 from decimal import Decimal
+from typing import Sequence
 
 
 @dataclass
@@ -24,7 +25,7 @@ class Expense:
 
 @dataclass
 class Budget:
-    categories: list[Category]
+    categories: Sequence[Category]
     _monthly_limit: float | Decimal
 
     expenses: list[Expense] = field(default_factory=list)

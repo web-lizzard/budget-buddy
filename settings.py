@@ -4,7 +4,7 @@ from dotenv import find_dotenv
 
 
 class Database(BaseModel):
-    uri: str
+    url: str
 
 
 class Settings(BaseSettings):
