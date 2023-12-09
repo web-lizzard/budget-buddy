@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_USER: budget_buddy
+      POSTGRES_PASSWORD: budget_buddy
+      POSTGRES_DB: budget_buddy
+      PGDATA: /var/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/pgdata
+
+  backend:
+    build:
+      context: .
+      target: development
+    depends_on:
+      - postgres
+    environment:
+      DATABASE__URL: postgresql://budget_buddy:budget_buddy@postgres:5432/budget_buddy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+
+volumes:
+  pgdata:
