@@ -5,8 +5,8 @@ from datetime import datetime
 
 def create_budget() -> tuple[Budget, Expense, Category]:
     category = Category(name="Meal")
-    budget = Budget(monthly_limit=Money.mint(2000), categories=[category])
-    expense = Expense(category=category, amount=Money.mint(25.4))
+    budget = Budget(_monthly_limit=2000, categories=[category])
+    expense = Expense(category=category, _amount=25.4)
 
     return (budget, expense, category)
 
@@ -15,7 +15,7 @@ def test_associate_expense():
     budget, expense, _ = create_budget()
     second_category = Category(name="name")
     second_budget = Budget(
-        monthly_limit=Money.mint(2000),
+        _monthly_limit=2000,
         categories=[second_category],
     )
 
@@ -27,7 +27,7 @@ def test_associate_expense():
 
 def test_compute_expensed_in_budget():
     budget, expense, category = create_budget()
-    second_expense = Expense(category=category, amount=Money.mint(40))
+    second_expense = Expense(category=category, _amount=40)
 
     associate_expense(expense=expense, budgets=[budget])
     associate_expense(expense=second_expense, budgets=[budget])

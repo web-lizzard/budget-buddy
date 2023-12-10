@@ -2,17 +2,15 @@ from sqlalchemy.orm import registry, relationship
 from sqlalchemy import (
     Table,
     Column,
-    Integer,
+    DECIMAL,
     String,
     ForeignKey,
     DateTime,
     MetaData,
-    BINARY,
     create_engine,
     Uuid,
 )
 from budget.budget import Budget, Category, Expense
-from uuid import uuid4
 from settings import settings
 
 
@@ -22,14 +20,10 @@ metadata = MetaData()
 engine = create_engine(settings.database.url)
 
 
-def _create_uuid():
-    return uuid4()
-
-
 category_table = Table(
     "categories",
     metadata,
-    Column("id", Uuid(as_uuid=True), primary_key=True, default=uuid4, nullable=False),
+    Column("id", Uuid(as_uuid=True), primary_key=True, unique=True, nullable=False),
     Column("name", String(length=100)),
 )
 
@@ -37,22 +31,20 @@ category_table = Table(
 expense_table = Table(
     "expenses",
     metadata,
-    Column("id", Uuid(as_uuid=True), primary_key=True, default=_create_uuid),
-    Column("amount_int", Integer),
+    Column("id", Uuid(as_uuid=True), primary_key=True, unique=True, nullable=False),
     Column("expense_date", DateTime),
     Column("category_id", ForeignKey("categories.id")),
+    Column("_amount", DECIMAL),
 )
 
 
 budget_table = Table(
     "budgets",
     metadata,
-    Column(
-        "id", Uuid(as_uuid=True), primary_key=True, unique=True, default=_create_uuid
-    ),
-    Column("limit", Integer),
+    Column("id", Uuid(as_uuid=True), primary_key=True, unique=True, nullable=False),
     Column("start_date", DateTime),
     Column("end_date", DateTime),
+    Column("_monthly_limit", DECIMAL),
 )
 
 budget_category_association_table = Table(
@@ -73,8 +65,12 @@ budget_expense_association_table = Table(
 def start_mappers():
     category_mapper = mapper_registry.map_imperatively(Category, category_table)
 
-    expense_mapper = mapper_registry.map_imperatively(Expense, expense_table)
-    budget_mapper = mapper_registry.map_imperatively(
+    expense_mapper = mapper_registry.map_imperatively(
+        Expense,
+        expense_table,
+        properties={"category": relationship(category_mapper)},
+    )
+    mapper_registry.map_imperatively(
         Budget,
         budget_table,
         properties={

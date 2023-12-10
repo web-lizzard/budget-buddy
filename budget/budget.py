@@ -3,37 +3,44 @@ from dateutil.relativedelta import relativedelta
 from dataclasses import dataclass, field
 from monetary.money import Money
 from functools import reduce
+from decimal import Decimal
+from uuid import uuid4, UUID
 
 
 @dataclass
 class Category:
     name: str
 
-    id: str | None = None
+    id: UUID = field(default_factory=uuid4)
 
 
 @dataclass
 class Expense:
     category: Category
-    amount: Money
-    expense_date: datetime = datetime.now()
+    _amount: float | Decimal
 
-    id: str | None = None
+    expense_date: datetime = datetime.now()
+    id: UUID = field(default_factory=uuid4)
 
     @property
-    def amount_int(self):
-        return self.amount.current_amount
+    def amount(self):
+        return Money.mint(self._amount)
 
 
 @dataclass
 class Budget:
-    monthly_limit: Money
     categories: list[Category]
+
+    _monthly_limit: float | Decimal
 
     expenses: list[Expense] = field(default_factory=list)
     start_date: datetime = datetime.now()
     end_date: datetime = datetime.now() + relativedelta(months=1)
-    id: str | None = None
+    id: UUID = field(default_factory=uuid4)
+
+    @property
+    def monthly_limit(self) -> Money:
+        return Money.mint(self._monthly_limit)
 
     @property
     def current_balance(self) -> Money:
@@ -50,6 +57,8 @@ class Budget:
 
 def associate_expense(expense: Expense, budgets: list[Budget]):
     now = datetime.now()
+    print(expense)
     for budget in budgets:
         if expense.category in budget.categories and budget.end_date >= now:
             budget.expenses.append(expense)
+            print("eh")
