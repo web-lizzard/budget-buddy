@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, clear_mappers
 
 from db.model import start_mappers, metadata
+from settings import Setting, DatabaseSettings
 
 
 @pytest.fixture
