@@ -7,7 +7,7 @@ services:
       POSTGRES_DB: budget_buddy
       PGDATA: /var/pgdata
     ports:
-      - "5432:5432"
+      - "5431:5432"
     volumes:
       - pgdata:/var/pgdata
 

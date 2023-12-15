@@ -1,7 +1,6 @@
 .PHONY: *
 
 BACKEND_RUN := @docker compose run --rm backend
-FRONTEND_RUN := @docker compose run --rm frontend
 
 DEPENDENCY ?= $(shell bash -c 'read -p "Dependency: " dependency; echo $$dependency')
 MESSAGE ?= $(shell bash -c 'read -p "Message: " message; echo $$message')
