@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from budget.budget import Budget, Category, associate_expense, Expense
 from monetary.money import Money
 from db.session import get_session
-from db.repository import SQLRepository
+from db.repository import SQLRepository, Repository
 from datetime import datetime
 from decimal import Decimal
 from db.session import get_session
@@ -14,6 +14,10 @@ from db.model import start_mappers
 app = FastAPI()
 
 start_mappers()
+
+
+def get_repo(session: Session) -> Repository:
+    return SQLRepository(session=session, model=Budget)
 
 
 def get_database():
@@ -61,16 +65,15 @@ def create_category(
 @app.post("/create-budget")
 def create_budget(budget_dto: CreateBudgetDTO):
     session = get_session()
+    budget_repository = SQLRepository(session=session, model=Budget)
+    category_repository = SQLRepository(session=session, model=Category)
 
-    categories = (
-        session.query(Category)
-        .filter(or_(*(Category.id == id for id in budget_dto.categories_id)))
-        .all()
+    categories = category_repository.list(
+        or_(*(Category.id == id for id in budget_dto.categories_id))
     )
-
     budget = Budget(_monthly_limit=budget_dto.monthly_amount, categories=categories)
 
-    session.add(budget)
+    budget_repository.add(budget)
     session.commit()
 
     return budget
@@ -79,11 +82,12 @@ def create_budget(budget_dto: CreateBudgetDTO):
 @app.post("/add-expense")
 def expense(dto: AddExpenseDTO):
     session = get_session()
+    budget_repository = SQLRepository(session=session, model=Budget)
+    category_repository = SQLRepository(session=session, model=Category)
 
-    category = session.query(Category).filter_by(id=dto.category_id).first()
-    budgets = session.query(Budget).select_from(Category).all()
+    category = category_repository.get(id=dto.category_id)
+    budgets = budget_repository.list(join_table=Category)
     expense = Expense(category=category, _amount=dto.amount)
 
     associate_expense(expense=expense, budgets=budgets)
-
     session.commit()
