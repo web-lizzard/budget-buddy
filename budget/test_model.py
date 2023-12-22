@@ -1,4 +1,4 @@
-from .budget import Category, Expense, Budget, associate_expense
+from .model import Category, Expense, Budget, associate_expense
 
 
 def create_budget() -> tuple[Budget, Expense, Category]:

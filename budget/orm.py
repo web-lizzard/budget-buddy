@@ -1,4 +1,3 @@
-from sqlalchemy.orm import registry, relationship
 from sqlalchemy import (
     Table,
     Column,
@@ -6,18 +5,12 @@ from sqlalchemy import (
     String,
     ForeignKey,
     DateTime,
-    MetaData,
-    create_engine,
     Uuid,
+    MetaData,
 )
-from budget.budget import Budget, Category, Expense
-from settings import settings
-
-
-mapper_registry = registry()
-metadata = MetaData()
-
-engine = create_engine(settings.database.url)
+from sqlalchemy.orm import relationship, registry
+from budget.model import Budget, Category, Expense
+from db.session import metadata, mapper_registry
 
 
 category_table = Table(

@@ -2,7 +2,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, clear_mappers
 
-from db.model import start_mappers, metadata
+from db.session import metadata
+from db.registry import start_mappers
 
 
 @pytest.fixture

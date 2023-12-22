@@ -1,15 +1,14 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, select, any_
+from sqlalchemy import or_
 from pydantic import BaseModel
-from budget.budget import Budget, Category, associate_expense, Expense
-from monetary.money import Money
+from budget.model import Budget, Category, associate_expense, Expense
 from db.session import get_session
 from db.repository import SQLRepository, Repository
 from datetime import datetime
 from decimal import Decimal
 from db.session import get_session
-from db.model import start_mappers
+from db.registry import start_mappers
 
 app = FastAPI()
 
@@ -79,7 +78,7 @@ def create_budget(budget_dto: CreateBudgetDTO):
     return budget
 
 
-@app.post("/add-expense")
+@app.post("/add-expense", status_code=201)
 def expense(dto: AddExpenseDTO):
     session = get_session()
     budget_repository = SQLRepository(session=session, model=Budget)
