@@ -68,7 +68,7 @@ def create_budget(budget_dto: CreateBudgetDTO):
     category_repository = SQLRepository(session=session, model=Category)
 
     categories = category_repository.list(
-        or_(*(Category.id == id for id in budget_dto.categories_id))
+        criterion=or_(*(Category.id == id for id in budget_dto.categories_id))
     )
     budget = Budget(_monthly_limit=budget_dto.monthly_amount, categories=categories)
 

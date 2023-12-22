@@ -26,11 +26,11 @@ class SQLRepository:
 
     def list(self, criterion=None, join_table=None) -> list[Any]:
         entities = self._session.query(self._model)
-        if join_table:
+        if join_table is not None:
             entities = entities.select_from(join_table)
 
-        if criterion:
-            entities.filter(criterion)
+        if criterion is not None:
+            entities = entities.filter(criterion)
 
         return entities.all()
 
