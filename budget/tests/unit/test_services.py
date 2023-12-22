@@ -1,8 +1,8 @@
-from .model import Budget, Category
+from budget.domain.model import Budget, Category
 import dto
 from db.repository import FakeRepository
 from db.session import FakeSession
-from budget import services
+from budget.services import services
 import pytest
 
 

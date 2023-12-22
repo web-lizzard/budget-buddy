@@ -1,5 +1,5 @@
 from db.repository import Repository
-from budget.model import Budget, Expense, Category, associate_expense
+from budget.domain.model import Budget, Expense, Category, associate_expense
 from sqlalchemy import or_
 import dto
 

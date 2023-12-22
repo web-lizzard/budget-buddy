@@ -8,7 +8,7 @@ from sqlalchemy import (
     Uuid,
 )
 from sqlalchemy.orm import relationship, registry
-from budget.model import Budget, Category, Expense
+from budget.domain.model import Budget, Category, Expense
 from db.session import metadata, mapper_registry
 
 

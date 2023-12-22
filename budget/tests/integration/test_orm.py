@@ -1,4 +1,4 @@
-from budget.model import Budget, Category, associate_expense, Expense
+from budget.domain.model import Budget, Category, associate_expense, Expense
 
 
 def test_create_budget(session):
