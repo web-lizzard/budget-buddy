@@ -30,10 +30,10 @@ class SQLRepository:
         join_table = kwargs.get("join_table")
         criterion = kwargs.get("criterion")
         entities = self._session.query(self._model)
-        if join_table:
+        if join_table is not None:
             entities = entities.select_from(join_table)
 
-        if criterion:
+        if criterion is not None:
             entities = entities.filter(criterion)
 
         return entities.all()
