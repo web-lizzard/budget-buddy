@@ -62,4 +62,5 @@ def associate_expense(expense: Expense, budgets: list[Budget]):
             expense.category in budget.categories
             and budget.end_date >= expense.expense_date
         ):
+            print("expense", expense)
             budget.expenses.append(expense)

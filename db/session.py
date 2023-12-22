@@ -13,3 +13,10 @@ mapper_registry = registry()
 get_session = sessionmaker(
     autocommit=False, autoflush=False, bind=engine, expire_on_commit=False
 )
+
+
+class FakeSession:
+    committed = False
+
+    def commit(self):
+        self.committed = True
