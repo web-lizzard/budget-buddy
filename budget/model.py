@@ -4,18 +4,27 @@ from dataclasses import dataclass, field
 from monetary.money import Money
 from functools import reduce
 from decimal import Decimal
+from uuid import uuid4, UUID
+
+
+def get_relative_delta(**kwargs):
+    return relativedelta(**kwargs)
 
 
 @dataclass
 class Category:
     name: str
 
+    id: UUID = field(default_factory=uuid4)
+
 
 @dataclass
 class Expense:
     category: Category
-    _amount: Decimal | float
+    _amount: float | Decimal
+
     expense_date: datetime = datetime.now()
+    id: UUID = field(default_factory=uuid4)
 
     @property
     def amount(self) -> Money:
@@ -27,9 +36,12 @@ class Budget:
     categories: list[Category]
     _monthly_limit: float | Decimal
 
+    _monthly_limit: float | Decimal
+
+    id: UUID = field(default_factory=uuid4)
     expenses: list[Expense] = field(default_factory=list)
+    end_date: datetime = datetime.now() + get_relative_delta(months=1)
     start_date: datetime = datetime.now()
-    end_date: datetime = datetime.now() + relativedelta(months=1)
 
     @property
     def monthly_limit(self) -> Money:
