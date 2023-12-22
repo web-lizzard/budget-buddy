@@ -6,10 +6,10 @@ from typing import Any
 
 
 class Repository(Protocol):
-    def get(self) -> None | Any:
+    def get(self, **kwargs) -> Any | None:
         ...
 
-    def list(self) -> list[Any]:
+    def list(self, **kwargs) -> list[Any]:
         ...
 
     def add(self, entity):
@@ -22,9 +22,13 @@ class SQLRepository:
         self._session = session
 
     def get(self, **kwarg) -> Any | None:
-        return self._session.query(self._model).filter_by(**kwarg).first()
+        item = self._session.query(self._model).filter_by(**kwarg).first()
 
-    def list(self, criterion=None, join_table=None) -> list[Any]:
+        return item
+
+    def list(self, **kwargs) -> list[Any]:
+        join_table = kwargs.get("join_table")
+        criterion = kwargs.get("criterion")
         entities = self._session.query(self._model)
         if join_table is not None:
             entities = entities.select_from(join_table)
@@ -40,13 +44,16 @@ class SQLRepository:
 
 class FakeRepository:
     def __init__(self, entities: list) -> None:
-        self._entities = set(entities)
+        self._entities = entities
 
-    def get(self, id):
-        return next(e for e in self._entities if self._entities.id == id)
+    def get(self, **kwargs):
+        try:
+            return next(e for e in self._entities if str(e.id) == kwargs["id"])
+        except StopIteration:
+            return None
 
-    def list(self):
+    def list(self, **kwargs):
         return list(self._entities)
 
     def add(self, entity):
-        self._entities.add(entity)
+        self._entities.append(entity)

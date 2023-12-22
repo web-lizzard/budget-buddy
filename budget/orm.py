@@ -6,7 +6,6 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     Uuid,
-    MetaData,
 )
 from sqlalchemy.orm import relationship, registry
 from budget.model import Budget, Category, Expense
