@@ -27,13 +27,14 @@ class Expense:
     id: UUID = field(default_factory=uuid4)
 
     @property
-    def amount(self):
+    def amount(self) -> Money:
         return Money.mint(self._amount)
 
 
 @dataclass
 class Budget:
     categories: list[Category]
+    _monthly_limit: float | Decimal
 
     _monthly_limit: float | Decimal
 
@@ -56,7 +57,9 @@ class Budget:
 
 
 def associate_expense(expense: Expense, budgets: list[Budget]):
-    now = datetime.now()
     for budget in budgets:
-        if expense.category in budget.categories and budget.end_date >= now:
+        if (
+            expense.category in budget.categories
+            and budget.end_date >= expense.expense_date
+        ):
             budget.expenses.append(expense)
