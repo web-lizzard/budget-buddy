@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, registry
 from budget.domain.model import Budget, Category, Expense
-from db.session import metadata, mapper_registry
+from common.db.session import metadata, mapper_registry
 
 
 category_table = Table(

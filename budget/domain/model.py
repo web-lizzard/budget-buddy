@@ -1,7 +1,7 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from dataclasses import dataclass, field
-from monetary.money import Money
+from common.monetary.money import Money
 from functools import reduce
 from decimal import Decimal
 from uuid import uuid4, UUID

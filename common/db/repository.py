@@ -1,11 +1,12 @@
 from typing import Protocol
+from abc import ABC
 
 from sqlalchemy.orm import Session
 
 from typing import Any
 
 
-class Repository(Protocol):
+class Repository(ABC):
     def get(self, **kwargs) -> Any | None:
         ...
 
@@ -16,7 +17,7 @@ class Repository(Protocol):
         ...
 
 
-class SQLRepository:
+class SQLRepository(Repository):
     def __init__(self, session: Session, model) -> None:
         self._model = model
         self._session = session

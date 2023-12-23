@@ -20,3 +20,11 @@ class FakeSession:
 
     def commit(self):
         self.committed = True
+
+
+def get_database():
+    db = get_session()
+    try:
+        yield get_session()
+    finally:
+        db.close()

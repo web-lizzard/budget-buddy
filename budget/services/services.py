@@ -1,6 +1,5 @@
-from db.repository import Repository
+from budget.adapters.repository import BudgetRepository
 from budget.domain.model import Budget, Expense, Category, associate_expense
-from sqlalchemy import or_
 import dto
 
 
@@ -8,7 +7,7 @@ class CategoriesNotFound(Exception):
     pass
 
 
-def create_category(dto: dto.CreateProductDTO, repository: Repository, session):
+def create_category(dto: dto.CreateProductDTO, repository: BudgetRepository, session):
     category = Category(name=dto.name)
     repository.add(category)
 
@@ -17,14 +16,11 @@ def create_category(dto: dto.CreateProductDTO, repository: Repository, session):
 
 
 def create_budget(
-    budget_repository: Repository,
-    categories_repository: Repository,
+    budget_repository: BudgetRepository,
     dto: dto.CreateBudgetDTO,
     session,
 ):
-    categories = categories_repository.list(
-        # criterion=or_(*(Category.id == id for id in dto.categories_id))
-    )
+    categories = budget_repository.find_categories_by_ids(dto.categories_id)
 
     if not len(categories):
         raise CategoriesNotFound("Impossible to create budget without categories")
@@ -37,12 +33,11 @@ def create_budget(
 
 
 def associate_expense_to_budgets(
-    budget_repository: Repository,
-    category_repository: Repository,
+    budget_repository: BudgetRepository,
     dto: dto.AddExpenseDTO,
     session,
 ):
-    category = category_repository.get(id=dto.category_id)
+    category = budget_repository.find_category(id=dto.category_id)
 
     if not category:
         raise CategoriesNotFound("Category not found")

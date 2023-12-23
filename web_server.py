@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from db.session import metadata, engine
-from db.registry import start_mappers
+from common.db.session import metadata, engine
+from common.db.registry import start_mappers
 from budget.web_server import router as budget_router
 
 

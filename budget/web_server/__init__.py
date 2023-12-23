@@ -1,36 +1,41 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
 from budget.domain.model import Budget, Category
-from db.session import get_session
-from db.repository import SQLRepository, Repository
-from db.session import get_session
+from budget.adapters.repository import SQLBudgetRepository
+from common.db.session import get_database
 from budget.services import services
 import dto
 
-router = APIRouter(prefix="/budgets")
+router = APIRouter(prefix="/budgets", tags=["budget"])
 
 
-def get_repo(session: Session) -> Repository:
-    return SQLRepository(session=session, model=Budget)
+@router.post("/", response_model=Budget)
+def create_budget(
+    budget_dto: dto.CreateBudgetDTO, session: Session = Depends(get_database)
+):
+    budget_repository = SQLBudgetRepository(session=session, model=Budget)
 
-
-def get_database():
-    db = get_session()
     try:
-        yield get_session()
-    finally:
-        db.close()
+        budget = services.create_budget(
+            budget_repository=budget_repository,
+            dto=budget_dto,
+            session=session,
+        )
+
+        return budget
+    except services.CategoriesNotFound as error:
+        raise HTTPException(status_code=400, detail=f"{error}")
 
 
 @router.post(
-    "/create-category",
+    "/category",
     response_model=Category,
 )
 def create_category(
     category_dto: dto.CreateProductDTO, session: Session = Depends(get_database)
 ):
-    repository = SQLRepository(session=session, model=Category)
+    repository = SQLBudgetRepository(session=session, model=Budget)
     category = services.create_category(
         dto=category_dto, session=session, repository=repository
     )
@@ -38,31 +43,15 @@ def create_category(
     return category
 
 
-@router.post("/create-budget")
-def create_budget(budget_dto: dto.CreateBudgetDTO):
-    session = get_session()
-    budget_repository = SQLRepository(session=session, model=Budget)
-    category_repository = SQLRepository(session=session, model=Category)
+@router.post("/expense", status_code=201)
+def expense(dto: dto.AddExpenseDTO, session: Session = Depends(get_database)):
+    budget_repository = SQLBudgetRepository(session=session, model=Budget)
 
-    budget = services.create_budget(
-        budget_repository=budget_repository,
-        categories_repository=category_repository,
-        dto=budget_dto,
-        session=session,
-    )
-
-    return budget
-
-
-@router.post("/add-expense", status_code=201)
-def expense(dto: dto.AddExpenseDTO):
-    session = get_session()
-    budget_repository = SQLRepository(session=session, model=Budget)
-    category_repository = SQLRepository(session=session, model=Category)
-
-    services.associate_expense_to_budgets(
-        budget_repository=budget_repository,
-        category_repository=category_repository,
-        session=session,
-        dto=dto,
-    )
+    try:
+        services.associate_expense_to_budgets(
+            budget_repository=budget_repository,
+            session=session,
+            dto=dto,
+        )
+    except services.CategoriesNotFound as error:
+        raise HTTPException(status_code=400, detail=f"{error}")
