@@ -1,8 +1,5 @@
-from budget.web_server import router, get_database
 from fastapi.testclient import TestClient
 from dto import CreateProductDTO, CreateBudgetDTO, AddExpenseDTO
-from common.db.session import sessionmaker
-from common.db.registry import start_mappers
 from common.db.session import metadata
 from conftest import override_get_db, engine
 import uuid
@@ -18,7 +15,7 @@ client = TestClient(app=app)
 
 
 def test_create_category():
-    app.dependency_overrides[get_database] = override_get_db
+    # app.dependency_overrides[get_database] = override_get_db
 
     dto = CreateProductDTO(name="test5")
 
@@ -30,7 +27,7 @@ def test_create_category():
 
 
 def test_create_budget():
-    app.dependency_overrides[get_database] = override_get_db
+    # app.dependency_overrides[get_database] = override_get_db
 
     dto = CreateProductDTO(name="test6")
 
@@ -47,7 +44,7 @@ def test_create_budget():
 
 
 def test_add_expense():
-    app.dependency_overrides[get_database] = override_get_db
+    # app.dependency_overrides[get_database] = override_get_db
 
     dto = CreateProductDTO(name="test6")
 
