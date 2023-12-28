@@ -36,7 +36,7 @@ class FakeBudgetRepository(FakeRepository, BudgetRepository):
         self._categories = categories
 
     def find_categories_by_ids(self, ids: list[str]) -> list[model.Category]:
-        return [item for item in self._categories if item.id in ids]
+        return [item for item in self._categories if str(item.id) in ids]
 
     def find_category(self, id) -> model.Category | None:
         try:
