@@ -14,7 +14,7 @@ router = APIRouter(prefix="/budgets", tags=["budget"])
 def create_budget(
     budget_dto: dto.CreateBudgetDTO, session: Session = Depends(get_database)
 ):
-    budget_repository = SQLBudgetRepository(session=session, model=Budget)
+    budget_repository = SQLBudgetRepository(session=session)
 
     try:
         budget = services.create_budget(
@@ -35,7 +35,7 @@ def create_budget(
 def create_category(
     category_dto: dto.CreateProductDTO, session: Session = Depends(get_database)
 ):
-    repository = SQLBudgetRepository(session=session, model=Budget)
+    repository = SQLBudgetRepository(session=session)
     category = services.create_category(
         dto=category_dto, session=session, repository=repository
     )
@@ -45,7 +45,7 @@ def create_category(
 
 @router.post("/expense", status_code=201)
 def expense(dto: dto.AddExpenseDTO, session: Session = Depends(get_database)):
-    budget_repository = SQLBudgetRepository(session=session, model=Budget)
+    budget_repository = SQLBudgetRepository(session=session)
 
     try:
         services.associate_expense_to_budgets(

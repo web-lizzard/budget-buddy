@@ -11,7 +11,7 @@ class CreateProductDTO(BaseModel):
 
 class CreateBudgetDTO(BaseModel):
     categories_id: list[str]
-    monthly_amount: float | Decimal
+    monthly_amount: float
 
     start_date: datetime | None = None
     end_dat: datetime | None = None
@@ -26,4 +26,4 @@ class CreateBudgetDTO(BaseModel):
 
 class AddExpenseDTO(BaseModel):
     category_id: str
-    amount: float | Decimal
+    amount: float

@@ -1,7 +1,9 @@
+from sqlalchemy.orm import Session
 from budget.domain import model
 from common.db.repository import Repository, SQLRepository, FakeRepository
 from abc import abstractmethod
 from sqlalchemy import or_, select, false
+import uuid
 
 
 class BudgetRepository(Repository):
@@ -15,14 +17,17 @@ class BudgetRepository(Repository):
 
 
 class SQLBudgetRepository(SQLRepository, BudgetRepository):
+    def __init__(self, session: Session) -> None:
+        super().__init__(session, model.Budget)
+
     def find_categories_by_ids(self, ids: list[str]):
         statement = select(model.Category).where(
-            or_(*(model.Category.id == id for id in ids), false())
+            or_(*(model.Category.id == uuid.UUID(id) for id in ids), false())
         )
         return self._session.scalars(statement=statement).all()
 
     def find_category(self, id):
-        return self._session.query(model.Category).filter_by(id=id).first()
+        return self._session.query(model.Category).filter_by(id=uuid.UUID(id)).first()
 
 
 class FakeBudgetRepository(FakeRepository, BudgetRepository):

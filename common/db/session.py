@@ -6,8 +6,8 @@ from sqlalchemy import MetaData
 
 
 metadata = MetaData()
-engine = create_engine(settings.database.url)
 mapper_registry = registry()
+engine = create_engine(settings.database.url)
 
 
 get_session = sessionmaker(
@@ -25,6 +25,6 @@ class FakeSession:
 def get_database():
     db = get_session()
     try:
-        yield get_session()
+        yield db
     finally:
         db.close()

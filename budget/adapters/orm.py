@@ -7,7 +7,7 @@ from sqlalchemy import (
     DateTime,
     Uuid,
 )
-from sqlalchemy.orm import relationship, registry
+from sqlalchemy.orm import relationship
 from budget.domain.model import Budget, Category, Expense
 from common.db.session import metadata, mapper_registry
 
