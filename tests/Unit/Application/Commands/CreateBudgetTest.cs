@@ -27,8 +27,9 @@ public class CreateBudgetTests
     {
         var command = new CreateBudget(
             new Date(_clock.Current()).AddDays(-1),
+            new Date(_clock.Current()).AddDays(-1),
             [Guid.Empty],
-            "test", new Monetary(100000, Currency.USD));
+            "test", new Monetary(100000, Currency.USD), "");
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<InvalidDateException>();
@@ -37,11 +38,12 @@ public class CreateBudgetTests
     [Fact]
     public async void should_fail_if_budget_with_given_name_for_given_users_already_exist()
     {
-        var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(100000, Currency.USD));
+        var command = new CreateBudget(new Date(_clock.Current()), new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
+            100000, Currency.USD), "");
         var id = Guid.NewGuid();
         await _repository.Save(new Budget(id,
             "test",
-            100000,
+            new Monetary(100000, Currency.USD),
             [Guid.Empty],
             command.StartDate,
             command.StartDate.AddDays(40),
@@ -55,7 +57,10 @@ public class CreateBudgetTests
     [Fact]
     public void should_fail_if_budget_name_is_too_short()
     {
-        var record = Record.Exception(() => new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "sh", new Monetary(100000, Currency.USD)));
+        var record = Record.Exception(() => new CreateBudget(new Date(_clock.Current()), new Date(_clock.Current()),
+            [Guid.Empty],
+            "sh",
+            new Monetary(100000, Currency.USD), ""));
 
         record.ShouldBeOfType<BudgetNameTooShortException>();
     }
@@ -63,8 +68,26 @@ public class CreateBudgetTests
     [Fact]
     public void should_fail_if_limit_is_too_low()
     {
-        var record = Record.Exception(() => new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(10000, Currency.USD)));
+        var record = Record.Exception(() => new CreateBudget
+        (new Date(_clock.Current()),
+        new Date(_clock.Current()).AddDays(40),
+            [Guid.Empty],
+            "test",
+            new Monetary(10000, Currency.USD), ""));
 
         record.ShouldBeOfType<TooShortLimitException>();
+    }
+
+
+    [Fact]
+    public async void should_succed_with_correct_command()
+    {
+        var command = new CreateBudget(
+            new Date(_clock.Current()), new Date(_clock.Current()).AddDays(50), [Guid.Empty], "test", new Monetary(100000,
+                Currency.USD), ""
+        );
+
+        await _handler.Handle(command);
+        (await _repository.isBudgetExist(command.Name, command.Users)).ShouldBe(true);
     }
 }

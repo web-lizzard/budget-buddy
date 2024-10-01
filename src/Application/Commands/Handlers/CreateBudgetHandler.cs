@@ -1,3 +1,4 @@
+using BudgetBuddy.Domain.Eniities;
 using BudgetBuddy.Domain.Exceptions;
 using BudgetBuddy.Domain.Ports;
 using BudgetBuddy.Domain.ValueObjects;
@@ -28,5 +29,16 @@ public sealed class CreateBudgetHandler(Clock clock, BudgetRepository repository
             throw new BudgetAlreadyExistsException(command.Name);
         }
 
+
+        var budget = new Budget(
+            Guid.NewGuid(),
+            command.Name,
+            command.Limit,
+            command.Users,
+            command.StartDate,
+            command.EndDate,
+            command.CreationPolicy);
+
+        await _repository.Save(budget);
     }
 }
