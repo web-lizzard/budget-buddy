@@ -5,10 +5,10 @@ public record Name
 {
     public Name(string value)
     {
-        ChangeName(value);
+        SetName(value);
     }
 
-    public void ChangeName(string value)
+    private void SetName(string value)
     {
         if (value.Length is < 3)
         {
