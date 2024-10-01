@@ -28,13 +28,13 @@ public sealed record DatePeriodSchema
             case Type.NTH_WORKING_DAY:
                 if (value > RegularDayBreakpoint)
                 {
-                    throw new ExceededDayForPolicy(value, RegularDayBreakpoint);
+                    throw new ExceededDayForPeriodSchemaException(value, RegularDayBreakpoint);
                 }
                 break;
             case Type.NTH_REGULAR_DAY:
                 if (value > WorkingDayBreakpoint)
                 {
-                    throw new ExceededDayForPolicy(value, WorkingDayBreakpoint);
+                    throw new ExceededDayForPeriodSchemaException(value, WorkingDayBreakpoint);
                 }
                 break;
         }
