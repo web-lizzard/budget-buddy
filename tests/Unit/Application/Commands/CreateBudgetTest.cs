@@ -1,24 +1,31 @@
 using BudgetBuddy.Application.Commands;
 using BudgetBuddy.Application.Commands.Handlers;
 using BudgetBuddy.Domain.Exceptions;
+using BudgetBuddy.Domain.Ports;
 using BudgetBuddy.Domain.ValueObjects;
 using Shouldly;
+using Unit.Shared;
 
 namespace Unit.Application.Commands;
 public class CreateBudgetTests
 {
+
+    private readonly Clock _clock;
+    private readonly CreateBudgetHandler _handler;
+    public CreateBudgetTests()
+    {
+        _clock = new TestClock();
+        _handler = new CreateBudgetHandler(_clock);
+    }
+
     [Fact]
     public async void should_fail_if_date_is_past()
     {
-        // Given
         var command = new CreateBudget(
-           Date.Now.AddDays(-1)
+           new Date(_clock.Current()).AddDays(-1)
         );
-        var handler = new CreateBudgetHandler();
-        // When
-        var record = await Record.ExceptionAsync(async () => await handler.Handle(command));
+        var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
-        // Then
         record.ShouldBeOfType<InvalidDateException>();
     }
 }
