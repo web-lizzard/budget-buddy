@@ -1,5 +1,6 @@
 using BudgetBuddy.Application.Commands;
 using BudgetBuddy.Application.Commands.Handlers;
+using BudgetBuddy.Domain.Eniities;
 using BudgetBuddy.Domain.Exceptions;
 using BudgetBuddy.Domain.Ports;
 using BudgetBuddy.Domain.ValueObjects;
@@ -22,17 +23,28 @@ public class CreateBudgetTests
     public async void should_fail_if_date_is_past()
     {
         var command = new CreateBudget(
-           new Date(_clock.Current()).AddDays(-1)
-        );
+            new Date(_clock.Current()).AddDays(-1),
+            ["user_1"],
+            "test");
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<InvalidDateException>();
     }
 
     [Fact]
-    public async void should_fail_if_budget_already_exist()
+    public async void should_fail_if_budget_with_given_name_for_given_users_already_exist()
     {
-        var command = new CreateBudget(new Date(_clock.Current()));
+        var command = new CreateBudget(new Date(_clock.Current()), ["user_1"], "test");
+        var id = Guid.NewGuid();
+        _handler.budgets.TryAdd(
+            id, new Budget(id,
+                "test",
+                100000,
+                ["user_1"],
+                command.StartDate,
+                command.StartDate.AddDays(40),
+                "Every 5th working day"));
+
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<BudgetAlreadyExistsException>();
