@@ -1,6 +1,7 @@
 using BudgetBuddy.Application.Commands;
 using BudgetBuddy.Application.Commands.Handlers;
 using BudgetBuddy.Domain.Exceptions;
+using BudgetBuddy.Domain.ValueObjects;
 using Shouldly;
 
 namespace Unit.Application.Commands;
@@ -11,7 +12,7 @@ public class CreateBudgetTests
     {
         // Given
         var command = new CreateBudget(
-            DateTime.UtcNow.AddDays(-1)
+           Date.Now.AddDays(-1)
         );
         var handler = new CreateBudgetHandler();
         // When
