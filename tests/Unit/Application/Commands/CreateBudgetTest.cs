@@ -52,5 +52,13 @@ public class CreateBudgetTests
         record.ShouldBeOfType<BudgetAlreadyExistsException>();
     }
 
+    [Fact]
+    public async void should_faill_if_budget_name_is_too_short()
+    {
+        var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "sh");
 
+        var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
+
+        record.ShouldBeOfType<BudgetNameTooShortException>(command.Name);
+    }
 }
