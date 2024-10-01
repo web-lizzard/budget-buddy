@@ -28,4 +28,15 @@ public class CreateBudgetTests
 
         record.ShouldBeOfType<InvalidDateException>();
     }
+
+    [Fact]
+    public async void should_fail_if_budget_already_exist()
+    {
+        var command = new CreateBudget(new Date(_clock.Current()));
+        var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
+
+        record.ShouldBeOfType<BudgetAlreadyExistsException>();
+    }
+
+
 }
