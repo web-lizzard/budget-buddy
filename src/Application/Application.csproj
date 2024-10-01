@@ -15,4 +15,9 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
 </ItemGroup>
 
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Unit"></InternalsVisibleTo>
+  </ItemGroup>
+
 </Project>
