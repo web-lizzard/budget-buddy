@@ -28,7 +28,7 @@ public class CreateBudgetTests
         var command = new CreateBudget(
             new Date(_clock.Current()).AddDays(-1),
             [Guid.Empty],
-            "test");
+            "test", 100000);
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<InvalidDateException>();
@@ -37,7 +37,7 @@ public class CreateBudgetTests
     [Fact]
     public async void should_fail_if_budget_with_given_name_for_given_users_already_exist()
     {
-        var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test");
+        var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test", 100000);
         var id = Guid.NewGuid();
         await _repository.Save(new Budget(id,
             "test",
@@ -53,12 +53,22 @@ public class CreateBudgetTests
     }
 
     [Fact]
-    public async void should_faill_if_budget_name_is_too_short()
+    public async void should_fail_if_budget_name_is_too_short()
     {
-        var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "sh");
+        var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "sh", 100000);
 
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<BudgetNameTooShortException>(command.Name);
+    }
+
+    [Fact]
+    public async void should_fail_if_limit_is_too_low()
+    {
+        var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test", 10000);
+
+        var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
+
+        record.ShouldBeOfType<TooShortLimitException>();
     }
 }
