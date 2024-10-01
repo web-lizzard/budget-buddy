@@ -24,7 +24,7 @@ public class CreateBudgetTests
     {
         var command = new CreateBudget(
             new Date(_clock.Current()).AddDays(-1),
-            ["user_1"],
+            [Guid.Empty],
             "test");
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
@@ -34,13 +34,13 @@ public class CreateBudgetTests
     [Fact]
     public async void should_fail_if_budget_with_given_name_for_given_users_already_exist()
     {
-        var command = new CreateBudget(new Date(_clock.Current()), ["user_1"], "test");
+        var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test");
         var id = Guid.NewGuid();
         _handler.budgets.TryAdd(
             id, new Budget(id,
                 "test",
                 100000,
-                ["user_1"],
+                [Guid.Empty],
                 command.StartDate,
                 command.StartDate.AddDays(40),
                 "Every 5th working day"));

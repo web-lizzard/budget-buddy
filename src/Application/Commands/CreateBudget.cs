@@ -2,4 +2,4 @@ using BudgetBuddy.Domain.ValueObjects;
 
 namespace BudgetBuddy.Application.Commands;
 
-public sealed record CreateBudget(Date StartDate, IEnumerable<string> Users, string Name);
+public sealed record CreateBudget(Date StartDate, IEnumerable<User> Users, string Name);
