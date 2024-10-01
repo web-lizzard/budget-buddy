@@ -15,4 +15,10 @@
     <ProjectReference Include="..\Application\Application.csproj" />
 </ItemGroup>
 
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Unit"></InternalsVisibleTo>
+  </ItemGroup>
+
+
 </Project>

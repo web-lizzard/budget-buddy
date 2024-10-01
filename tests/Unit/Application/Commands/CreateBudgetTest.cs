@@ -1,3 +1,4 @@
+using BudgetBuddy.Adapters.Repositories;
 using BudgetBuddy.Application.Commands;
 using BudgetBuddy.Application.Commands.Handlers;
 using BudgetBuddy.Domain.Eniities;
@@ -13,10 +14,12 @@ public class CreateBudgetTests
 
     private readonly Clock _clock;
     private readonly CreateBudgetHandler _handler;
+    private readonly BudgetRepository _repository;
     public CreateBudgetTests()
     {
         _clock = new TestClock();
-        _handler = new CreateBudgetHandler(_clock);
+        _repository = new InMemoryBudgetRepository();
+        _handler = new CreateBudgetHandler(_clock, _repository);
     }
 
     [Fact]
@@ -36,15 +39,14 @@ public class CreateBudgetTests
     {
         var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test");
         var id = Guid.NewGuid();
-        _handler.budgets.TryAdd(
-            id, new Budget(id,
-                "test",
-                100000,
-                [Guid.Empty],
-                command.StartDate,
-                command.StartDate.AddDays(40),
-                "Every 5th working day"));
-
+        await _repository.Save(new Budget(id,
+            "test",
+            100000,
+            [Guid.Empty],
+            command.StartDate,
+            command.StartDate.AddDays(40),
+            "Every 5th working day")
+            );
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<BudgetAlreadyExistsException>();
