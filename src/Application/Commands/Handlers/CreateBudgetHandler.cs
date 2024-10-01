@@ -12,7 +12,7 @@ public sealed class CreateBudgetHandler
 
         if (command.StartDate < now)
         {
-            throw new InvalidDateException();
+            throw new InvalidDateException(command.StartDate);
         }
 
         return Task.CompletedTask;

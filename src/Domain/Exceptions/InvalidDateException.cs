@@ -1,3 +1,5 @@
+using BudgetBuddy.Domain.ValueObjects;
+
 namespace BudgetBuddy.Domain.Exceptions;
 
-public class InvalidDateException : Exception { }
+public class InvalidDateException(Date date) : DomainException($"Invalid Date {date}") { }
