@@ -1,3 +1,4 @@
+using BudgetBuddy.Application.Factories;
 using BudgetBuddy.Domain.Eniities;
 using BudgetBuddy.Domain.Exceptions;
 using BudgetBuddy.Domain.Ports;
@@ -5,12 +6,14 @@ using BudgetBuddy.Domain.ValueObjects;
 
 namespace BudgetBuddy.Application.Commands.Handlers;
 
-public sealed class CreateBudgetHandler(Clock clock, BudgetRepository repository)
+public sealed class CreateBudgetHandler(Clock clock, BudgetRepository repository, BudgetFactory budgetFactory)
 
 
 {
     private readonly Clock _clock = clock;
     private readonly BudgetRepository _repository = repository;
+
+    private readonly BudgetFactory _budgetFactory = budgetFactory;
 
     async public Task Handle(CreateBudget command)
     {
@@ -29,14 +32,7 @@ public sealed class CreateBudgetHandler(Clock clock, BudgetRepository repository
             throw new BudgetAlreadyExistsException(command.Name);
         }
 
-        var budget = new Budget(
-            Guid.NewGuid(),
-            command.Name,
-            command.Limit,
-            command.Users,
-            new DatePeriod(command.StartDate,
-                command.EndDate),
-            command.DatePeriodSchema);
+        var budget = _budgetFactory.From(command);
 
         await _repository.Save(budget);
     }

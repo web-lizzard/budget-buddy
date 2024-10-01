@@ -1,6 +1,7 @@
 using BudgetBuddy.Adapters.Repositories;
 using BudgetBuddy.Application.Commands;
 using BudgetBuddy.Application.Commands.Handlers;
+using BudgetBuddy.Application.Factories;
 using BudgetBuddy.Domain.Eniities;
 using BudgetBuddy.Domain.Exceptions;
 using BudgetBuddy.Domain.Ports;
@@ -15,11 +16,14 @@ public class CreateBudgetTests
     private readonly Clock _clock;
     private readonly CreateBudgetHandler _handler;
     private readonly BudgetRepository _repository;
+
+    private readonly BudgetFactory _factory;
     public CreateBudgetTests()
     {
         _clock = new TestClock();
         _repository = new InMemoryBudgetRepository();
-        _handler = new CreateBudgetHandler(_clock, _repository);
+        _factory = new BudgetFactory();
+        _handler = new CreateBudgetHandler(_clock, _repository, _factory);
     }
 
     [Fact]
@@ -41,17 +45,8 @@ public class CreateBudgetTests
         var command = new CreateBudget(new Date(_clock.Current()), new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
             100000, Currency.USD), new DatePeriodSchema(1, DatePeriodSchema.Type.NTH_WORKING_DAY));
 
-        var period = new DatePeriod(command.StartDate,
-            command.StartDate.AddDays(40));
-        var id = Guid.NewGuid();
-        await _repository.Save(new Budget(
-            id,
-            "test",
-            new Monetary(100000, Currency.USD),
-            [Guid.Empty],
-            period,
-            command.DatePeriodSchema)
-            );
+
+        await _repository.Save(_factory.From(command));
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<BudgetAlreadyExistsException>();
