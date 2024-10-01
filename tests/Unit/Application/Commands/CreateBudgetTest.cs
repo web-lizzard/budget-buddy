@@ -40,13 +40,16 @@ public class CreateBudgetTests
     {
         var command = new CreateBudget(new Date(_clock.Current()), new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
             100000, Currency.USD), new DatePeriodSchema(1, DatePeriodSchema.Type.NTH_WORKING_DAY));
+
+        var period = new DatePeriod(command.StartDate,
+            command.StartDate.AddDays(40));
         var id = Guid.NewGuid();
-        await _repository.Save(new Budget(id,
+        await _repository.Save(new Budget(
+            id,
             "test",
             new Monetary(100000, Currency.USD),
             [Guid.Empty],
-            command.StartDate,
-            command.StartDate.AddDays(40),
+            period,
             command.DatePeriodSchema)
             );
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));

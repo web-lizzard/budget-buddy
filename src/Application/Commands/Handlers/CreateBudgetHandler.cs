@@ -29,14 +29,13 @@ public sealed class CreateBudgetHandler(Clock clock, BudgetRepository repository
             throw new BudgetAlreadyExistsException(command.Name);
         }
 
-
         var budget = new Budget(
             Guid.NewGuid(),
             command.Name,
             command.Limit,
             command.Users,
-            command.StartDate,
-            command.EndDate,
+            new DatePeriod(command.StartDate,
+                command.EndDate),
             command.DatePeriodSchema);
 
         await _repository.Save(budget);
