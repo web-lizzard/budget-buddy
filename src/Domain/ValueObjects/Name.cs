@@ -1,8 +1,20 @@
+using BudgetBuddy.Domain.Exceptions;
+
 namespace BudgetBuddy.Domain.ValueObjects;
 public record Name
 {
     public Name(string value)
     {
+        ChangeName(value);
+    }
+
+    public void ChangeName(string value)
+    {
+        if (value.Length is < 3)
+        {
+            throw new BudgetNameTooShortException(value);
+        }
+
         Value = value;
     }
 
