@@ -37,7 +37,7 @@ public sealed class CreateBudgetHandler(Clock clock, BudgetRepository repository
             command.Users,
             command.StartDate,
             command.EndDate,
-            command.CreationPolicy);
+            command.DatePeriodSchema);
 
         await _repository.Save(budget);
     }

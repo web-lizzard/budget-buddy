@@ -7,7 +7,7 @@ public sealed class Budget(Guid id,
     IEnumerable<User> users,
     Date startDate,
     Date endDate,
-    string creationPolicy)
+    DatePeriodSchema datePeriodSchema)
 {
     public Guid Id { get; } = id;
     public Name Name { get; } = name;
@@ -15,5 +15,5 @@ public sealed class Budget(Guid id,
     public IEnumerable<User> Users { get; } = users;
     public Date StartDate { get; } = startDate;
     public Date EndDate { get; } = endDate;
-    public string CreationPolicy { get; } = creationPolicy;
+    public DatePeriodSchema DatePeriodSchema { get; } = datePeriodSchema;
 }

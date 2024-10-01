@@ -29,7 +29,7 @@ public class CreateBudgetTests
             new Date(_clock.Current()).AddDays(-1),
             new Date(_clock.Current()).AddDays(-1),
             [Guid.Empty],
-            "test", new Monetary(100000, Currency.USD), "");
+            "test", new Monetary(100000, Currency.USD), new DatePeriodSchema(10, DatePeriodSchema.Type.NTH_WORKING_DAY));
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<InvalidDateException>();
@@ -39,7 +39,7 @@ public class CreateBudgetTests
     public async void should_fail_if_budget_with_given_name_for_given_users_already_exist()
     {
         var command = new CreateBudget(new Date(_clock.Current()), new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
-            100000, Currency.USD), "");
+            100000, Currency.USD), new DatePeriodSchema(1, DatePeriodSchema.Type.NTH_WORKING_DAY));
         var id = Guid.NewGuid();
         await _repository.Save(new Budget(id,
             "test",
@@ -47,7 +47,7 @@ public class CreateBudgetTests
             [Guid.Empty],
             command.StartDate,
             command.StartDate.AddDays(40),
-            "Every 5th working day")
+            command.DatePeriodSchema)
             );
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
@@ -60,7 +60,7 @@ public class CreateBudgetTests
         var record = Record.Exception(() => new CreateBudget(new Date(_clock.Current()), new Date(_clock.Current()),
             [Guid.Empty],
             "sh",
-            new Monetary(100000, Currency.USD), ""));
+            new Monetary(100000, Currency.USD), new DatePeriodSchema(11, DatePeriodSchema.Type.NTH_WORKING_DAY)));
 
         record.ShouldBeOfType<BudgetNameTooShortException>();
     }
@@ -73,7 +73,7 @@ public class CreateBudgetTests
         new Date(_clock.Current()).AddDays(40),
             [Guid.Empty],
             "test",
-            new Monetary(10000, Currency.USD), ""));
+            new Monetary(10000, Currency.USD), new DatePeriodSchema(12, DatePeriodSchema.Type.NTH_WORKING_DAY)));
 
         record.ShouldBeOfType<TooShortLimitException>();
     }
@@ -84,10 +84,11 @@ public class CreateBudgetTests
     {
         var command = new CreateBudget(
             new Date(_clock.Current()), new Date(_clock.Current()).AddDays(50), [Guid.Empty], "test", new Monetary(100000,
-                Currency.USD), ""
+                Currency.USD), new DatePeriodSchema(10, DatePeriodSchema.Type.NTH_WORKING_DAY)
         );
 
         await _handler.Handle(command);
         (await _repository.isBudgetExist(command.Name, command.Users)).ShouldBe(true);
     }
+
 }
