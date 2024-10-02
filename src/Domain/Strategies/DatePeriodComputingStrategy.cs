@@ -2,9 +2,9 @@ using BudgetBuddy.Domain.ValueObjects;
 
 namespace BudgetBuddy.Domain.Strategies;
 
-public interface DatePeriodCreationStrategy
+public interface DatePeriodComputingStrategy
 {
     public bool CanApply(DatePeriodSchema.Type schema);
 
-    public Task<DatePeriod> CreatePeriod(Date startDate, DatePeriodSchema day);
+    public Task<DatePeriod> ComputeDatePeriod(Date startDate, DatePeriodSchema schema);
 }

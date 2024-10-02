@@ -18,7 +18,7 @@ public class DatePeriodCreationStrategyTest
     public void should_returns_true_when_input_match_to_schema_type()
     {
         var inputType = DatePeriodSchema.Type.NTH_REGULAR_DAY;
-        var strategy = new RegularMonthDatePeriodCreationStrategy();
+        var strategy = new RegularMonthDatePeriodComputingStrategy();
 
         var canApply = strategy.CanApply(inputType);
 
@@ -30,10 +30,10 @@ public class DatePeriodCreationStrategyTest
     {
         var now = new Date(_clock.Current());
         var schema = new DatePeriodSchema(5, DatePeriodSchema.Type.NTH_WORKING_DAY);
-        var strategy = new RegularMonthDatePeriodCreationStrategy();
+        var strategy = new RegularMonthDatePeriodComputingStrategy();
         var expectedDateRange = new DatePeriod(now, GetEndDate(5));
 
-        var result = await strategy.CreatePeriod(now, schema);
+        var result = await strategy.ComputeDatePeriod(now, schema);
 
         result.ShouldBe(expectedDateRange);
     }
