@@ -47,3 +47,26 @@ public class RegularDatePeriodComputingStrategyTest
         result.ShouldBe(expectedDateRange);
     }
 }
+
+
+public class WorkingDayDatePeriodComputingStrategyTest
+{
+    private readonly WorkingDayDatePeriodComputingStrategy _strategy;
+
+    public WorkingDayDatePeriodComputingStrategyTest()
+    {
+        _strategy = new WorkingDayDatePeriodComputingStrategy();
+    }
+
+    [Fact]
+    public void should_returns_true_when_input_match_to_schema_type()
+    {
+        // Given
+        var inputType = DatePeriodSchema.Type.NTH_WORKING_DAY;
+        // When
+        var canApply = _strategy.CanApply(inputType);
+        // Then
+
+        canApply.ShouldBe(true);
+    }
+}
