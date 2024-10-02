@@ -7,7 +7,7 @@ internal sealed class RegularMonthDatePeriodCreationStrategy : DatePeriodCreatio
 {
     public bool CanApply(DatePeriodSchema.Type schema)
     {
-        throw new NotImplementedException();
+        return schema is DatePeriodSchema.Type.NTH_REGULAR_DAY;
     }
 
     public Task<DatePeriod> CreatePeriod(Date startDate)
