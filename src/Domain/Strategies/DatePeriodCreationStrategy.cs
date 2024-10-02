@@ -6,5 +6,5 @@ public interface DatePeriodCreationStrategy
 {
     public bool CanApply(DatePeriodSchema.Type schema);
 
-    public Task<DatePeriod> CreatePeriod(Date startDate);
+    public Task<DatePeriod> CreatePeriod(Date startDate, DatePeriodSchema day);
 }
