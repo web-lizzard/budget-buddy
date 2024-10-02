@@ -11,8 +11,8 @@
   </ItemGroup>
 
 
-    <ItemGroup>
-    <InternalsVisibleTo Include="Units"></InternalsVisibleTo>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Unit"></InternalsVisibleTo>
   </ItemGroup>
 
 </Project>
