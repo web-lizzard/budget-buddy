@@ -35,8 +35,17 @@ internal sealed class OfflineWorkingDayChecker : WorkingDayChecker
 
     private bool isPublicHoliday(Date day)
     {
-        var key = $"{day.Value.Month}-{day.Value.Day}";
+
+        var key = BuildKey(day);
         return worldWideHolidays.ContainsKey(key);
 
+    }
+
+    private string BuildKey(Date day)
+    {
+        var monthPrefix = day.Value.Month is <= 9 ? $"0{day.Value.Month}" : $"{day.Value.Month}";
+        var daySufix = day.Value.Day is <= 9 ? $"0{day.Value.Day}" : $"{day.Value.Day}";
+
+        return monthPrefix + "-" + daySufix;
     }
 }

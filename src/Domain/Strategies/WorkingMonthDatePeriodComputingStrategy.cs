@@ -22,8 +22,6 @@ internal sealed class WorkingDayDatePeriodComputingStrategy(WorkingDayChecker wo
         while (currentDate.Month == month)
         {
             var date = new Date(currentDate);
-            // if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
-
             if (await _workingDayChecker.isWorkingDay(date))
             {
                 workingDayCount++;
