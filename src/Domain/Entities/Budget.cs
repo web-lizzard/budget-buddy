@@ -1,17 +1,44 @@
+using BudgetBuddy.Domain.Snapshots;
 using BudgetBuddy.Domain.ValueObjects;
 
 namespace BudgetBuddy.Domain.Eniities;
-public sealed class Budget(Guid id,
-    Name name,
-    Limit limit,
-    IEnumerable<User> users,
-    DatePeriod datePeriod,
-    DatePeriodSchema datePeriodSchema)
+public sealed class Budget
 {
-    public Guid Id { get; } = id;
-    public Name Name { get; } = name;
-    public Limit Limit { get; } = limit;
-    public IEnumerable<User> Users { get; } = users;
-    public DatePeriod datePeriod { get; } = datePeriod;
-    public DatePeriodSchema DatePeriodSchema { get; } = datePeriodSchema;
+
+    private Guid Id { get; }
+    private Name Name { get; }
+    private Limit Limit { get; }
+    private IEnumerable<User> Users { get; }
+    private DatePeriod DatePeriod { get; }
+    private DatePeriodSchema DatePeriodSchema { get; }
+
+    private Budget(Guid id,
+        Name name,
+        Limit limit,
+        IEnumerable<User> users,
+        DatePeriod datePeriod,
+        DatePeriodSchema datePeriodSchema)
+    {
+        Id = id;
+        Name = name;
+        Limit = limit;
+        Users = users;
+        DatePeriod = datePeriod;
+        DatePeriodSchema = datePeriodSchema;
+    }
+
+    public BudgetSnapshot Snapshot
+    {
+        get
+        {
+            return new BudgetSnapshot(Id, Name, Limit, Users, DatePeriod, DatePeriodSchema);
+        }
+    }
+
+    internal static Budget From(BudgetSnapshot snapshot)
+    {
+        return new Budget(
+            snapshot.Id, snapshot.Name, snapshot.Limit, snapshot.Users, snapshot.DatePeriod, snapshot.DatePeriodSchema
+        );
+    }
 }

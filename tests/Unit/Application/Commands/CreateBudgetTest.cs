@@ -1,10 +1,11 @@
+using BudgetBuddy.Adapters.Checkers;
 using BudgetBuddy.Adapters.Repositories;
 using BudgetBuddy.Application.Commands;
 using BudgetBuddy.Application.Commands.Handlers;
-using BudgetBuddy.Application.Factories;
-using BudgetBuddy.Domain.Eniities;
 using BudgetBuddy.Domain.Exceptions;
 using BudgetBuddy.Domain.Ports;
+using BudgetBuddy.Domain.Services;
+using BudgetBuddy.Domain.Strategies;
 using BudgetBuddy.Domain.ValueObjects;
 using Shouldly;
 using Unit.Shared;
@@ -17,20 +18,23 @@ public class CreateBudgetTests
     private readonly CreateBudgetHandler _handler;
     private readonly BudgetRepository _repository;
 
-    private readonly BudgetFactory _factory;
+    private readonly CreateBudgetService _service;
+
     public CreateBudgetTests()
     {
         _clock = new TestClock();
         _repository = new InMemoryBudgetRepository();
-        _factory = new BudgetFactory();
-        _handler = new CreateBudgetHandler(_clock, _repository, _factory);
+
+        var checker = new OfflineWorkingDayChecker();
+        IEnumerable<DatePeriodComputingStrategy> strategies = [new WorkingDayDatePeriodComputingStrategy(checker), new RegularMonthDatePeriodComputingStrategy()];
+        _service = new CreateBudgetService(strategies);
+        _handler = new CreateBudgetHandler(_clock, _repository, _service);
     }
 
     [Fact]
     public async void should_fail_if_date_is_past()
     {
         var command = new CreateBudget(
-            new Date(_clock.Current()).AddDays(-1),
             new Date(_clock.Current()).AddDays(-1),
             [Guid.Empty],
             "test", new Monetary(100000, Currency.USD), new DatePeriodSchema(10, DatePeriodSchema.Type.NTH_WORKING_DAY));
@@ -42,11 +46,13 @@ public class CreateBudgetTests
     [Fact]
     public async void should_fail_if_budget_with_given_name_for_given_users_already_exist()
     {
-        var command = new CreateBudget(new Date(_clock.Current()), new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
+        var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
             100000, Currency.USD), new DatePeriodSchema(1, DatePeriodSchema.Type.NTH_WORKING_DAY));
 
 
-        await _repository.Save(_factory.From(command));
+        await _repository.Save(
+            await _service.CreateBudget(command.StartDate, command.Users, command.Name, command.Limit, command.DatePeriodSchema)
+        );
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<BudgetAlreadyExistsException>();
@@ -55,7 +61,7 @@ public class CreateBudgetTests
     [Fact]
     public void should_fail_if_budget_name_is_too_short()
     {
-        var record = Record.Exception(() => new CreateBudget(new Date(_clock.Current()), new Date(_clock.Current()),
+        var record = Record.Exception(() => new CreateBudget(new Date(_clock.Current()),
             [Guid.Empty],
             "sh",
             new Monetary(100000, Currency.USD), new DatePeriodSchema(11, DatePeriodSchema.Type.NTH_WORKING_DAY)));
@@ -68,7 +74,6 @@ public class CreateBudgetTests
     {
         var record = Record.Exception(() => new CreateBudget
         (new Date(_clock.Current()),
-        new Date(_clock.Current()).AddDays(40),
             [Guid.Empty],
             "test",
             new Monetary(10000, Currency.USD), new DatePeriodSchema(12, DatePeriodSchema.Type.NTH_WORKING_DAY)));
@@ -84,7 +89,7 @@ public class CreateBudgetTests
         var record = Record.Exception(() =>
         {
             DatePeriodSchema datePeriodSchema = new DatePeriodSchema(day, type);
-            return new CreateBudget(new Date(_clock.Current()), new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
+            return new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
                 100000, Currency.USD), datePeriodSchema);
         });
 
@@ -96,7 +101,7 @@ public class CreateBudgetTests
     public async void should_succed_with_correct_command()
     {
         var command = new CreateBudget(
-            new Date(_clock.Current()), new Date(_clock.Current()).AddDays(50), [Guid.Empty], "test", new Monetary(100000,
+            new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(100000,
                 Currency.USD), new DatePeriodSchema(10, DatePeriodSchema.Type.NTH_WORKING_DAY)
         );
 

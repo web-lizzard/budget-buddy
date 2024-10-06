@@ -13,12 +13,13 @@ internal sealed class InMemoryBudgetRepository : BudgetRepository
         var exists = false;
         foreach (var item in budgets)
         {
-            if (item.Value.Name != name)
+            var snapshot = item.Value.Snapshot;
+            if (snapshot.Name != name)
             {
                 continue;
             }
 
-            exists = item.Value.Users.Any(x => users.Any(y => y == x));
+            exists = snapshot.Users.Any(x => users.Any(y => y == x));
         }
 
         return Task.FromResult(exists);
@@ -26,7 +27,8 @@ internal sealed class InMemoryBudgetRepository : BudgetRepository
 
     public Task Save(Budget budget)
     {
-        budgets.TryAdd(budget.Id, budget);
+        var id = budget.Snapshot.Id;
+        budgets.TryAdd(id, budget);
         return Task.CompletedTask;
     }
 }
