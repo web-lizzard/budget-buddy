@@ -2,7 +2,7 @@ using BudgetBuddy.Domain.Exceptions;
 
 namespace BudgetBuddy.Domain.ValueObjects;
 
-public sealed record DatePeriodSchema
+public sealed record PeriodSchema
 
 {
     public enum Type
@@ -12,18 +12,18 @@ public sealed record DatePeriodSchema
     }
     public const int RegularDayBreakpoint = 20;
     public const int WorkingDayBreakpoint = 28;
-    public DatePeriodSchema(int day, Type policy)
+    public PeriodSchema(int day, Type strategy)
     {
-        Policy = policy;
+        Strategy = strategy;
         SetDay(day);
     }
 
-    public Type Policy { get; private set; }
+    public Type Strategy { get; private set; }
     public int Day { get; private set; }
 
     private void SetDay(int value)
     {
-        switch (Policy)
+        switch (Strategy)
         {
             case Type.NTH_WORKING_DAY:
                 if (value > RegularDayBreakpoint)

@@ -10,14 +10,14 @@ public sealed class Budget
     private Limit Limit { get; }
     private IEnumerable<User> Users { get; }
     private DatePeriod DatePeriod { get; }
-    private DatePeriodSchema DatePeriodSchema { get; }
+    private PeriodSchema DatePeriodSchema { get; }
 
     private Budget(Guid id,
         Name name,
         Limit limit,
         IEnumerable<User> users,
         DatePeriod datePeriod,
-        DatePeriodSchema datePeriodSchema)
+        PeriodSchema datePeriodSchema)
     {
         Id = id;
         Name = name;

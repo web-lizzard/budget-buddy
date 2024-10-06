@@ -7,12 +7,12 @@ internal sealed class WorkingDayDatePeriodComputingStrategy(WorkingDayChecker wo
 {
 
     private readonly WorkingDayChecker _workingDayChecker = workingDayChecker;
-    public bool CanApply(DatePeriodSchema.Type schema)
+    public bool CanApply(PeriodSchema.Type schema)
     {
-        return schema is DatePeriodSchema.Type.NTH_WORKING_DAY;
+        return schema is PeriodSchema.Type.NTH_WORKING_DAY;
     }
 
-    public async Task<DatePeriod> ComputeDatePeriod(Date startDate, DatePeriodSchema schema)
+    public async Task<DatePeriod> ComputeDatePeriod(Date startDate, PeriodSchema schema)
     {
         var year = startDate.Value.Month is 12 ? startDate.Value.Year + 1 : startDate.Value.Year;
         var month = startDate.Value.Month is 12 ? 1 : startDate.Value.Month + 1;

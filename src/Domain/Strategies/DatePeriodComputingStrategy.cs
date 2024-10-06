@@ -4,7 +4,7 @@ namespace BudgetBuddy.Domain.Strategies;
 
 public interface DatePeriodComputingStrategy
 {
-    public bool CanApply(DatePeriodSchema.Type schema);
+    public bool CanApply(PeriodSchema.Type schema);
 
-    public Task<DatePeriod> ComputeDatePeriod(Date startDate, DatePeriodSchema schema);
+    public Task<DatePeriod> ComputeDatePeriod(Date startDate, PeriodSchema schema);
 }

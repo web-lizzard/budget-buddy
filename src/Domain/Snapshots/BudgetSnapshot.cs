@@ -7,7 +7,7 @@ public sealed class BudgetSnapshot(Guid id,
     Limit limit,
     IEnumerable<User> users,
     DatePeriod datePeriod,
-    DatePeriodSchema datePeriodSchema)
+    PeriodSchema datePeriodSchema)
 {
 
 
@@ -16,7 +16,7 @@ public sealed class BudgetSnapshot(Guid id,
     public Limit Limit { get; } = limit;
     public IEnumerable<User> Users { get; } = users;
     public DatePeriod DatePeriod { get; } = datePeriod;
-    public DatePeriodSchema DatePeriodSchema { get; } = datePeriodSchema;
+    public PeriodSchema DatePeriodSchema { get; } = datePeriodSchema;
 
 
 }

@@ -15,9 +15,9 @@ public sealed class CreateBudgetService(IEnumerable<DatePeriodComputingStrategy>
                                IEnumerable<User> users,
                                Name name,
                                Limit limit,
-                               DatePeriodSchema datePeriodSchema)
+                               PeriodSchema datePeriodSchema)
     {
-        var strategy = _strategies.Single((s) => s.CanApply(datePeriodSchema.Policy));
+        var strategy = _strategies.Single((s) => s.CanApply(datePeriodSchema.Strategy));
         var datePeriod = await strategy.ComputeDatePeriod(startDate, datePeriodSchema);
         var id = Guid.NewGuid();
         var snapshot = new BudgetSnapshot(id, name, limit, users, datePeriod, datePeriodSchema);

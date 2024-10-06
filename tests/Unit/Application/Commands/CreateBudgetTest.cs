@@ -37,7 +37,7 @@ public class CreateBudgetTests
         var command = new CreateBudget(
             new Date(_clock.Current()).AddDays(-1),
             [Guid.Empty],
-            "test", new Monetary(100000, Currency.USD), new DatePeriodSchema(10, DatePeriodSchema.Type.NTH_WORKING_DAY));
+            "test", new Monetary(100000, Currency.USD), new PeriodSchema(10, PeriodSchema.Type.NTH_WORKING_DAY));
         var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<InvalidDateException>();
@@ -47,7 +47,7 @@ public class CreateBudgetTests
     public async void should_fail_if_budget_with_given_name_for_given_users_already_exist()
     {
         var command = new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
-            100000, Currency.USD), new DatePeriodSchema(1, DatePeriodSchema.Type.NTH_WORKING_DAY));
+            100000, Currency.USD), new PeriodSchema(1, PeriodSchema.Type.NTH_WORKING_DAY));
 
 
         await _repository.Save(
@@ -64,7 +64,7 @@ public class CreateBudgetTests
         var record = Record.Exception(() => new CreateBudget(new Date(_clock.Current()),
             [Guid.Empty],
             "sh",
-            new Monetary(100000, Currency.USD), new DatePeriodSchema(11, DatePeriodSchema.Type.NTH_WORKING_DAY)));
+            new Monetary(100000, Currency.USD), new PeriodSchema(11, PeriodSchema.Type.NTH_WORKING_DAY)));
 
         record.ShouldBeOfType<BudgetNameTooShortException>();
     }
@@ -76,19 +76,19 @@ public class CreateBudgetTests
         (new Date(_clock.Current()),
             [Guid.Empty],
             "test",
-            new Monetary(10000, Currency.USD), new DatePeriodSchema(12, DatePeriodSchema.Type.NTH_WORKING_DAY)));
+            new Monetary(10000, Currency.USD), new PeriodSchema(12, PeriodSchema.Type.NTH_WORKING_DAY)));
 
         record.ShouldBeOfType<TooShortLimitException>();
     }
 
     [Theory]
-    [InlineData(30, DatePeriodSchema.Type.NTH_REGULAR_DAY)]
-    [InlineData(21, DatePeriodSchema.Type.NTH_WORKING_DAY)]
-    public void should_faild_if_day_in_budget_schema_is_exceeded(int day, DatePeriodSchema.Type type)
+    [InlineData(30, PeriodSchema.Type.NTH_REGULAR_DAY)]
+    [InlineData(21, PeriodSchema.Type.NTH_WORKING_DAY)]
+    public void should_faild_if_day_in_budget_schema_is_exceeded(int day, PeriodSchema.Type type)
     {
         var record = Record.Exception(() =>
         {
-            DatePeriodSchema datePeriodSchema = new DatePeriodSchema(day, type);
+            PeriodSchema datePeriodSchema = new PeriodSchema(day, type);
             return new CreateBudget(new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(
                 100000, Currency.USD), datePeriodSchema);
         });
@@ -102,7 +102,7 @@ public class CreateBudgetTests
     {
         var command = new CreateBudget(
             new Date(_clock.Current()), [Guid.Empty], "test", new Monetary(100000,
-                Currency.USD), new DatePeriodSchema(10, DatePeriodSchema.Type.NTH_WORKING_DAY)
+                Currency.USD), new PeriodSchema(10, PeriodSchema.Type.NTH_WORKING_DAY)
         );
 
         await _handler.Handle(command);

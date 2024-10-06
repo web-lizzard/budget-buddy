@@ -6,4 +6,4 @@ public sealed record CreateBudget(Date StartDate,
     IEnumerable<User> Users,
     Name Name,
     Limit Limit,
-    DatePeriodSchema DatePeriodSchema);
+    PeriodSchema DatePeriodSchema);

@@ -18,7 +18,7 @@ public class RegularDatePeriodComputingStrategyTest
     [Fact]
     public void should_returns_true_when_input_match_to_schema_type()
     {
-        var inputType = DatePeriodSchema.Type.NTH_REGULAR_DAY;
+        var inputType = PeriodSchema.Type.NTH_REGULAR_DAY;
 
         var canApply = _strategy.CanApply(inputType);
 
@@ -28,7 +28,7 @@ public class RegularDatePeriodComputingStrategyTest
     [Fact]
     public void should_fail_if_expected_day_is_above_breakpoint()
     {
-        var record = Record.Exception(() => new DatePeriodSchema(29, DatePeriodSchema.Type.NTH_REGULAR_DAY));
+        var record = Record.Exception(() => new PeriodSchema(29, PeriodSchema.Type.NTH_REGULAR_DAY));
 
         record.ShouldBeOfType<ExceededDayForPeriodSchemaException>();
 
@@ -40,7 +40,7 @@ public class RegularDatePeriodComputingStrategyTest
     public async void should_returns_computed_date_period_calculated_by_strategy(string startDate, string endDate, int expectedEndDay)
     {
         var now = new Date(DateTime.Parse(startDate));
-        var schema = new DatePeriodSchema(expectedEndDay, DatePeriodSchema.Type.NTH_REGULAR_DAY);
+        var schema = new PeriodSchema(expectedEndDay, PeriodSchema.Type.NTH_REGULAR_DAY);
         var expectedDateRange = new DatePeriod(now, new Date(DateTime.Parse(endDate + expectedEndDay)));
 
         var result = await _strategy.ComputeDatePeriod(now, schema);
@@ -63,7 +63,7 @@ public class WorkingDayDatePeriodComputingStrategyTest
     [Fact]
     public void should_returns_true_when_input_match_to_schema_type()
     {
-        var inputType = DatePeriodSchema.Type.NTH_WORKING_DAY;
+        var inputType = PeriodSchema.Type.NTH_WORKING_DAY;
         var canApply = _strategy.CanApply(inputType);
 
         canApply.ShouldBe(true);
@@ -72,7 +72,7 @@ public class WorkingDayDatePeriodComputingStrategyTest
     [Fact]
     public void should_fail_if_expected_day_is_above_breakpoint()
     {
-        var record = Record.Exception(() => new DatePeriodSchema(21, DatePeriodSchema.Type.NTH_WORKING_DAY));
+        var record = Record.Exception(() => new PeriodSchema(21, PeriodSchema.Type.NTH_WORKING_DAY));
 
         record.ShouldBeOfType<ExceededDayForPeriodSchemaException>();
     }
@@ -83,7 +83,7 @@ public class WorkingDayDatePeriodComputingStrategyTest
     public async void should_returns_computed_date_period_calculated_by_strategy(string startDate, string endDate, int expectedEndDay)
     {
         var now = new Date(DateTime.Parse(startDate));
-        var schema = new DatePeriodSchema(expectedEndDay, DatePeriodSchema.Type.NTH_WORKING_DAY);
+        var schema = new PeriodSchema(expectedEndDay, PeriodSchema.Type.NTH_WORKING_DAY);
         var expectedDateRange = new DatePeriod(now, new Date(DateTime.Parse(endDate)));
 
         var result = await _strategy.ComputeDatePeriod(now, schema);
