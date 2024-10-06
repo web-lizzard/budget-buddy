@@ -78,7 +78,8 @@ public class WorkingDayDatePeriodComputingStrategyTest
     }
 
     [Theory]
-    [InlineData("2022-11-26", "2022-12-27", 18)]
+    [InlineData("2024-11-26", "2024-12-27", 18)]
+    [InlineData("2024-10-20", "2024-11-07", 4)]
     public async void should_returns_computed_date_period_calculated_by_strategy(string startDate, string endDate, int expectedEndDay)
     {
         var now = new Date(DateTime.Parse(startDate));
