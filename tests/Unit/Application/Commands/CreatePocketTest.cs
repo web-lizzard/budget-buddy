@@ -9,20 +9,21 @@ public sealed class CreatePocketTest
 {
 
     private readonly BudgetRepository _repository;
+    private readonly CreatePocketHandler _handler;
 
-    CreatePocketTest()
+    public CreatePocketTest()
     {
         _repository = new InMemoryBudgetRepository();
+
+        _handler = new CreatePocketHandler(_repository);
     }
 
 
     [Fact]
     public async void should_fail_if_parent_budget_does_not_exist()
     {
-        var command = new CreatePocket();
-        var handler = new CreatePocketHandler();
-
-        var record = await Record.ExceptionAsync(async () => await handler.Handle(command));
+        var command = new CreatePocket(Guid.Empty);
+        var record = await Record.ExceptionAsync(async () => await _handler.Handle(command));
 
         record.ShouldBeOfType<BudgetNotExistsException>();
 

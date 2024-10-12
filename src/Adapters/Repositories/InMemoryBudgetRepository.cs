@@ -8,6 +8,12 @@ namespace BudgetBuddy.Adapters.Repositories;
 internal sealed class InMemoryBudgetRepository : BudgetRepository
 {
     private readonly ConcurrentDictionary<Guid, Budget> budgets = new();
+
+    public Task<Budget?> GetById(Guid budgetId)
+    {
+        return Task.FromResult(budgets.GetValueOrDefault(budgetId));
+    }
+
     public Task<bool> isBudgetExist(Name name, IEnumerable<User> users)
     {
         var exists = false;

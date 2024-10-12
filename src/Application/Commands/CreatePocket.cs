@@ -1,4 +1,4 @@
 namespace BudgetBuddy.Application.Commands;
 
 
-public record CreatePocket;
+public record CreatePocket(Guid BudgetId);

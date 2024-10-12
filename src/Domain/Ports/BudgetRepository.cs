@@ -9,4 +9,6 @@ public interface BudgetRepository
     Task<bool> isBudgetExist(Name name, IEnumerable<User> users);
 
     Task Save(Budget budget);
+
+    Task<Budget?> GetById(Guid budgetId);
 }
