@@ -16,19 +16,30 @@ public sealed record Monetary
 
     public Monetary(Limit limit, Currency currency)
     {
-        SetMonetary(limit.Value.Value);
+        SetMonetary(limit.Value);
         Currency = currency;
     }
 
 
     private void SetMonetary(int value)
     {
+        ValidateMonetary(value);
+        Value = value;
+    }
+
+    private void SetMonetary(Monetary monetary)
+    {
+        ValidateMonetary(monetary.Value);
+        Value = monetary.Value;
+    }
+
+
+    private void ValidateMonetary(int value)
+    {
         if (value % 100 != 0 && value != 0)
         {
             throw new InvalidMonetaryValueException(value);
         }
-
-        Value = value;
     }
 
 

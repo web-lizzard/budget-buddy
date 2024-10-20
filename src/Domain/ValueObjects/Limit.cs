@@ -61,6 +61,4 @@ public sealed record Limit
         return Limit1.Value <= limit2.Value;
     }
 
-
-
 }
