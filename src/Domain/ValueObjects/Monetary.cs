@@ -23,7 +23,7 @@ public sealed record Monetary
 
     private void SetMonetary(int value)
     {
-        if (value < 100 && value != 0 || value < -100)
+        if (value % 100 != 0 && value != 0)
         {
             throw new InvalidMonetaryValueException(value);
         }
@@ -62,9 +62,5 @@ public sealed record Monetary
     {
         return monetary1.Value <= monetary2.Value;
     }
-
-    public static implicit operator Monetary(Limit limit) => new(limit.Value.Value, limit.Value.Currency);
-    public static implicit operator Limit(Monetary monetary) => new(monetary);
-
 
 }
