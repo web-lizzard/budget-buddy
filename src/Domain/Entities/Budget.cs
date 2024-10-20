@@ -12,6 +12,14 @@ public sealed class Budget
     private DatePeriod DatePeriod { get; }
     private PeriodSchema DatePeriodSchema { get; }
 
+    private Currency Currency
+    {
+        get
+        {
+            return Limit.Currency;
+        }
+    }
+
     private readonly HashSet<Pocket> _pockets = [];
 
     private Budget(Guid id,
@@ -54,6 +62,6 @@ public sealed class Budget
 
     private Monetary ComputeSumOfPocketsLimit()
     {
-        return _pockets.Aggregate(new Monetary(0, Currency.USD), (total, next) => total + next.Limit.Value);
+        return _pockets.Aggregate(new Monetary(0, Currency), (total, next) => total + next.Limit.Value);
     }
 }
