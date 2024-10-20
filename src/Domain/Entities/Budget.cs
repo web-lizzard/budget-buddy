@@ -12,6 +12,8 @@ public sealed class Budget
     private DatePeriod DatePeriod { get; }
     private PeriodSchema DatePeriodSchema { get; }
 
+    private readonly HashSet<Pocket> _pockets = [];
+
     private Budget(Guid id,
         Name name,
         Limit limit,
@@ -40,5 +42,18 @@ public sealed class Budget
         return new Budget(
             snapshot.Id, snapshot.Name, snapshot.Limit, snapshot.Users, snapshot.DatePeriod, snapshot.DatePeriodSchema
         );
+    }
+
+    public bool IsLimitExceedingBudgetRemainsLimit(Limit limit)
+    {
+        var pocketLimits = ComputeSumOfPocketsLimit();
+        var remainLimit = Limit.Value - pocketLimits;
+        return limit.Value > remainLimit;
+    }
+
+
+    private Monetary ComputeSumOfPocketsLimit()
+    {
+        return _pockets.Aggregate(new Monetary(0, Currency.USD), (total, next) => total + next.Limit.Value);
     }
 }

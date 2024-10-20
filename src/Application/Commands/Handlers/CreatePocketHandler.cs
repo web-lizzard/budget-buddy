@@ -12,11 +12,10 @@ public sealed class CreatePocketHandler(BudgetRepository repository)
 
     public async Task Handle(CreatePocket command)
     {
-        var budget = await _repository.GetById(command.BudgetId);
-
-        if (budget is null)
+        var budget = await _repository.GetById(command.BudgetId) ?? throw new BudgetNotExistsException(command.BudgetId);
+        if (budget.IsLimitExceedingBudgetRemainsLimit(command.limit))
         {
-            throw new BudgetNotExistsException(command.BudgetId);
+            throw new PocketLimitExceedBudgetLimitException();
         }
 
     }

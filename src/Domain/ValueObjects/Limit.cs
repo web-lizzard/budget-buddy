@@ -30,6 +30,37 @@ public sealed record Limit
     public static implicit operator Limit(Monetary monetary) => new(monetary);
     public static implicit operator Monetary(Limit value) => new(value.Value, value.Currency);
 
+    public static Limit operator +(Limit limit1, Limit limit2)
+    {
+        return new Limit(limit1.Value + limit2.Value);
+    }
+
+    public static Limit operator -(Limit limit1, Limit limit2)
+    {
+        return new Limit(limit1.Value - limit2.Value);
+    }
+
+
+    public static bool operator >(Limit Limit1, Limit Limit2)
+    {
+        return Limit1.Value > Limit2.Value;
+    }
+
+    public static bool operator <(Limit Limit1, Limit Limit2)
+    {
+        return Limit1.Value < Limit2.Value;
+    }
+
+    public static bool operator >=(Limit Limit1, Limit Limit2)
+    {
+        return Limit1.Value >= Limit2.Value;
+    }
+
+    public static bool operator <=(Limit Limit1, Limit limit2)
+    {
+        return Limit1.Value <= limit2.Value;
+    }
+
 
 
 }
