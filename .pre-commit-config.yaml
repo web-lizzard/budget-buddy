@@ -1,0 +1,30 @@
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        language: system
+        entry: bash -c 'cd ./frontend && npm run lint:fix && npm run format'
+        files: \.(js|jsx|ts|tsx|astro)$
+        types: [file]
+
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types: [python]
+        files: \.py$
+        require_serial: true
+        pass_filenames: false
+        args: ["--config-file=pyproject.toml"]

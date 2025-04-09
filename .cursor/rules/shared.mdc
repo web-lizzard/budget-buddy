@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+Rule Type: Always
+---
+
+# AI Rules for {{project-name}}
+
+{{project-description}}
+
+## Tech Stack
+
+### Frontend
+- Astro 5
+- TypeScript 5
+- React 19
+- Tailwind 4
+
+### Backend
+
+
+## Project Structure
+
+When introducing changes to the project, always follow the directory structure below:
+
+- `./frontend` - frontend ui application
+- `./backend` - backend application
+
+When modifying the directory structure, always update this section.
+
+## Coding practices
+
+### Guidelines for clean code
+
+- Prioritize error handling and edge cases
+- Handle errors and edge cases at the beginning of functions.
+- Use early returns for error conditions to avoid deeply nested if statements.
+- Place the happy path last in the function or method for improved readability.
+- Avoid unnecessary else statements; use if-return pattern instead.
+- Use guard clauses to handle preconditions and invalid states early.
