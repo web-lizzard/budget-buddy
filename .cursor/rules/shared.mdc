@@ -1,15 +1,16 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
 ---
 Rule Type: Always
 ---
 
-# AI Rules for {{project-name}}
+# AI Rules for Budget Buddy
 
-{{project-description}}
+Budget Buddy is a web application that supports users in managing personal finances. Its main purpose is to allow users to monitor expenses, assign transactions to categories, generate budget recommendations and provide statistics to support budget control. The application is aimed at people who want to consciously manage their finances and achieve savings goals.
+
 
 ## Tech Stack
 
@@ -21,6 +22,11 @@ Rule Type: Always
 
 ### Backend
 
+- Fastapi
+- Dependency Injector
+- pydantic
+- alembic
+- postgresql
 
 ## Project Structure
 

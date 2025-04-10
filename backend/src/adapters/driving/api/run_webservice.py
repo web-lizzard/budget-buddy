@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI
 
 
@@ -7,8 +8,6 @@ def create_app() -> FastAPI:
 
 
 def run_webservice() -> None:
-    import uvicorn
-
     uvicorn.run(
         create_app(),
         host="0.0.0.0",
