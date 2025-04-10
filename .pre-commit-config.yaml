@@ -10,21 +10,28 @@ repos:
         types: [file]
 
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.4
+  - repo: local
     hooks:
       - id: ruff
-        args: [--fix]
+        name: ruff
+        language: system
+        entry: bash -c 'cd ./backend && uv run ruff check --fix'
       - id: ruff-format
-
+        name: ruff-format
+        language: system
+        entry: bash -c 'cd ./backend && uv run ruff format'
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--unsafe]
   - repo: local
     hooks:
       - id: mypy
         name: mypy
-        entry: mypy
+        entry: bash -c 'cd ./backend && uv run mypy . --config-file=mypy.ini'
+        types_or: [python, pyi]
         language: system
-        types: [python]
-        files: \.py$
         require_serial: true
-        pass_filenames: false
-        args: ["--config-file=pyproject.toml"]
