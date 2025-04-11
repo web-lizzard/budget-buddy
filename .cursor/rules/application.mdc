@@ -1,0 +1,48 @@
+---
+description:
+globs: "backend/src/application/**/*.py"
+alwaysApply: false
+---
+## Application Layer Rules
+
+### Core Principles
+- Orchestrate use cases using domain objects
+- Keep application services thin
+- Use CQRS pattern for operations
+- Handle transactions explicitly
+
+
+### DTOs
+- Keep DTOs in dedicated modules
+- Use pydantic for validation
+- Include only necessary fields
+
+
+### Commands
+- One command handles one use case
+- Commands modify state
+- Use command handlers for execution
+- Use command object as a input
+- Validate input at the boundary
+
+
+### Queries
+- Queries don't modify state
+- use Query (dataclass) object as input
+- use QueryHandler to handle the logic
+- Return DTOs, not domain objects
+- Optimize for read operations
+- Use dedicated query models if needed
+
+
+### Testing
+- Test commands and queries independently
+- Create InMemory/Dummy adapters instead of mockin repositories and services e.g class InMemoryBudgetRepository
+- Test error conditions
+- Verify event handling
+
+### Documentation
+- Document use cases use ```docs/mvp/prd.md``` as reference
+- Describe command and query contracts
+- Document error conditions
+- Keep API documentation up to date

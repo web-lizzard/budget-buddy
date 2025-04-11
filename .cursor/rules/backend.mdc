@@ -1,6 +1,52 @@
 ---
-description: 
-globs: **/*.py
+description:
+globs: "**/*.py"
 alwaysApply: false
 ---
- 
+## Backend General Rules
+
+### Core Principles
+- Prefer composition over inheritance
+- Follow Clean Architecture principles
+- Use type hints consistently throughout the codebase
+- Handle errors explicitly and early
+
+### Code Quality
+- Follow rules defined in `backend/mypy.ini` and `backend/ruff.toml`
+- Use pre-commit hooks for automated code checking
+- Write descriptive commit messages
+- Document public APIs and complex logic
+
+### Project Structure
+```
+backend/
+├── src/
+│   ├── application/
+│   ├── domain/
+│   ├── adapters/
+│   └── config/
+├── tests/
+    ── application/
+    ├── domain/
+    └── adapters/
+```
+
+### Testing Guidelines
+- Write tests for all new functionality
+- Place tests parallel to the module structure
+- Use meaningful test names that describe the scenario
+- Follow AAA pattern (Arrange-Act-Assert)
+
+### Configuration Management
+- Use environment variables for configuration
+- Never commit sensitive data
+- Use pydantic for settings validation
+
+### Monitoring and Logging
+- Implement structured logging
+
+### Documentation
+- Keep documentation up to date
+- Document architectural decisions
+- Maintain API documentation
+- Update README.md with setup instructions

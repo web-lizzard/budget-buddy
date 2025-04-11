@@ -1,0 +1,68 @@
+---
+description:
+globs: "backend/src/domain/**/*.py"
+alwaysApply: false
+---
+## Domain Layer Rules
+
+### Core Principles
+- Domain layer must be independent of other layers
+- Use ubiquitous language as defined in `docs/mvp/ubiquitous_language.md`
+- Keep business logic pure and free of infrastructure concerns
+- Enforce invariants at the domain level
+
+### Exception Handling
+```python
+# Base domain exceptions
+class DomainError(Exception):
+    """Base exception for all domain errors"""
+    pass
+
+class ValidationError(DomainError):
+    """Raised when domain validation fails"""
+    pass
+
+class BusinessRuleError(DomainError):
+    """Raised when a business rule is violated"""
+    pass
+```
+
+### Domain Models
+- Use value objects for immutable concepts
+- Implement entities with clear identity
+- Create aggregates to maintain consistency boundaries
+- Keep domain models pure Python classes
+- Validate state changes within the model
+- always create unique ValuObject to held entity/aggregate id e.g ```class BudgetId```
+
+
+### Domain Services
+- Use domain services for operations that don't belong to entities
+- Keep services focused on domain logic
+- Avoid dependencies on infrastructure
+- Use interfaces (protocols) for external dependencies define it as port in /domain/ports dir
+
+
+### Ports
+- Ports are external dependencies for a model usually they include some I/O operation e.g Repository for data managment
+- Define ports interfaces in the domain layer
+- Use protocols to define
+
+
+### Business Rules
+- Implement business rules as domain services or within entities/aggregates
+- Make business rules explicit and testable
+- Use value objects to enforce invariants
+- Raise domain-specific exceptions for rule violations
+
+### Testing
+- Write unit tests for all domain logic
+- Test business rules thoroughly
+- Use property-based testing for value objects
+- Mock external dependencies using protocols
+
+### Documentation
+- Document domain concepts clearly
+- Maintain a glossary of domain terms
+- Document business rules and their rationale
+- Keep documentation in sync with code

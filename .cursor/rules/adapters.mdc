@@ -1,0 +1,175 @@
+---
+description:
+globs: "backend/src/adapters/**/*.py"
+alwaysApply: false
+---
+## Adapters Layer Rules
+
+### Core Principles
+- Implement interfaces defined in domain/application layers
+- Keep adapters thin and focused
+- Handle infrastructure concerns
+- Maintain separation between different types of adapters
+
+### Exception Handling
+```python
+class AdapterError(Exception):
+    """Base exception for adapter layer"""
+    pass
+
+class DatabaseError(AdapterError):
+    """Database-specific errors"""
+    pass
+
+class ExternalServiceError(AdapterError):
+    """External service communication errors"""
+    pass
+```
+
+### API Adapters
+- Use FastAPI for REST endpoints
+- Implement proper error handling
+- Use Pydantic models for request/response validation
+- Document API using OpenAPI/Swagger
+-
+
+```python
+class BudgetController:
+    @inject
+    def __init__(self, command_bus: CommandBus):
+        self.command_bus = command_bus
+
+    @router.post("/budgets")
+    async def create_budget(
+        self,
+        request: CreateBudgetRequest
+    ) -> BudgetResponse:
+        try:
+            result = await self.command_bus.execute(
+                CreateBudgetCommand(request.to_dto())
+            )
+            return BudgetResponse.from_dto(result)
+        except DomainError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=str(e)
+            )
+```
+
+### Repository Implementations
+- Implement repository interfaces from domain
+- Handle database-specific concerns
+- Use proper transaction management
+- Implement efficient querying
+
+```python
+class SQLBudgetRepository(BudgetRepository):
+    def __init__(self, session: Session):
+        self.session = session
+
+    def save(self, budget: Budget) -> None:
+        budget_model = BudgetModel.from_domain(budget)
+        self.session.merge(budget_model)
+
+    def get_by_id(self, id: UUID) -> Optional[Budget]:
+        budget_model = self.session.query(BudgetModel).get(id)
+        return budget_model.to_domain() if budget_model else None
+```
+
+### Middleware
+- Implement request logging
+- Add error handling middleware
+- Include performance monitoring
+- Handle authentication/authorization
+
+```python
+class ErrorHandlingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: RequestResponseEndpoint
+    ) -> Response:
+        try:
+            response = await call_next(request)
+            return response
+        except DomainError as e:
+            return JSONResponse(
+                status_code=400,
+                content={"error": str(e)}
+            )
+        except Exception as e:
+            logger.error(f"Unhandled error: {e}")
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Internal server error"}
+            )
+```
+
+### External Services
+- Use dependency injection for external services
+- Implement retry mechanisms
+- Handle timeouts appropriately
+- Log external service interactions
+
+```python
+class ExternalPaymentService:
+    def __init__(self, client: HttpClient, config: Config):
+        self.client = client
+        self.config = config
+
+    async def process_payment(
+        self,
+        payment: Payment
+    ) -> PaymentResult:
+        try:
+            response = await self.client.post(
+                f"{self.config.payment_url}/process",
+                json=payment.dict()
+            )
+            return PaymentResult.parse_obj(response.json())
+        except Exception as e:
+            raise ExternalServiceError(f"Payment failed: {e}")
+```
+
+### Database
+- Use SQLAlchemy for database operations
+- Implement proper migration strategy
+- Handle connection pooling
+- Implement efficient querying
+
+```python
+class Database:
+    def __init__(self, url: str):
+        self.engine = create_engine(url)
+        self.Session = sessionmaker(bind=self.engine)
+
+    @contextmanager
+    def session(self):
+        session = self.Session()
+        try:
+            yield session
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+```
+
+### Testing
+- Write integration tests for repositories
+- Test API endpoints end-to-end
+- Mock external services in tests
+- Test error handling scenarios
+
+### Monitoring
+- Implement health checks
+- Add performance metrics
+- Monitor external service calls
+- Track database performance
+
+### Documentation
+- Document API endpoints
+- Describe error responses
+- Document configuration options
+- Maintain deployment documentation
