@@ -1,0 +1,696 @@
+[
+    {
+        "label": "runpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "runpy",
+        "description": "runpy",
+        "detail": "runpy",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "site",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "site",
+        "description": "site",
+        "detail": "site",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "ABC",
+        "importPath": "abc",
+        "description": "abc",
+        "isExtraImport": true,
+        "detail": "abc",
+        "documentation": {}
+    },
+    {
+        "label": "abstractmethod",
+        "importPath": "abc",
+        "description": "abc",
+        "isExtraImport": true,
+        "detail": "abc",
+        "documentation": {}
+    },
+    {
+        "label": "ABC",
+        "importPath": "abc",
+        "description": "abc",
+        "isExtraImport": true,
+        "detail": "abc",
+        "documentation": {}
+    },
+    {
+        "label": "abstractmethod",
+        "importPath": "abc",
+        "description": "abc",
+        "isExtraImport": true,
+        "detail": "abc",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "Enum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "Enum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "auto",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "Enum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "auto",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidStrategyParameterError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "CurrencyMismatchError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidLimitValueError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidCurrencyError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "CurrencyMismatchError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidTransferPolicyError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "DomainError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidStrategyParameterError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "CurrencyMismatchError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidLimitValueError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "CurrencyMismatchError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidCurrencyError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidTransferPolicyError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "Decimal",
+        "importPath": "decimal",
+        "description": "decimal",
+        "isExtraImport": true,
+        "detail": "decimal",
+        "documentation": {}
+    },
+    {
+        "label": "Decimal",
+        "importPath": "decimal",
+        "description": "decimal",
+        "isExtraImport": true,
+        "detail": "decimal",
+        "documentation": {}
+    },
+    {
+        "label": "Union",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "UUID",
+        "importPath": "uuid",
+        "description": "uuid",
+        "isExtraImport": true,
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "UUID",
+        "importPath": "uuid",
+        "description": "uuid",
+        "isExtraImport": true,
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "pytest",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pytest",
+        "description": "pytest",
+        "detail": "pytest",
+        "documentation": {}
+    },
+    {
+        "label": "BudgetStrategyType",
+        "importPath": "domain.value_objects.budget_strategy",
+        "description": "domain.value_objects.budget_strategy",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.budget_strategy",
+        "documentation": {}
+    },
+    {
+        "label": "MonthlyBudgetStrategyInput",
+        "importPath": "domain.value_objects.budget_strategy",
+        "description": "domain.value_objects.budget_strategy",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.budget_strategy",
+        "documentation": {}
+    },
+    {
+        "label": "YearlyBudgetStrategyInput",
+        "importPath": "domain.value_objects.budget_strategy",
+        "description": "domain.value_objects.budget_strategy",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.budget_strategy",
+        "documentation": {}
+    },
+    {
+        "label": "Limit",
+        "importPath": "domain.value_objects.limit",
+        "description": "domain.value_objects.limit",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.limit",
+        "documentation": {}
+    },
+    {
+        "label": "Money",
+        "importPath": "domain.value_objects.money",
+        "description": "domain.value_objects.money",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.money",
+        "documentation": {}
+    },
+    {
+        "label": "Money",
+        "importPath": "domain.value_objects.money",
+        "description": "domain.value_objects.money",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.money",
+        "documentation": {}
+    },
+    {
+        "label": "DeleteTransactionsTransferPolicyInput",
+        "importPath": "domain.value_objects.transaction_transfer_policy",
+        "description": "domain.value_objects.transaction_transfer_policy",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.transaction_transfer_policy",
+        "documentation": {}
+    },
+    {
+        "label": "MoveToOtherCategoryTransferPolicyInput",
+        "importPath": "domain.value_objects.transaction_transfer_policy",
+        "description": "domain.value_objects.transaction_transfer_policy",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.transaction_transfer_policy",
+        "documentation": {}
+    },
+    {
+        "label": "TransactionTransferPolicyInput",
+        "importPath": "domain.value_objects.transaction_transfer_policy",
+        "description": "domain.value_objects.transaction_transfer_policy",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.transaction_transfer_policy",
+        "documentation": {}
+    },
+    {
+        "label": "TransactionTransferPolicyType",
+        "importPath": "domain.value_objects.transaction_transfer_policy",
+        "description": "domain.value_objects.transaction_transfer_policy",
+        "isExtraImport": true,
+        "detail": "domain.value_objects.transaction_transfer_policy",
+        "documentation": {}
+    },
+    {
+        "label": "TransactionType",
+        "importPath": "domain.value_objects",
+        "description": "domain.value_objects",
+        "isExtraImport": true,
+        "detail": "domain.value_objects",
+        "documentation": {}
+    },
+    {
+        "label": "bin_dir",
+        "kind": 5,
+        "importPath": "backend..venv.bin.activate_this",
+        "description": "backend..venv.bin.activate_this",
+        "peekOfCode": "bin_dir = os.path.dirname(abs_file)\nbase = bin_dir[: -len(\"bin\") - 1]  # strip away the bin part from the __file__, plus the path separator\n# prepend bin to PATH (this file is inside the bin directory)\nos.environ[\"PATH\"] = os.pathsep.join([bin_dir, *os.environ.get(\"PATH\", \"\").split(os.pathsep)])\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"backend\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"../lib/python3.13/site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))",
+        "detail": "backend..venv.bin.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "base",
+        "kind": 5,
+        "importPath": "backend..venv.bin.activate_this",
+        "description": "backend..venv.bin.activate_this",
+        "peekOfCode": "base = bin_dir[: -len(\"bin\") - 1]  # strip away the bin part from the __file__, plus the path separator\n# prepend bin to PATH (this file is inside the bin directory)\nos.environ[\"PATH\"] = os.pathsep.join([bin_dir, *os.environ.get(\"PATH\", \"\").split(os.pathsep)])\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"backend\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"../lib/python3.13/site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)",
+        "detail": "backend..venv.bin.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"PATH\"]",
+        "kind": 5,
+        "importPath": "backend..venv.bin.activate_this",
+        "description": "backend..venv.bin.activate_this",
+        "peekOfCode": "os.environ[\"PATH\"] = os.pathsep.join([bin_dir, *os.environ.get(\"PATH\", \"\").split(os.pathsep)])\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"backend\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"../lib/python3.13/site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix",
+        "detail": "backend..venv.bin.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"VIRTUAL_ENV\"]",
+        "kind": 5,
+        "importPath": "backend..venv.bin.activate_this",
+        "description": "backend..venv.bin.activate_this",
+        "peekOfCode": "os.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"backend\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"../lib/python3.13/site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend..venv.bin.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"VIRTUAL_ENV_PROMPT\"]",
+        "kind": 5,
+        "importPath": "backend..venv.bin.activate_this",
+        "description": "backend..venv.bin.activate_this",
+        "peekOfCode": "os.environ[\"VIRTUAL_ENV_PROMPT\"] = \"backend\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"../lib/python3.13/site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend..venv.bin.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "prev_length",
+        "kind": 5,
+        "importPath": "backend..venv.bin.activate_this",
+        "description": "backend..venv.bin.activate_this",
+        "peekOfCode": "prev_length = len(sys.path)\nfor lib in \"../lib/python3.13/site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend..venv.bin.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.path[:]",
+        "kind": 5,
+        "importPath": "backend..venv.bin.activate_this",
+        "description": "backend..venv.bin.activate_this",
+        "peekOfCode": "sys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend..venv.bin.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.real_prefix",
+        "kind": 5,
+        "importPath": "backend..venv.bin.activate_this",
+        "description": "backend..venv.bin.activate_this",
+        "peekOfCode": "sys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": "backend..venv.bin.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.prefix",
+        "kind": 5,
+        "importPath": "backend..venv.bin.activate_this",
+        "description": "backend..venv.bin.activate_this",
+        "peekOfCode": "sys.prefix = base",
+        "detail": "backend..venv.bin.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidStrategyParameterError",
+        "kind": 6,
+        "importPath": "backend.src.domain.exceptions.budget_strategy_error",
+        "description": "backend.src.domain.exceptions.budget_strategy_error",
+        "peekOfCode": "class InvalidStrategyParameterError(DomainError):\n    \"\"\"Exception raised when budget strategy parameter is invalid.\"\"\"\n    def __init__(self, parameter_name, parameter_value):\n        super().__init__(\n            f\"Invalid budget strategy parameter '{parameter_name}': {parameter_value}\"\n        )",
+        "detail": "backend.src.domain.exceptions.budget_strategy_error",
+        "documentation": {}
+    },
+    {
+        "label": "DomainError",
+        "kind": 6,
+        "importPath": "backend.src.domain.exceptions.domain_exception",
+        "description": "backend.src.domain.exceptions.domain_exception",
+        "peekOfCode": "class DomainError(Exception):\n    \"\"\"Base class for domain exceptions.\"\"\"\n    def __init__(self, message: str):\n        \"\"\"Initialize domain error.\n        Args:\n            message: Error message\n        \"\"\"\n        super().__init__(message)\n        self.message = message\n        self.status = self._derive_status_from_class_name()",
+        "detail": "backend.src.domain.exceptions.domain_exception",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidLimitValueError",
+        "kind": 6,
+        "importPath": "backend.src.domain.exceptions.limit_error",
+        "description": "backend.src.domain.exceptions.limit_error",
+        "peekOfCode": "class InvalidLimitValueError(DomainError):\n    \"\"\"Exception raised when limit value is invalid.\"\"\"\n    def __init__(self, value):\n        super().__init__(f\"Invalid limit value: {value}\")",
+        "detail": "backend.src.domain.exceptions.limit_error",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidCurrencyError",
+        "kind": 6,
+        "importPath": "backend.src.domain.exceptions.money_error",
+        "description": "backend.src.domain.exceptions.money_error",
+        "peekOfCode": "class InvalidCurrencyError(DomainError):\n    \"\"\"Exception raised when currency is invalid.\"\"\"\n    def __init__(self, currency):\n        super().__init__(f\"Invalid currency: {currency}\")\nclass CurrencyMismatchError(DomainError):\n    \"\"\"Exception raised when trying to perform operations between different currencies.\"\"\"\n    def __init__(self, currency1, currency2):\n        super().__init__(f\"Cannot perform operation between different currencies: {currency1} and {currency2}\")",
+        "detail": "backend.src.domain.exceptions.money_error",
+        "documentation": {}
+    },
+    {
+        "label": "CurrencyMismatchError",
+        "kind": 6,
+        "importPath": "backend.src.domain.exceptions.money_error",
+        "description": "backend.src.domain.exceptions.money_error",
+        "peekOfCode": "class CurrencyMismatchError(DomainError):\n    \"\"\"Exception raised when trying to perform operations between different currencies.\"\"\"\n    def __init__(self, currency1, currency2):\n        super().__init__(f\"Cannot perform operation between different currencies: {currency1} and {currency2}\")",
+        "detail": "backend.src.domain.exceptions.money_error",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidTransferPolicyError",
+        "kind": 6,
+        "importPath": "backend.src.domain.exceptions.transaction_transfer_policy_error",
+        "description": "backend.src.domain.exceptions.transaction_transfer_policy_error",
+        "peekOfCode": "class InvalidTransferPolicyError(DomainError):\n    \"\"\"Exception raised when transaction transfer policy is invalid.\"\"\"\n    def __init__(self, message: str):\n        super().__init__(message)",
+        "detail": "backend.src.domain.exceptions.transaction_transfer_policy_error",
+        "documentation": {}
+    },
+    {
+        "label": "BudgetStrategyType",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.budget_strategy",
+        "description": "backend.src.domain.value_objects.budget_strategy",
+        "peekOfCode": "class BudgetStrategyType(Enum):\n    \"\"\"Enum representing budget strategy types.\"\"\"\n    MONTHLY = \"monthly\"\n    YEARLY = \"yearly\"\n    def __str__(self) -> str:\n        return self.value\n@dataclass(frozen=True)\nclass BudgetStrategyInput(ABC):\n    \"\"\"\n    Abstract value object defining input parameters for a budget strategy.",
+        "detail": "backend.src.domain.value_objects.budget_strategy",
+        "documentation": {}
+    },
+    {
+        "label": "BudgetStrategyInput",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.budget_strategy",
+        "description": "backend.src.domain.value_objects.budget_strategy",
+        "peekOfCode": "class BudgetStrategyInput(ABC):\n    \"\"\"\n    Abstract value object defining input parameters for a budget strategy.\n    \"\"\"\n    @property\n    @abstractmethod\n    def strategy_type(self) -> BudgetStrategyType:\n        \"\"\"Return the strategy type.\"\"\"\n        pass\n@dataclass(frozen=True)",
+        "detail": "backend.src.domain.value_objects.budget_strategy",
+        "documentation": {}
+    },
+    {
+        "label": "MonthlyBudgetStrategyInput",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.budget_strategy",
+        "description": "backend.src.domain.value_objects.budget_strategy",
+        "peekOfCode": "class MonthlyBudgetStrategyInput(BudgetStrategyInput):\n    \"\"\"Monthly budget strategy input parameters.\"\"\"\n    start_day: int = 1\n    def __post_init__(self):\n        \"\"\"Validate parameters after initialization.\"\"\"\n        if (\n            not isinstance(self.start_day, int)\n            or self.start_day < 1\n            or self.start_day > 28\n        ):",
+        "detail": "backend.src.domain.value_objects.budget_strategy",
+        "documentation": {}
+    },
+    {
+        "label": "YearlyBudgetStrategyInput",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.budget_strategy",
+        "description": "backend.src.domain.value_objects.budget_strategy",
+        "peekOfCode": "class YearlyBudgetStrategyInput(BudgetStrategyInput):\n    \"\"\"Yearly budget strategy input parameters.\"\"\"\n    start_month: int = 1\n    start_day: int = 1\n    def __post_init__(self):\n        \"\"\"Validate parameters after initialization.\"\"\"\n        if (\n            not isinstance(self.start_month, int)\n            or self.start_month < 1\n            or self.start_month > 12",
+        "detail": "backend.src.domain.value_objects.budget_strategy",
+        "documentation": {}
+    },
+    {
+        "label": "Limit",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.limit",
+        "description": "backend.src.domain.value_objects.limit",
+        "peekOfCode": "class Limit:\n    \"\"\"\n    Value object representing a spending limit.\n    \"\"\"\n    value: Money\n    def __post_init__(self):\n        \"\"\"\n        Validate the limit value after initialization.\n        Raises:\n            InvalidLimitValueError: If the limit value is negative",
+        "detail": "backend.src.domain.value_objects.limit",
+        "documentation": {}
+    },
+    {
+        "label": "Money",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.money",
+        "description": "backend.src.domain.value_objects.money",
+        "peekOfCode": "class Money:\n    \"\"\"\n    Value object representing an amount in a specific currency.\n    \"\"\"\n    amount: int\n    currency: str\n    def __post_init__(self):\n        \"\"\"Validate currency after initialization.\"\"\"\n        if not isinstance(self.currency, str) or not self.currency or len(self.currency) != 3:\n            raise InvalidCurrencyError(self.currency)",
+        "detail": "backend.src.domain.value_objects.money",
+        "documentation": {}
+    },
+    {
+        "label": "TransactionTransferPolicyType",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "description": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "peekOfCode": "class TransactionTransferPolicyType(Enum):\n    \"\"\"Enum representing transaction transfer policy types.\"\"\"\n    DELETE_TRANSACTIONS = auto()\n    MOVE_TO_OTHER_CATEGORY = auto()\n@dataclass(frozen=True)\nclass TransactionTransferPolicyInput(ABC):\n    \"\"\"\n    Abstract value object defining how transactions are handled when a category is deleted.\n    \"\"\"\n    @property",
+        "detail": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "documentation": {}
+    },
+    {
+        "label": "TransactionTransferPolicyInput",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "description": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "peekOfCode": "class TransactionTransferPolicyInput(ABC):\n    \"\"\"\n    Abstract value object defining how transactions are handled when a category is deleted.\n    \"\"\"\n    @property\n    @abstractmethod\n    def policy_type(self) -> TransactionTransferPolicyType:\n        \"\"\"Return the policy type.\"\"\"\n        pass\n@dataclass(frozen=True)",
+        "detail": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "documentation": {}
+    },
+    {
+        "label": "DeleteTransactionsTransferPolicyInput",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "description": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "peekOfCode": "class DeleteTransactionsTransferPolicyInput(TransactionTransferPolicyInput):\n    \"\"\"Policy input for deleting transactions.\"\"\"\n    @property\n    def policy_type(self) -> TransactionTransferPolicyType:\n        return TransactionTransferPolicyType.DELETE_TRANSACTIONS\n    def __str__(self) -> str:\n        return \"DELETE_TRANSACTIONS\"\n@dataclass(frozen=True)\nclass MoveToOtherCategoryTransferPolicyInput(TransactionTransferPolicyInput):\n    \"\"\"Policy input for moving transactions to another category.\"\"\"",
+        "detail": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "documentation": {}
+    },
+    {
+        "label": "MoveToOtherCategoryTransferPolicyInput",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "description": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "peekOfCode": "class MoveToOtherCategoryTransferPolicyInput(TransactionTransferPolicyInput):\n    \"\"\"Policy input for moving transactions to another category.\"\"\"\n    target_category_id: UUID\n    def __post_init__(self):\n        \"\"\"Validate policy configuration after initialization.\"\"\"\n        if self.target_category_id is None:\n            raise InvalidTransferPolicyError(\"Category ID cannot be None\")\n    @property\n    def policy_type(self) -> TransactionTransferPolicyType:\n        return TransactionTransferPolicyType.MOVE_TO_OTHER_CATEGORY",
+        "detail": "backend.src.domain.value_objects.transaction_transfer_policy",
+        "documentation": {}
+    },
+    {
+        "label": "TransactionType",
+        "kind": 6,
+        "importPath": "backend.src.domain.value_objects.transaction_type",
+        "description": "backend.src.domain.value_objects.transaction_type",
+        "peekOfCode": "class TransactionType(Enum):\n    \"\"\"Enum representing transaction types.\"\"\"\n    EXPENSE = auto()\n    INCOME = auto()\n    def __str__(self) -> str:\n        return self.name\n    @classmethod\n    def from_string(cls, value: str) -> 'TransactionType':\n        \"\"\"\n        Create TransactionType from string.",
+        "detail": "backend.src.domain.value_objects.transaction_type",
+        "documentation": {}
+    },
+    {
+        "label": "TestDomainError",
+        "kind": 6,
+        "importPath": "backend.tests.domain.exceptions.test_domain_exception",
+        "description": "backend.tests.domain.exceptions.test_domain_exception",
+        "peekOfCode": "class TestDomainError:\n    def test_initialization(self):\n        \"\"\"Test if DomainError is initialized correctly.\"\"\"\n        error = DomainError(\"This is an error message\")\n        assert error.message == \"This is an error message\"\n        assert error.status == \"domain\"\n        assert str(error) == \"This is an error message\"\n    def test_status_derivation(self):\n        \"\"\"Test status derivation from class name.\"\"\"\n        class CustomDomainError(DomainError):",
+        "detail": "backend.tests.domain.exceptions.test_domain_exception",
+        "documentation": {}
+    },
+    {
+        "label": "TestBudgetStrategy",
+        "kind": 6,
+        "importPath": "backend.tests.domain.value_objects.test_budget_strategy",
+        "description": "backend.tests.domain.value_objects.test_budget_strategy",
+        "peekOfCode": "class TestBudgetStrategy:\n    def test_monthly_budget_strategy_input(self):\n        \"\"\"Test creating MonthlyBudgetStrategyInput.\"\"\"\n        strategy = MonthlyBudgetStrategyInput(start_day=15)\n        assert strategy.strategy_type == BudgetStrategyType.MONTHLY\n        assert strategy.start_day == 15\n    def test_monthly_budget_strategy_input_default(self):\n        \"\"\"Test creating MonthlyBudgetStrategyInput with default values.\"\"\"\n        strategy = MonthlyBudgetStrategyInput()\n        assert strategy.strategy_type == BudgetStrategyType.MONTHLY",
+        "detail": "backend.tests.domain.value_objects.test_budget_strategy",
+        "documentation": {}
+    },
+    {
+        "label": "TestLimit",
+        "kind": 6,
+        "importPath": "backend.tests.domain.value_objects.test_limit",
+        "description": "backend.tests.domain.value_objects.test_limit",
+        "peekOfCode": "class TestLimit:\n    def test_init_valid_limit(self):\n        \"\"\"Test creating a valid Limit object.\"\"\"\n        money = Money(1000, \"USD\")\n        limit = Limit(money)\n        assert limit.value == money\n        assert limit.value.amount == 1000\n        assert limit.value.currency == \"USD\"\n    def test_init_negative_limit(self):\n        \"\"\"Test creating a Limit with negative value should raise error.\"\"\"",
+        "detail": "backend.tests.domain.value_objects.test_limit",
+        "documentation": {}
+    },
+    {
+        "label": "TestMoney",
+        "kind": 6,
+        "importPath": "backend.tests.domain.value_objects.test_money",
+        "description": "backend.tests.domain.value_objects.test_money",
+        "peekOfCode": "class TestMoney:\n    def test_init_valid_money(self):\n        \"\"\"Test creating a valid Money object.\"\"\"\n        money = Money(1000, \"USD\")\n        assert money.amount == 1000\n        assert money.currency == \"USD\"\n    def test_init_with_lowercase_currency(self):\n        \"\"\"Test that currency is converted to uppercase during initialization.\"\"\"\n        money = Money(1000, \"usd\")\n        assert money.currency == \"USD\"",
+        "detail": "backend.tests.domain.value_objects.test_money",
+        "documentation": {}
+    },
+    {
+        "label": "TestTransactionTransferPolicy",
+        "kind": 6,
+        "importPath": "backend.tests.domain.value_objects.test_transaction_transfer_policy",
+        "description": "backend.tests.domain.value_objects.test_transaction_transfer_policy",
+        "peekOfCode": "class TestTransactionTransferPolicy:\n    def test_delete_transactions_policy_input(self):\n        \"\"\"Test creating DELETE_TRANSACTIONS policy input.\"\"\"\n        policy = DeleteTransactionsTransferPolicyInput()\n        assert policy.policy_type == TransactionTransferPolicyType.DELETE_TRANSACTIONS\n    def test_move_to_other_category_policy_input(self):\n        \"\"\"Test creating MOVE_TO_OTHER_CATEGORY policy input.\"\"\"\n        category_id = UUID(\"12345678-1234-5678-1234-567812345678\")\n        policy = MoveToOtherCategoryTransferPolicyInput(target_category_id=category_id)\n        assert (",
+        "detail": "backend.tests.domain.value_objects.test_transaction_transfer_policy",
+        "documentation": {}
+    },
+    {
+        "label": "TestTransactionType",
+        "kind": 6,
+        "importPath": "backend.tests.domain.value_objects.test_transaction_type",
+        "description": "backend.tests.domain.value_objects.test_transaction_type",
+        "peekOfCode": "class TestTransactionType:\n    def test_enum_values(self):\n        \"\"\"Test that TransactionType enum has expected values.\"\"\"\n        assert TransactionType.EXPENSE.name == \"EXPENSE\"\n        assert TransactionType.INCOME.name == \"INCOME\"\n        assert len(list(TransactionType)) == 2\n    @pytest.mark.parametrize(\"transaction_type, expected_str\", [\n        pytest.param(TransactionType.EXPENSE, \"EXPENSE\", id=\"expense_type\"),\n        pytest.param(TransactionType.INCOME, \"INCOME\", id=\"income_type\"),\n    ])",
+        "detail": "backend.tests.domain.value_objects.test_transaction_type",
+        "documentation": {}
+    }
+]

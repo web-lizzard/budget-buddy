@@ -1,4 +1,4 @@
-from domain.exceptions.domain_exception import DomainError
+from domain.exceptions import DomainError
 
 
 class TestDomainError:
