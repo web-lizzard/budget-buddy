@@ -33,7 +33,7 @@ class Category:
             Various CategoryNameError subclasses if name is invalid
             InvalidLimitValueError if limit is invalid
         """
-        self._id = id if isinstance(id, UUID) else UUID(id)
+        self._id = id
         self._budget_id = budget_id
         self._name = name
         self._limit = limit
