@@ -50,7 +50,7 @@ Part of the Budget aggregate, representing an area of spending.
 
 - ID (UUID)
 - BudgetId (Budget ID)
-- Name (String) - category name (unique within the budget)
+- Name (String) - category name
 - Limit (Money) - spending limit for the category
 
 **Methods:**
