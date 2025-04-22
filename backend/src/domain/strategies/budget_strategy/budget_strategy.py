@@ -10,3 +10,7 @@ class BudgetStrategy(ABC):
         self, budget_strategy_input: BudgetStrategyInput, start_date: datetime
     ) -> datetime:
         pass
+
+    @abstractmethod
+    def is_active(self, budget_strategy_input: BudgetStrategyInput) -> bool:
+        pass
