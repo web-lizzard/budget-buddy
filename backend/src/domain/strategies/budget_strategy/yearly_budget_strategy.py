@@ -40,3 +40,15 @@ class YearlyBudgetStrategy(BudgetStrategy):
         end_date = end_date - timedelta(seconds=1)
 
         return end_date
+
+    def is_active(self, budget_strategy_input: BudgetStrategyInput) -> bool:
+        """
+        Check if this strategy is applicable for the given input.
+
+        Args:
+            budget_strategy_input: Input parameters for budget strategy
+
+        Returns:
+            True if this strategy should be used for the given input, False otherwise
+        """
+        return isinstance(budget_strategy_input, YearlyBudgetStrategyInput)

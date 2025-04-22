@@ -13,8 +13,14 @@ class InMemoryBudgetRepository(BudgetRepository):
 
     def __init__(self, budgets: dict | None, users: dict | None):
         """Initialize repository."""
-        self._budgets = budgets or IN_MEMORY_DATABASE.get_database()["budgets"]
-        self._users = users or IN_MEMORY_DATABASE.get_database()["users"]
+        self._budgets = (
+            budgets
+            if budgets is not None
+            else IN_MEMORY_DATABASE.get_database()["budgets"]
+        )
+        self._users = (
+            users if users is not None else IN_MEMORY_DATABASE.get_database()["users"]
+        )
 
     async def find_by(self, budget_id: UUID, user_id: UUID) -> Tuple[int, Budget]:
         """Find budget by id and user id.
