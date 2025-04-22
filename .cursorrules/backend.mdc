@@ -1,5 +1,5 @@
 ---
-description: 
+description:
 globs: *.py
 alwaysApply: false
 ---
@@ -17,4 +17,3 @@ alwaysApply: false
 12. **Public methods**: Always add public methods on the top of the class declaration
 13. **Tests**: Use pytest.mark.paramtrerize for differentiate the test cases
 14. **Run Tests Command**: Use make test command to run backend unit tests
-

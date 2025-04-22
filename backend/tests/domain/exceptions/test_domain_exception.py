@@ -11,6 +11,7 @@ class TestDomainError:
 
     def test_status_derivation(self):
         """Test status derivation from class name."""
+
         class CustomDomainError(DomainError):
             pass
 
@@ -19,6 +20,7 @@ class TestDomainError:
 
     def test_status_derivation_with_error_suffix(self):
         """Test status derivation with Error suffix in class name."""
+
         class BudgetNotFoundError(DomainError):
             pass
 
@@ -27,8 +29,9 @@ class TestDomainError:
 
     def test_multi_word_class_name(self):
         """Test status derivation with multiple words in class name."""
+
         class UserAuthenticationFailedError(DomainError):
             pass
 
         error = UserAuthenticationFailedError("Authentication failed")
-        assert error.status == "user_authentication_failed" 
+        assert error.status == "user_authentication_failed"

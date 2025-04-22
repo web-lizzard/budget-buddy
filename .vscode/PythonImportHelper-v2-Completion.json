@@ -518,7 +518,7 @@
         "kind": 6,
         "importPath": "backend.src.domain.exceptions.money_error",
         "description": "backend.src.domain.exceptions.money_error",
-        "peekOfCode": "class InvalidCurrencyError(DomainError):\n    \"\"\"Exception raised when currency is invalid.\"\"\"\n    def __init__(self, currency):\n        super().__init__(f\"Invalid currency: {currency}\")\nclass CurrencyMismatchError(DomainError):\n    \"\"\"Exception raised when trying to perform operations between different currencies.\"\"\"\n    def __init__(self, currency1, currency2):\n        super().__init__(f\"Cannot perform operation between different currencies: {currency1} and {currency2}\")",
+        "peekOfCode": "class InvalidCurrencyError(DomainError):\n    \"\"\"Exception raised when currency is invalid.\"\"\"\n    def __init__(self, currency):\n        super().__init__(f\"Invalid currency: {currency}\")\nclass CurrencyMismatchError(DomainError):\n    \"\"\"Exception raised when trying to perform operations between different currencies.\"\"\"\n    def __init__(self, currency1, currency2):\n        super().__init__(\n            f\"Cannot perform operation between different currencies: {currency1} and {currency2}\"\n        )",
         "detail": "backend.src.domain.exceptions.money_error",
         "documentation": {}
     },
@@ -527,7 +527,7 @@
         "kind": 6,
         "importPath": "backend.src.domain.exceptions.money_error",
         "description": "backend.src.domain.exceptions.money_error",
-        "peekOfCode": "class CurrencyMismatchError(DomainError):\n    \"\"\"Exception raised when trying to perform operations between different currencies.\"\"\"\n    def __init__(self, currency1, currency2):\n        super().__init__(f\"Cannot perform operation between different currencies: {currency1} and {currency2}\")",
+        "peekOfCode": "class CurrencyMismatchError(DomainError):\n    \"\"\"Exception raised when trying to perform operations between different currencies.\"\"\"\n    def __init__(self, currency1, currency2):\n        super().__init__(\n            f\"Cannot perform operation between different currencies: {currency1} and {currency2}\"\n        )",
         "detail": "backend.src.domain.exceptions.money_error",
         "documentation": {}
     },
@@ -590,7 +590,7 @@
         "kind": 6,
         "importPath": "backend.src.domain.value_objects.money",
         "description": "backend.src.domain.value_objects.money",
-        "peekOfCode": "class Money:\n    \"\"\"\n    Value object representing an amount in a specific currency.\n    \"\"\"\n    amount: int\n    currency: str\n    def __post_init__(self):\n        \"\"\"Validate currency after initialization.\"\"\"\n        if not isinstance(self.currency, str) or not self.currency or len(self.currency) != 3:\n            raise InvalidCurrencyError(self.currency)",
+        "peekOfCode": "class Money:\n    \"\"\"\n    Value object representing an amount in a specific currency.\n    \"\"\"\n    amount: int\n    currency: str\n    def __post_init__(self):\n        \"\"\"Validate currency after initialization.\"\"\"\n        if (\n            not isinstance(self.currency, str)",
         "detail": "backend.src.domain.value_objects.money",
         "documentation": {}
     },
@@ -635,7 +635,7 @@
         "kind": 6,
         "importPath": "backend.src.domain.value_objects.transaction_type",
         "description": "backend.src.domain.value_objects.transaction_type",
-        "peekOfCode": "class TransactionType(Enum):\n    \"\"\"Enum representing transaction types.\"\"\"\n    EXPENSE = auto()\n    INCOME = auto()\n    def __str__(self) -> str:\n        return self.name\n    @classmethod\n    def from_string(cls, value: str) -> 'TransactionType':\n        \"\"\"\n        Create TransactionType from string.",
+        "peekOfCode": "class TransactionType(Enum):\n    \"\"\"Enum representing transaction types.\"\"\"\n    EXPENSE = auto()\n    INCOME = auto()\n    def __str__(self) -> str:\n        return self.name\n    @classmethod\n    def from_string(cls, value: str) -> \"TransactionType\":\n        \"\"\"\n        Create TransactionType from string.",
         "detail": "backend.src.domain.value_objects.transaction_type",
         "documentation": {}
     },
@@ -689,7 +689,7 @@
         "kind": 6,
         "importPath": "backend.tests.domain.value_objects.test_transaction_type",
         "description": "backend.tests.domain.value_objects.test_transaction_type",
-        "peekOfCode": "class TestTransactionType:\n    def test_enum_values(self):\n        \"\"\"Test that TransactionType enum has expected values.\"\"\"\n        assert TransactionType.EXPENSE.name == \"EXPENSE\"\n        assert TransactionType.INCOME.name == \"INCOME\"\n        assert len(list(TransactionType)) == 2\n    @pytest.mark.parametrize(\"transaction_type, expected_str\", [\n        pytest.param(TransactionType.EXPENSE, \"EXPENSE\", id=\"expense_type\"),\n        pytest.param(TransactionType.INCOME, \"INCOME\", id=\"income_type\"),\n    ])",
+        "peekOfCode": "class TestTransactionType:\n    def test_enum_values(self):\n        \"\"\"Test that TransactionType enum has expected values.\"\"\"\n        assert TransactionType.EXPENSE.name == \"EXPENSE\"\n        assert TransactionType.INCOME.name == \"INCOME\"\n        assert len(list(TransactionType)) == 2\n    @pytest.mark.parametrize(\n        \"transaction_type, expected_str\",\n        [\n            pytest.param(TransactionType.EXPENSE, \"EXPENSE\", id=\"expense_type\"),",
         "detail": "backend.tests.domain.value_objects.test_transaction_type",
         "documentation": {}
     }

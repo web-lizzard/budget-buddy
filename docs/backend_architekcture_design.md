@@ -116,14 +116,14 @@ router = APIRouter(prefix="/budgets", tags=["budgets"])
 async def create_budget(budget_data: dict):
     command = CreateBudgetCommand(**budget_data)
     budget = command_bus.handle(command)
-    
+
     # Schedule automatic statistics calculation
     celery_app.send_task(
         "calculate_statistics",
         args=[str(budget.id)],
         countdown=10  # Run after 10 seconds
     )
-    
+
     return {"id": str(budget.id), "message": "Budget created successfully"}
 ```
 
@@ -145,12 +145,12 @@ from app.application.command_handlers.transaction_command_handlers import AddTra
 
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration()
-    
+
     # Database
     db_session_factory = providers.Singleton(
         # Session factory implementation
     )
-    
+
     # Event Publisher
     event_publisher = providers.Singleton(
         RabbitMQEventPublisher,
@@ -159,38 +159,38 @@ class Container(containers.DeclarativeContainer):
         username=config.rabbitmq.username,
         password=config.rabbitmq.password
     )
-    
+
     # Repositories
     budget_repository = providers.Singleton(
         SQLAlchemyBudgetRepository,
         session_factory=db_session_factory
     )
-    
+
     transaction_repository = providers.Singleton(
         SQLAlchemyTransactionRepository,
         session_factory=db_session_factory
     )
-    
+
     # Services
     budget_service = providers.Factory(
         BudgetService,
         budget_repository=budget_repository,
         event_publisher=event_publisher
     )
-    
+
     transaction_service = providers.Factory(
         TransactionService,
         transaction_repository=transaction_repository,
         budget_repository=budget_repository,
         event_publisher=event_publisher
     )
-    
+
     # Command Handlers
     create_budget_command_handler = providers.Factory(
         CreateBudgetCommandHandler,
         budget_service=budget_service
     )
-    
+
     add_transaction_command_handler = providers.Factory(
         AddTransactionCommandHandler,
         transaction_service=transaction_service
@@ -220,7 +220,7 @@ container.config.from_dict({
 @app.get("/budgets/{budget_id}")
 @inject
 async def get_budget(
-    budget_id: str, 
+    budget_id: str,
     budget_service: BudgetService = Depends(Provide[Container.budget_service])
 ):
     budget = budget_service.get_budget_by_id(budget_id)
@@ -241,21 +241,21 @@ from decimal import Decimal
 class Money:
     amount: Decimal
     currency: str
-    
+
     def __post_init__(self):
         if not isinstance(self.amount, Decimal):
             object.__setattr__(self, 'amount', Decimal(str(self.amount)))
-    
+
     def add(self, other):
         if self.currency != other.currency:
             raise ValueError(f"Cannot add money with different currencies: {self.currency} and {other.currency}")
         return Money(amount=self.amount + other.amount, currency=self.currency)
-    
+
     def subtract(self, other):
         if self.currency != other.currency:
             raise ValueError(f"Cannot subtract money with different currencies: {self.currency} and {other.currency}")
         return Money(amount=self.amount - other.amount, currency=self.currency)
-    
+
     def multiply(self, factor):
         return Money(amount=self.amount * Decimal(str(factor)), currency=self.currency)
 ```
@@ -270,13 +270,13 @@ from datetime import date
 
 class Budget(Base):
     __tablename__ = "budgets"
-    
+
     id = Column(String, primary_key=True)
     user_id = Column(String, nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     is_active = Column(Boolean, default=True)
-    
+
     # Value object mapping using composite
     _amount = Column("amount", Numeric(precision=10, scale=2), nullable=False)
     _currency = Column("currency", String(3), nullable=False)
@@ -285,10 +285,10 @@ class Budget(Base):
         _amount,
         _currency
     )
-    
+
     # Relationships
     categories = relationship("Category", back_populates="budget", cascade="all, delete-orphan")
-    
+
     def __init__(self, id, user_id, start_date, end_date, total_limit):
         self.id = id
         self.user_id = user_id
@@ -309,7 +309,7 @@ from app.domain.model.valueObjects.money import Money
 
 class MoneyType(TypeDecorator):
     impl = VARCHAR
-    
+
     def process_bind_param(self, value, dialect):
         if value is not None:
             return json.dumps({
@@ -317,7 +317,7 @@ class MoneyType(TypeDecorator):
                 'currency': value.currency
             })
         return None
-    
+
     def process_result_value(self, value, dialect):
         if value is not None:
             data = json.loads(value)
@@ -334,12 +334,12 @@ from app.infrastructure.database.custom_types import MoneyType
 
 class Category(Base):
     __tablename__ = "categories"
-    
+
     id = Column(String, primary_key=True)
     budget_id = Column(String, ForeignKey("budgets.id"), nullable=False)
     name = Column(String, nullable=False)
     limit = Column(MoneyType, nullable=False)  # Using custom type
-    
+
     # Relationships
     budget = relationship("Budget", back_populates="categories")
     transactions = relationship("Transaction", back_populates="category", cascade="all, delete-orphan")
@@ -359,10 +359,10 @@ from app.application.command_handlers.base_command_handler import BaseCommandHan
 class CommandBus:
     def __init__(self):
         self._handlers: Dict[Type[BaseCommand], BaseCommandHandler] = {}
-    
+
     def register(self, command_type: Type[BaseCommand], handler: BaseCommandHandler) -&gt; None:
         self._handlers[command_type] = handler
-    
+
     def handle(self, command: BaseCommand) -&gt; Any:
         handler = self._handlers.get(type(command))
         if not handler:
@@ -399,7 +399,7 @@ container.config.from_dict({
 # Register command handlers
 def register_command_handlers():
     command_bus.register(
-        CreateBudgetCommand, 
+        CreateBudgetCommand,
         container.create_budget_command_handler()
     )
     command_bus.register(
