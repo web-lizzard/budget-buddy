@@ -7,6 +7,7 @@ from domain.entities.category import Category
 from domain.exceptions import (
     CannotAddTransactionToDeactivatedBudgetError,
     CategoryLimitExceedsBudgetError,
+    CategoryNotFoundError,
     CurrencyMismatchError,
     DuplicateCategoryNameError,
     MaxCategoriesReachedError,
@@ -156,15 +157,14 @@ class Budget:
             self._deactivation_date = datetime.now()
 
     def validate_transaction_date(self, transaction_date: datetime) -> None:
-        """
-        Validate transaction date against budget period.
+        """Validate if transaction date is within budget period.
 
         Args:
-            transaction_date: Transaction date
+            transaction_date: Transaction date to validate
 
         Raises:
-            TransactionOutsideBudgetPeriodError: If transaction date is outside budget period
-            CannotAddTransactionToDeactivatedBudgetError: If budget is deactivated and transaction date is after deactivation
+            TransactionDateError: When transaction date is not within budget period
+            DeactivatedBudgetError: When budget is deactivated and transaction date is after deactivation date
         """
         # Check if transaction date is within budget period
         if transaction_date < self._start_date or transaction_date > self._end_date:
@@ -188,6 +188,23 @@ class Budget:
         """
         if currency != self._currency:
             raise CurrencyMismatchError(currency, self._currency)
+
+    def get_category_by(self, category_id: UUID) -> Category:
+        """Get category by id.
+
+        Args:
+            category_id: The ID of the category to find
+
+        Returns:
+            Category if found
+
+        Raises:
+            CategoryNotFoundError: When category is not found in this budget
+        """
+        category = next((c for c in self._categories if c.id == category_id), None)
+        if category is None:
+            raise CategoryNotFoundError(str(category_id))
+        return category
 
     def _calculate_used_limit(self, limit: Limit) -> Limit:
         """

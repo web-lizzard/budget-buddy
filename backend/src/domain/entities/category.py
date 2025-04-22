@@ -1,7 +1,11 @@
+from datetime import datetime
 from uuid import UUID
 
+from domain.aggregates.transaction import Transaction
 from domain.value_objects.category_name import CategoryName
 from domain.value_objects.limit import Limit
+from domain.value_objects.money import Money
+from domain.value_objects.transaction_type import TransactionType
 
 
 class Category:
@@ -80,8 +84,39 @@ class Category:
         Raises:
             InvalidLimitValueError: If limit value is negative or invalid type
         """
-
         self._limit = new_limit
+
+    def create_transaction(
+        self,
+        id: UUID,
+        amount: Money,
+        transaction_type: TransactionType,
+        occurred_date: datetime,
+        user_id: UUID,
+        description: str | None = None,
+    ) -> Transaction:
+        """Create a new transaction for this category.
+
+        Args:
+            id: Transaction ID
+            amount: Transaction amount
+            type: Transaction type
+            occurred_date: Transaction date
+            user_id: The ID of the user who owns the transaction
+            description: Optional transaction description
+
+        Returns:
+            Created transaction
+        """
+        return Transaction(
+            id=id,
+            category_id=self._id,
+            amount=amount,
+            transaction_type=transaction_type,
+            occurred_date=occurred_date,
+            description=description,
+            user_id=user_id,
+        )
 
     def __str__(self) -> str:
         return f"Category: {self._name} (ID: {self._id}, Budget: {self._budget_id}), Limit: {self._limit}"
