@@ -72,13 +72,12 @@ class TestLimit:
             pytest.param(1000, 500, False, id="not_exceeded"),
             pytest.param(1000, 1000, False, id="exactly_at_limit"),
             pytest.param(1000, 1001, True, id="exceeded"),
-            pytest.param(0, -500, False, id="zero_limit"),
         ],
     )
     def test_is_exceeded(self, limit_amount, spending_amount, is_exceeded):
         """Test is_exceeded method."""
         limit = Limit(Money(limit_amount, "USD"))
-        spending = Money(spending_amount, "USD")
+        spending = Limit(Money(spending_amount, "USD"))
 
         assert limit.is_exceeded(spending) == is_exceeded
 
@@ -86,17 +85,16 @@ class TestLimit:
         """Test is_exceeded with invalid spending type."""
         limit = Limit(Money(1000, "USD"))
 
-        # Using monkeypatch instead of passing wrong type directly to avoid type checking errors
         with pytest.raises(AttributeError):
             # We use a workaround to test runtime behavior without triggering static type errors
             # pylint: disable=no-member
-            invalid_input: Any = "not a money object"
+            invalid_input: Any = "not a limit object"
             limit.is_exceeded(invalid_input)  # type: ignore
 
     def test_is_exceeded_with_different_currency(self):
         """Test is_exceeded with different currency."""
         limit = Limit(Money(1000, "USD"))
-        spending = Money(500, "EUR")
+        spending = Limit(Money(500, "EUR"))
 
         with pytest.raises(InvalidLimitValueError):
             limit.is_exceeded(spending)

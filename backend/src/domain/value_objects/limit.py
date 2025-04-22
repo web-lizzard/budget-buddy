@@ -23,7 +23,7 @@ class Limit:
         if self.value.amount < 0:
             raise InvalidLimitValueError("Limit cannot be negative")
 
-    def is_exceeded(self, current_spending: Money) -> bool:
+    def is_exceeded(self, current_spending: "Limit") -> bool:
         """
         Check if the limit is exceeded.
 
@@ -36,12 +36,19 @@ class Limit:
         Raises:
             CurrencyMismatchError: If currencies don't match
         """
-        if current_spending.currency != self.value.currency:
+        value = current_spending.value
+        if value.currency != self.value.currency:
             raise InvalidLimitValueError(
-                f"Currency mismatch: limit is in {self.value.currency}, spending is in {current_spending.currency}"
+                f"Currency mismatch: limit is in {self.value.currency}, spending is in {value.currency}"
             )
 
-        return current_spending.amount > self.value.amount
+        return value.amount > self.value.amount
+
+    def add(self, other: "Limit") -> "Limit":
+        """
+        Add two limits together.
+        """
+        return Limit(value=self.value.add(other.value))
 
     def remaining_amount(self, current_spending: Money) -> Money:
         """
