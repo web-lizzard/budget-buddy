@@ -10,6 +10,11 @@ alwaysApply: false
 5. **Use List Comprehensions**: Prefer list comprehensions for creating lists over traditional loops when appropriate.
 6. **Handle Exceptions**: Use try-except blocks to handle exceptions gracefully.
 7. **Use Virtual Environments**: Isolate project dependencies using virtual environments (e.g., `venv`).
-8. **Write Tests**: Implement unit tests to ensure code reliability.
+8. **Write Tests**: Implement unit tests to ensure code reliability. Write it to correspond module in `backend/tests/**`
 9. **Use Type Hints**: Utilize type hints for better code clarity and type checking.
 10. **Avoid Global Variables**: Limit the use of global variables to reduce side effects.
+11. **Create Separete Files**: Always create a file for a new class function in correspond folder
+12. **Public methods**: Always add public methods on the top of the class declaration
+13. **Tests**: Use pytest.mark.paramtrerize for differentiate the test cases
+14. **Run Tests Command**: Use make test command to run backend unit tests
+

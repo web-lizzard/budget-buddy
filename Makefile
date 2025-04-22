@@ -9,7 +9,7 @@ run:
 
 # Run tests
 test:
-	cd backend && PYTHONPATH=$(PYTHONPATH) python -m pytest
+	cd backend && PYTHONPATH=$(PYTHONPATH) uv run pytest
 
 # Add dependencies
 add-dep:
