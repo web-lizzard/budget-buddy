@@ -14,12 +14,13 @@ The main aggregate representing a user's financial plan for a specified period.
 - Currency (String) - budget currency
 - StartDate (Date) - budget start date
 - EndDate (Date) - budget end date (calculated based on strategy)
+- BudgetStrategyInput - budget strategy used to calculated
 - DeactivationDate (Date, optional) - budget deactivation date
 
 **Methods:**
 
-- AddCategory(name, limit) - adds a new category with a limit, checking if the limit doesn't exceed the available budget, if the name is unique, and if the category count doesn't exceed the maximum (5)
-- RemoveCategory(Category) - removes a category with a selected transaction transfer policy
+- AddCategory(name, limit) -> Category - adds a new category with a limit, checking if the limit doesn't exceed the available budget, if the name is unique, and if the category count doesn't exceed the maximum (5)
+- RemoveCategory(Category) - removes a category
 - DeactivateBudget() - deactivates the budget
 - ValidateTransactionDate(Transaction) - checks if the transaction date is within the budget period
 
