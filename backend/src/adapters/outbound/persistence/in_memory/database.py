@@ -11,6 +11,7 @@ class InMemoryDatabase:
     _database: Dict[str, Dict[Any, Any]] = {
         "budgets": {},  # UUID -> Tuple[int, Budget]
         "users": {DEFAULT_USER_ID: {"user_id": DEFAULT_USER_ID}},
+        "transactions": {},  # UUID -> Transaction
     }
 
     def __new__(cls) -> "InMemoryDatabase":

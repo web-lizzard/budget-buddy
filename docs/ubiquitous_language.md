@@ -186,6 +186,7 @@ Calculates statistics based on transactions.
 - FindByBudgetId(budgetId)
 - Save(transaction)
 - Delete(transaction)
+- DeleteBulk(transactions)
 
 ### StatisticsRepository
 

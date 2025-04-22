@@ -16,6 +16,7 @@ from domain.exceptions.limit_error import InvalidLimitValueError
 from domain.exceptions.max_categories_reached_error import MaxCategoriesReachedError
 from domain.exceptions.money_error import CurrencyMismatchError, InvalidCurrencyError
 from domain.exceptions.not_compatible_version_error import NotCompatibleVersionError
+from domain.exceptions.transaction_not_found_error import TransactionNotFoundError
 from domain.exceptions.transaction_outside_budget_period_error import (
     TransactionOutsideBudgetPeriodError,
 )
@@ -41,4 +42,5 @@ __all__ = [
     "CannotAddTransactionToDeactivatedBudgetError",
     "NotCompatibleVersionError",
     "BudgetNotFoundError",
+    "TransactionNotFoundError",
 ]

@@ -8,6 +8,7 @@ from domain.entities import Category
 from domain.exceptions import (
     CannotAddTransactionToDeactivatedBudgetError,
     CategoryLimitExceedsBudgetError,
+    CategoryNotFoundError,
     CurrencyMismatchError,
     DuplicateCategoryNameError,
     MaxCategoriesReachedError,
@@ -240,3 +241,29 @@ class TestBudget:
         assert f"User: {valid_budget.user_id}" in budget_str
         assert f"Limit: {valid_budget.total_limit}" in budget_str
         assert "Active: True" in budget_str
+
+    def test_get_category_by_id(self, valid_budget):
+        """Test getting a category by ID."""
+        category = valid_budget.add_category(
+            CategoryName("Test Category"),
+            Limit(Money(1000, "USD")),
+        )
+
+        found_category = valid_budget.get_category_by(category.id)
+        assert found_category == category
+
+    def test_get_category_by_id_not_found(self, valid_budget):
+        """Test getting a non-existent category by ID."""
+        with pytest.raises(CategoryNotFoundError):
+            valid_budget.get_category_by(uuid.uuid4())
+
+    def test_budget_string_representation(self, valid_budget):
+        """Test the string representation of a budget."""
+        str_repr = str(valid_budget)
+
+        assert str(valid_budget.id) in str_repr
+        assert str(valid_budget.user_id) in str_repr
+        assert str(valid_budget.total_limit) in str_repr
+        assert str(valid_budget.start_date) in str_repr
+        assert str(valid_budget.end_date) in str_repr
+        assert str(len(valid_budget.categories)) in str_repr

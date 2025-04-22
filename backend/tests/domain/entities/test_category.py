@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from uuid import UUID
 
 import pytest
@@ -9,6 +10,47 @@ from domain.exceptions import (
     EmptyCategoryNameError,
 )
 from domain.value_objects import CategoryName, Limit, Money
+from domain.value_objects.transaction_type import TransactionType
+
+
+@pytest.fixture
+def category_id() -> UUID:
+    return uuid.uuid4()
+
+
+@pytest.fixture
+def budget_id() -> UUID:
+    return uuid.uuid4()
+
+
+@pytest.fixture
+def user_id() -> UUID:
+    return uuid.uuid4()
+
+
+@pytest.fixture
+def category_name() -> CategoryName:
+    return CategoryName("Test Category")
+
+
+@pytest.fixture
+def category_limit() -> Limit:
+    return Limit(Money(1000, "USD"))
+
+
+@pytest.fixture
+def category(
+    category_id: UUID,
+    budget_id: UUID,
+    category_name: CategoryName,
+    category_limit: Limit,
+) -> Category:
+    return Category(
+        id=category_id,
+        budget_id=budget_id,
+        name=category_name,
+        limit=category_limit,
+    )
 
 
 class TestCategory:
@@ -139,3 +181,83 @@ class TestCategory:
         assert str(category_id) in str(category)
         assert str(budget_id) in str(category)
         assert str(limit) in str(category)
+
+    def test_create_category(self, category: Category):
+        """Test creating a category with all required fields."""
+        assert isinstance(category, Category)
+        assert isinstance(category.id, UUID)
+        assert isinstance(category.budget_id, UUID)
+        assert isinstance(category.name, CategoryName)
+        assert isinstance(category.limit, Limit)
+
+    def test_change_category_name(
+        self,
+        category: Category,
+    ):
+        """Test changing category name."""
+        new_name = CategoryName("New Category Name")
+        category.change_name(new_name)
+        assert category.name == new_name
+
+    def test_change_category_limit(
+        self,
+        category: Category,
+    ):
+        """Test changing category limit."""
+        new_limit = Limit(Money(2000, "USD"))
+        category.change_limit(new_limit)
+        assert category.limit == new_limit
+
+    def test_create_transaction(
+        self,
+        category: Category,
+        user_id: UUID,
+    ):
+        """Test creating a transaction in the category."""
+        transaction_id = uuid.uuid4()
+        amount = Money(500, "USD")
+        transaction_type = TransactionType.EXPENSE
+        occurred_date = datetime(2024, 1, 1, 12, 0)
+        description = "Test transaction"
+
+        transaction = category.create_transaction(
+            id=transaction_id,
+            amount=amount,
+            transaction_type=transaction_type,
+            occurred_date=occurred_date,
+            user_id=user_id,
+            description=description,
+        )
+
+        assert transaction.id == transaction_id
+        assert transaction.category_id == category.id
+        assert transaction.amount == amount
+        assert transaction.transaction_type == transaction_type
+        assert transaction.occurred_date == occurred_date
+        assert transaction.description == description
+        assert transaction.user_id == user_id
+
+    def test_create_transaction_without_description(
+        self,
+        category: Category,
+        user_id: UUID,
+    ):
+        """Test creating a transaction without description."""
+        transaction = category.create_transaction(
+            id=uuid.uuid4(),
+            amount=Money(500, "USD"),
+            transaction_type=TransactionType.EXPENSE,
+            occurred_date=datetime(2024, 1, 1, 12, 0),
+            user_id=user_id,
+        )
+
+        assert transaction.description is None
+
+    def test_category_string_representation(self, category: Category):
+        """Test the string representation of a category."""
+        str_repr = str(category)
+
+        assert str(category.name) in str_repr
+        assert str(category.id) in str_repr
+        assert str(category.budget_id) in str_repr
+        assert str(category.limit) in str_repr
