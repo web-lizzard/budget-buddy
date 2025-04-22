@@ -5,7 +5,7 @@ export PYTHONPATH := $(CURDIR)/backend/src
 
 # Run main.py
 run:
-	cd backend && PYTHONPATH=$(PYTHONPATH) python src/main.py
+	cd backend && PYTHONPATH=$(PYTHONPATH) uv run src/main.py
 
 # Run tests
 test:
