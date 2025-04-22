@@ -37,9 +37,6 @@ Represents a single financial operation.
 - Date (DateTime) - transaction date and time
 - Description (String, optional) - transaction description
 
-**Methods:**
-
-- UpdateTransaction(amount, type, date, description) - updates the transaction
 
 ## Entities
 
@@ -178,15 +175,14 @@ Calculates statistics based on transactions.
 
 **Methods:**
 
-- FindById(id, user_id)
-- Save(budget)
+- FindById(id, user_id) -> version, Budget
+- Save(budget) -> None
 
 ### TransactionRepository
 
 **Methods:**
 
 - FindById(id)
-- FindByCategoryId(categoryId)
 - FindByBudgetId(budgetId)
 - Save(transaction)
 - Delete(transaction)

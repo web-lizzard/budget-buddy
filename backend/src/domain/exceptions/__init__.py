@@ -1,3 +1,4 @@
+from domain.exceptions.budget_not_found_error import BudgetNotFoundError
 from domain.exceptions.budget_strategy_error import InvalidStrategyParameterError
 from domain.exceptions.cannot_add_transaction_to_deactivated_budget_error import (
     CannotAddTransactionToDeactivatedBudgetError,
@@ -14,6 +15,7 @@ from domain.exceptions.empty_category_name_error import EmptyCategoryNameError
 from domain.exceptions.limit_error import InvalidLimitValueError
 from domain.exceptions.max_categories_reached_error import MaxCategoriesReachedError
 from domain.exceptions.money_error import CurrencyMismatchError, InvalidCurrencyError
+from domain.exceptions.not_compatible_version_error import NotCompatibleVersionError
 from domain.exceptions.transaction_outside_budget_period_error import (
     TransactionOutsideBudgetPeriodError,
 )
@@ -37,4 +39,6 @@ __all__ = [
     "CategoryNotFoundError",
     "TransactionOutsideBudgetPeriodError",
     "CannotAddTransactionToDeactivatedBudgetError",
+    "NotCompatibleVersionError",
+    "BudgetNotFoundError",
 ]
