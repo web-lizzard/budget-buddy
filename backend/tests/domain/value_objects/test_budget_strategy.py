@@ -1,9 +1,7 @@
 import pytest
 from domain.exceptions import InvalidStrategyParameterError
 from domain.value_objects.budget_strategy import (
-    BudgetStrategyInput,
     BudgetStrategyType,
-    CustomBudgetStrategyInput,
     MonthlyBudgetStrategyInput,
     YearlyBudgetStrategyInput,
 )
@@ -66,18 +64,6 @@ class TestBudgetStrategy:
             YearlyBudgetStrategyInput(start_day=29)
         assert "start_day" in str(exc.value)
 
-    def test_custom_budget_strategy_input(self):
-        """Test creating CustomBudgetStrategyInput."""
-        strategy = CustomBudgetStrategyInput(duration_days=30)
-        assert strategy.strategy_type == BudgetStrategyType.CUSTOM
-        assert strategy.duration_days == 30
-
-    def test_custom_budget_strategy_input_invalid_duration_days(self):
-        """Test that creating CustomBudgetStrategyInput with invalid duration_days raises an exception."""
-        with pytest.raises(InvalidStrategyParameterError) as exc:
-            CustomBudgetStrategyInput(duration_days=0)
-        assert "duration_days" in str(exc.value)
-
     @pytest.mark.parametrize(
         "strategy1, strategy2, should_be_equal",
         [
@@ -114,16 +100,24 @@ class TestBudgetStrategy:
         else:
             assert strategy1 != strategy2
 
-    def test_str_representation(self):
+    @pytest.mark.parametrize(
+        "strategy, expected_str",
+        [
+            pytest.param(
+                MonthlyBudgetStrategyInput(start_day=15),
+                "monthly (start_day: 15)",
+                id="monthly_strategy",
+            ),
+            pytest.param(
+                YearlyBudgetStrategyInput(start_month=3, start_day=15),
+                "yearly (start_month: 3, start_day: 15)",
+                id="yearly_strategy",
+            ),
+        ],
+    )
+    def test_str_representation(self, strategy, expected_str):
         """Test string representation of budget strategies."""
-        monthly = MonthlyBudgetStrategyInput(start_day=15)
-        assert str(monthly) == "monthly (start_day: 15)"
-
-        yearly = YearlyBudgetStrategyInput(start_month=3, start_day=15)
-        assert str(yearly) == "yearly (start_month: 3, start_day: 15)"
-
-        custom = CustomBudgetStrategyInput(duration_days=30)
-        assert str(custom) == "custom (duration_days: 30)"
+        assert str(strategy) == expected_str
 
     def test_immutability(self):
         """Test that budget strategy objects are immutable."""

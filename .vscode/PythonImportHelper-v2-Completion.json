@@ -44,22 +44,6 @@
         "documentation": {}
     },
     {
-        "label": "DomainError",
-        "importPath": "domain.exceptions.domain_exception",
-        "description": "domain.exceptions.domain_exception",
-        "isExtraImport": true,
-        "detail": "domain.exceptions.domain_exception",
-        "documentation": {}
-    },
-    {
-        "label": "DomainError",
-        "importPath": "domain.exceptions.domain_exception",
-        "description": "domain.exceptions.domain_exception",
-        "isExtraImport": true,
-        "detail": "domain.exceptions.domain_exception",
-        "documentation": {}
-    },
-    {
         "label": "re",
         "kind": 6,
         "isExtraImport": true,
@@ -181,6 +165,14 @@
         "documentation": {}
     },
     {
+        "label": "CurrencyMismatchError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
         "label": "InvalidLimitValueError",
         "importPath": "domain.exceptions",
         "description": "domain.exceptions",
@@ -222,6 +214,14 @@
     },
     {
         "label": "InvalidStrategyParameterError",
+        "importPath": "domain.exceptions",
+        "description": "domain.exceptions",
+        "isExtraImport": true,
+        "detail": "domain.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "CurrencyMismatchError",
         "importPath": "domain.exceptions",
         "description": "domain.exceptions",
         "isExtraImport": true,
@@ -318,23 +318,7 @@
         "documentation": {}
     },
     {
-        "label": "BudgetStrategyInput",
-        "importPath": "domain.value_objects.budget_strategy",
-        "description": "domain.value_objects.budget_strategy",
-        "isExtraImport": true,
-        "detail": "domain.value_objects.budget_strategy",
-        "documentation": {}
-    },
-    {
         "label": "BudgetStrategyType",
-        "importPath": "domain.value_objects.budget_strategy",
-        "description": "domain.value_objects.budget_strategy",
-        "isExtraImport": true,
-        "detail": "domain.value_objects.budget_strategy",
-        "documentation": {}
-    },
-    {
-        "label": "CustomBudgetStrategyInput",
         "importPath": "domain.value_objects.budget_strategy",
         "description": "domain.value_objects.budget_strategy",
         "isExtraImport": true,
@@ -503,15 +487,6 @@
         "documentation": {}
     },
     {
-        "label": "InvalidStrategyTypeError",
-        "kind": 6,
-        "importPath": "backend.src.domain.exceptions.budget_strategy_error",
-        "description": "backend.src.domain.exceptions.budget_strategy_error",
-        "peekOfCode": "class InvalidStrategyTypeError(DomainError):\n    \"\"\"Exception raised when budget strategy type is invalid.\"\"\"\n    def __init__(self, strategy_type):\n        super().__init__(f\"Invalid budget strategy type: {strategy_type}\")\nclass InvalidStrategyParameterError(DomainError):\n    \"\"\"Exception raised when budget strategy parameter is invalid.\"\"\"\n    def __init__(self, parameter_name, parameter_value):\n        super().__init__(\n            f\"Invalid budget strategy parameter '{parameter_name}': {parameter_value}\"\n        )",
-        "detail": "backend.src.domain.exceptions.budget_strategy_error",
-        "documentation": {}
-    },
-    {
         "label": "InvalidStrategyParameterError",
         "kind": 6,
         "importPath": "backend.src.domain.exceptions.budget_strategy_error",
@@ -570,7 +545,7 @@
         "kind": 6,
         "importPath": "backend.src.domain.value_objects.budget_strategy",
         "description": "backend.src.domain.value_objects.budget_strategy",
-        "peekOfCode": "class BudgetStrategyType(Enum):\n    \"\"\"Enum representing budget strategy types.\"\"\"\n    MONTHLY = \"monthly\"\n    YEARLY = \"yearly\"\n    CUSTOM = \"custom\"\n    def __str__(self) -> str:\n        return self.value\n@dataclass(frozen=True)\nclass BudgetStrategyInput(ABC):\n    \"\"\"",
+        "peekOfCode": "class BudgetStrategyType(Enum):\n    \"\"\"Enum representing budget strategy types.\"\"\"\n    MONTHLY = \"monthly\"\n    YEARLY = \"yearly\"\n    def __str__(self) -> str:\n        return self.value\n@dataclass(frozen=True)\nclass BudgetStrategyInput(ABC):\n    \"\"\"\n    Abstract value object defining input parameters for a budget strategy.",
         "detail": "backend.src.domain.value_objects.budget_strategy",
         "documentation": {}
     },
@@ -598,15 +573,6 @@
         "importPath": "backend.src.domain.value_objects.budget_strategy",
         "description": "backend.src.domain.value_objects.budget_strategy",
         "peekOfCode": "class YearlyBudgetStrategyInput(BudgetStrategyInput):\n    \"\"\"Yearly budget strategy input parameters.\"\"\"\n    start_month: int = 1\n    start_day: int = 1\n    def __post_init__(self):\n        \"\"\"Validate parameters after initialization.\"\"\"\n        if (\n            not isinstance(self.start_month, int)\n            or self.start_month < 1\n            or self.start_month > 12",
-        "detail": "backend.src.domain.value_objects.budget_strategy",
-        "documentation": {}
-    },
-    {
-        "label": "CustomBudgetStrategyInput",
-        "kind": 6,
-        "importPath": "backend.src.domain.value_objects.budget_strategy",
-        "description": "backend.src.domain.value_objects.budget_strategy",
-        "peekOfCode": "class CustomBudgetStrategyInput(BudgetStrategyInput):\n    \"\"\"Custom budget strategy input parameters.\"\"\"\n    duration_days: int\n    def __post_init__(self):\n        \"\"\"Validate parameters after initialization.\"\"\"\n        if not isinstance(self.duration_days, int) or self.duration_days < 1:\n            raise InvalidStrategyParameterError(\"duration_days\", self.duration_days)\n    @property\n    def strategy_type(self) -> BudgetStrategyType:\n        return BudgetStrategyType.CUSTOM",
         "detail": "backend.src.domain.value_objects.budget_strategy",
         "documentation": {}
     },

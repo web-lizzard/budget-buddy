@@ -1,7 +1,6 @@
 from domain.value_objects.budget_strategy import (
     BudgetStrategyInput,
     BudgetStrategyType,
-    CustomBudgetStrategyInput,
     MonthlyBudgetStrategyInput,
     YearlyBudgetStrategyInput,
 )
@@ -20,7 +19,6 @@ __all__ = [
     "BudgetStrategyInput",
     "MonthlyBudgetStrategyInput",
     "YearlyBudgetStrategyInput",
-    "CustomBudgetStrategyInput",
     "Limit",
     "Money",
     "TransactionType",

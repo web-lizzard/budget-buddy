@@ -1,7 +1,7 @@
 from typing import Any
 
 import pytest
-from domain.exceptions import InvalidLimitValueError
+from domain.exceptions import CurrencyMismatchError, InvalidLimitValueError
 from domain.value_objects.limit import Limit
 from domain.value_objects.money import Money
 
@@ -135,7 +135,7 @@ class TestLimit:
         limit = Limit(Money(1000, "USD"))
         spending = Money(500, "EUR")
 
-        with pytest.raises(InvalidLimitValueError):
+        with pytest.raises(CurrencyMismatchError):
             limit.remaining_amount(spending)
 
     def test_immutability(self):

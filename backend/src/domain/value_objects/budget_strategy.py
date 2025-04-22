@@ -10,7 +10,6 @@ class BudgetStrategyType(Enum):
 
     MONTHLY = "monthly"
     YEARLY = "yearly"
-    CUSTOM = "custom"
 
     def __str__(self) -> str:
         return self.value
@@ -81,22 +80,3 @@ class YearlyBudgetStrategyInput(BudgetStrategyInput):
 
     def __str__(self) -> str:
         return f"{self.strategy_type} (start_month: {self.start_month}, start_day: {self.start_day})"
-
-
-@dataclass(frozen=True)
-class CustomBudgetStrategyInput(BudgetStrategyInput):
-    """Custom budget strategy input parameters."""
-
-    duration_days: int
-
-    def __post_init__(self):
-        """Validate parameters after initialization."""
-        if not isinstance(self.duration_days, int) or self.duration_days < 1:
-            raise InvalidStrategyParameterError("duration_days", self.duration_days)
-
-    @property
-    def strategy_type(self) -> BudgetStrategyType:
-        return BudgetStrategyType.CUSTOM
-
-    def __str__(self) -> str:
-        return f"{self.strategy_type} (duration_days: {self.duration_days})"

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from domain.exceptions import InvalidLimitValueError
+from domain.exceptions import CurrencyMismatchError, InvalidLimitValueError
 
 from .money import Money
 
@@ -34,7 +34,6 @@ class Limit:
             True if limit is exceeded, False otherwise
 
         Raises:
-            InvalidLimitValueError: If current_spending is not a Money object
             CurrencyMismatchError: If currencies don't match
         """
         if current_spending.currency != self.value.currency:
@@ -55,17 +54,15 @@ class Limit:
             Remaining amount as Money object
 
         Raises:
-            InvalidLimitValueError: If current_spending is not a Money object
             CurrencyMismatchError: If currencies don't match
         """
 
         if current_spending.currency != self.value.currency:
-            raise InvalidLimitValueError(
-                f"Currency mismatch: limit is in {self.value.currency}, spending is in {current_spending.currency}"
+            raise CurrencyMismatchError(
+                currency1=current_spending.currency, currency2=self.value.currency
             )
 
         if current_spending.amount >= self.value.amount:
-            # Return zero money with the same currency if limit is already exceeded
             return Money(0, self.value.currency)
 
         return Money(self.value.amount - current_spending.amount, self.value.currency)

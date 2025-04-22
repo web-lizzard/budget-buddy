@@ -1,11 +1,4 @@
-from domain.exceptions.domain_exception import DomainError
-
-
-class InvalidStrategyTypeError(DomainError):
-    """Exception raised when budget strategy type is invalid."""
-
-    def __init__(self, strategy_type):
-        super().__init__(f"Invalid budget strategy type: {strategy_type}")
+from .domain_exception import DomainError
 
 
 class InvalidStrategyParameterError(DomainError):
