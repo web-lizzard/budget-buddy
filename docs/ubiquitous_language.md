@@ -146,13 +146,13 @@ Responsible for automatically creating new budgets.
 - RenewBudget(expiredBudget) - creates a new budget based on an expired one
 - CopyCategories(sourceBudget, targetBudget) - copies categories from one budget to another
 
-### TransactionCategoryReassignmentService
+### RemoveCategoryService
 
 Manages moving transactions between categories.
 
 **Methods:**
 
-- ReassignTransactions(sourceCategory, targetCategory, budget) - moves transactions from one category to another
+- RemoveCategory(sourceCategory, targetCategory, budget) - moves transactions from one category to another
 - DeleteTransactions(category) - deletes all transactions from a category
 
 ### StatisticsCalculationService

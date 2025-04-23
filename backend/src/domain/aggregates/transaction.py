@@ -81,6 +81,10 @@ class Transaction:
         """Get user ID."""
         return self._user_id
 
+    def update_category(self, category_id: UUID) -> None:
+        """Update the category of the transaction."""
+        self._category_id = category_id
+
     def __str__(self) -> str:
         """String representation of the transaction."""
         return (

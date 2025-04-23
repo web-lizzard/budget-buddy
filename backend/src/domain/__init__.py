@@ -3,6 +3,7 @@ from domain import (
     entities,
     exceptions,
     factories,
+    services,
     strategies,
     value_objects,
 )
@@ -12,6 +13,7 @@ __all__ = [
     "entities",
     "exceptions",
     "factories",
+    "services",
     "strategies",
     "value_objects",
 ]
