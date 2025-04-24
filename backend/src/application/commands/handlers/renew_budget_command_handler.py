@@ -7,7 +7,7 @@ from domain.strategies.budget_strategy.budget_strategy import BudgetStrategy
 
 from application.commands import RenewBudgetCommand
 from application.commands.handlers.command_handler import CommandHandler
-from application.commands.ports.uow.uow import UnitOfWork
+from application.ports.uow import UnitOfWork
 
 
 class RenewBudgetCommandHandler(CommandHandler[RenewBudgetCommand]):

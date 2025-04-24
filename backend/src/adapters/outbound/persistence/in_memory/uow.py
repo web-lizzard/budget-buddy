@@ -1,4 +1,4 @@
-from application.commands.ports.uow.uow import UnitOfWork
+from application.ports.uow import UnitOfWork
 from domain.ports.domain_publisher import DomainPublisher
 
 

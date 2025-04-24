@@ -8,7 +8,7 @@ from domain.value_objects.money import Money
 
 from application.commands.add_category_command import AddCategoryCommand
 from application.commands.handlers.command_handler import CommandHandler
-from application.commands.ports.uow.uow import UnitOfWork
+from application.ports.uow import UnitOfWork
 
 
 class AddCategoryCommandHandler(CommandHandler[AddCategoryCommand]):

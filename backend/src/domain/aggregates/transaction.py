@@ -85,6 +85,26 @@ class Transaction:
         """Update the category of the transaction."""
         self._category_id = category_id
 
+    def update(
+        self,
+        category_id: UUID,
+        amount: Money,
+        transaction_type: TransactionType,
+        description: str | None = None,
+    ) -> None:
+        """Update transaction details.
+
+        Args:
+            category_id: New category ID
+            amount: New transaction amount
+            transaction_type: New transaction type
+            description: New transaction description
+        """
+        self._category_id = category_id
+        self._amount = amount
+        self._transaction_type = transaction_type
+        self._description = description
+
     def __str__(self) -> str:
         """String representation of the transaction."""
         return (

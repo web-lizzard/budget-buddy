@@ -7,7 +7,7 @@ from domain.value_objects import Money
 
 from application.commands import CreateTransactionCommand
 from application.commands.handlers.command_handler import CommandHandler
-from application.commands.ports.uow.uow import UnitOfWork
+from application.ports.uow import UnitOfWork
 
 
 class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):

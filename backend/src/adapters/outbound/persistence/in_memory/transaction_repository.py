@@ -88,39 +88,38 @@ class InMemoryTransactionRepository(TransactionRepository):
 
         Args:
             transaction: The transaction to save
-            user_id: The ID of the user who owns the transaction
         """
-
         self._transactions[transaction.id] = transaction
 
-    async def delete(self, transaction: Transaction, user_id: UUID) -> None:
+    async def delete(self, transaction: Transaction) -> None:
         """Delete transaction from repository.
 
         Args:
             transaction: The transaction to delete
-            user_id: The ID of the user who owns the transaction
 
         Raises:
             TransactionNotFoundError: When transaction is not found or belongs to different user
         """
         if transaction.id not in self._transactions:
             raise TransactionNotFoundError(str(transaction.id))
-        transaction = self._transactions[transaction.id]
-
-        if transaction.user_id != user_id:
-            raise TransactionNotFoundError(str(transaction.id))
 
         del self._transactions[transaction.id]
 
-    async def delete_bulk(self, transactions: List[Transaction], user_id: UUID) -> None:
+    async def save_bulk(self, transactions: List[Transaction]) -> None:
+        """Save multiple transactions to repository.
+
+        Args:
+            transactions: List of transactions to save
+        """
+        for transaction in transactions:
+            self._transactions[transaction.id] = transaction
+
+    async def delete_bulk(self, transactions: List[Transaction]) -> None:
         """Delete multiple transactions from repository.
 
         Args:
             transactions: The transactions to delete
-            user_id: The ID of the user who owns the transactions
         """
         for transaction in transactions:
             if transaction.id in self._transactions:
-                transaction = self._transactions[transaction.id]
-                if transaction.user_id == user_id:
-                    del self._transactions[transaction.id]
+                del self._transactions[transaction.id]

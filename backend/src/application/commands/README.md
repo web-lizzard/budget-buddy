@@ -158,7 +158,6 @@ class EditTransactionCommand:
     category_id: str
     amount: float
     transaction_type: str
-    occurred_date: date
     description: Optional[str]
 
 class DeleteTransactionCommand:

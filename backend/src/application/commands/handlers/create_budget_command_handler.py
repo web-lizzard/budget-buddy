@@ -7,7 +7,7 @@ from domain.value_objects import CategoryName, Limit, Money
 
 from application.commands import CategoryData, CreateBudgetCommand
 from application.commands.handlers.command_handler import CommandHandler
-from application.commands.ports.uow.uow import UnitOfWork
+from application.ports.uow import UnitOfWork
 
 
 class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):

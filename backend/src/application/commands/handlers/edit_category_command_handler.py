@@ -8,7 +8,7 @@ from domain.value_objects.money import Money
 
 from application.commands.edit_category_command import EditCategoryCommand
 from application.commands.handlers.command_handler import CommandHandler
-from application.commands.ports.uow.uow import UnitOfWork
+from application.ports.uow import UnitOfWork
 
 
 class EditCategoryCommandHandler(CommandHandler[EditCategoryCommand]):
