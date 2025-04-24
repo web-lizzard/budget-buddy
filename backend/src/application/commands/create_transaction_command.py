@@ -4,9 +4,11 @@ from uuid import UUID
 
 from domain.value_objects import TransactionType
 
+from .command import Command
+
 
 @dataclass(frozen=True)
-class CreateTransactionCommand:
+class CreateTransactionCommand(Command):
     """Command for creating a new transaction."""
 
     category_id: UUID

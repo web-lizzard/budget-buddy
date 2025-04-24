@@ -6,6 +6,7 @@ from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
 from adapters.outbound.persistence.in_memory.budget_repository import (
     InMemoryBudgetRepository,
 )
+from adapters.outbound.uow import InMemoryUnitOfWork
 from application.commands import CategoryData, CreateBudgetCommand
 from application.commands.handlers.create_budget_command_handler import (
     CreateBudgetCommandHandler,
@@ -37,13 +38,14 @@ def _get_deps(
 ]:
     domain_publisher = InMemoryDomainPublisher()
     repository = _get_repository(user_id)
+    unit_of_work = InMemoryUnitOfWork(domain_publisher)
     return (
         CreateBudgetCommandHandler(
             budget_factory=BudgetFactory(
                 strategies=[MonthlyBudgetStrategy(), YearlyBudgetStrategy()]
             ),
             budget_repository=repository,
-            domain_publisher=domain_publisher,
+            unit_of_work=unit_of_work,
         ),
         repository,
         domain_publisher,

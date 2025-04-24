@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from uuid import UUID
 
+from .command import Command
+
 
 @dataclass(frozen=True)
-class AddCategoryCommand:
+class AddCategoryCommand(Command):
     """Command for adding a new category to an existing budget."""
 
     budget_id: UUID
