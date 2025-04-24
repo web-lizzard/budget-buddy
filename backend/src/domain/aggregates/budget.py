@@ -156,7 +156,57 @@ class Budget:
         Args:
             category_id: ID of the category to remove
         """
-        self._categories = list(filter(lambda c: c.id != category_id, self._categories))
+        self._categories = [c for c in self._categories if c.id != category_id]
+
+    def edit_category(
+        self,
+        category_id: UUID,
+        name: CategoryName | None = None,
+        limit: Limit | None = None,
+    ) -> Category:
+        """
+        Edit a category in the budget.
+
+        Args:
+            category_id: ID of the category to edit
+            name: New name for the category (optional)
+            limit: New limit for the category (optional)
+
+        Returns:
+            The edited Category
+
+        Raises:
+            CategoryNotFoundError: If the category to edit does not exist in the budget.
+            DuplicateCategoryNameError: If another category with the same name already exists.
+            CategoryLimitExceedsBudgetError: If the new limit exceeds the available budget limit.
+        """
+        # Find the existing category by id
+        existing_category = next(
+            (c for c in self._categories if c.id == category_id), None
+        )
+        if existing_category is None:
+            raise CategoryNotFoundError(str(category_id))
+
+        if name is not None:
+            for c in self._categories:
+                if c.id != category_id and c.name.value.lower() == name.value.lower():
+                    raise DuplicateCategoryNameError(name.value)
+
+            existing_category.change_name(name)
+
+        if limit is not None:
+            used_limit = self._calculate_used_limit(
+                limit, exclude_category_id=category_id
+            )
+            if self.total_limit.is_exceeded(used_limit):
+                raise CategoryLimitExceedsBudgetError(
+                    name.value if name else existing_category.name.value,
+                    str(limit.value),
+                    str(self.total_limit.value),
+                )
+            existing_category.change_limit(limit)
+
+        return existing_category
 
     def deactivate_budget(self) -> None:
         """Deactivate the budget."""
@@ -213,7 +263,9 @@ class Budget:
             raise CategoryNotFoundError(str(category_id))
         return category
 
-    def _calculate_used_limit(self, limit: Limit) -> Limit:
+    def _calculate_used_limit(
+        self, limit: Limit, exclude_category_id: UUID | None = None
+    ) -> Limit:
         """
         Calculate the total limit used by all categories.
 
@@ -221,7 +273,11 @@ class Budget:
             Total limit used in smallest currency units (e.g., cents)
         """
         amount = reduce(
-            lambda acc, category: acc.add(category.limit.value),
+            lambda acc, category: (
+                acc.add(category.limit.value)
+                if category.id != exclude_category_id
+                else acc
+            ),
             self._categories,
             Money(0, self._currency),
         )
@@ -236,3 +292,33 @@ class Budget:
             f"Active: {self.is_active}, "
             f"Categories: {len(self._categories)}"
         )
+
+    def _validate_category_name_uniqueness(self, name: CategoryName) -> None:
+        """
+        Validate that the category name is unique within the budget.
+
+        Args:
+            name: The name of the category to check.
+
+        Raises:
+            DuplicateCategoryNameError: If a category with the same name already exists.
+        """
+        for category in self._categories:
+            if category.name.value.lower() == name.value.lower():
+                raise DuplicateCategoryNameError(name.value)
+
+    def _validate_category_limit(self, name: CategoryName, limit: Limit) -> None:
+        """
+        Validate that the category limit does not exceed the total budget limit.
+
+        Args:
+            name: The name of the category being validated.
+            limit: The limit to validate.
+
+        Raises:
+            CategoryLimitExceedsBudgetError: If the category limit exceeds the available budget limit.
+        """
+        if self.total_limit.is_exceeded(self._calculate_used_limit(limit)):
+            raise CategoryLimitExceedsBudgetError(
+                name.value, str(limit.value), str(self.total_limit.value)
+            )

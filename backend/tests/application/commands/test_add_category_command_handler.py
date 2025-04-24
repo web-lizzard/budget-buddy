@@ -9,9 +9,7 @@ from adapters.outbound.persistence.in_memory.budget_repository import (
 )
 from adapters.outbound.persistence.in_memory.uow import InMemoryUnitOfWork
 from application.commands import AddCategoryCommand
-from application.commands.handlers.add_category_command_handler import (
-    AddCategoryCommandHandler,
-)
+from application.commands.handlers import AddCategoryCommandHandler
 from domain.aggregates.budget import Budget
 from domain.entities.category import Category
 from domain.events.category import CategoryAdded
@@ -82,11 +80,10 @@ class TestAddCategoryCommandHandler:
         """Test that handling the command adds a category to the budget."""
         # Arrange
         command = AddCategoryCommand(
-            budget_id=budget_id,
-            user_id=user_id,
+            budget_id=str(budget_id),
+            user_id=str(user_id),
             name="Groceries",
             limit=300.0,
-            currency="USD",
         )
         command_handler, budget_repository, domain_publisher = _get_deps(
             user_id, budget_id
@@ -123,41 +120,20 @@ class TestAddCategoryCommandHandler:
         assert event.limit == Money.mint(300.0, "USD").amount
 
     @pytest.mark.asyncio
-    async def test_handle_adds_category_with_different_currency(
-        self, user_id, budget_id
-    ):
-        """Test that handling the command adds a category with a different currency."""
-        # Arrange
-        command = AddCategoryCommand(
-            budget_id=budget_id,
-            user_id=user_id,
-            name="Travel",
-            limit=500.0,
-            currency="EUR",
-        )
-        command_handler, budget_repository, _ = _get_deps(user_id, budget_id)
-
-        # Act with expectation
-        with pytest.raises(Exception):  # Should raise currency mismatch error
-            await command_handler.handle(command)
-
-    @pytest.mark.asyncio
     async def test_handle_adds_multiple_categories(self, user_id, budget_id):
         """Test that handling multiple commands adds multiple categories."""
         # Arrange
         command1 = AddCategoryCommand(
-            budget_id=budget_id,
-            user_id=user_id,
+            budget_id=str(budget_id),
+            user_id=str(user_id),
             name="Groceries",
             limit=300.0,
-            currency="USD",
         )
         command2 = AddCategoryCommand(
-            budget_id=budget_id,
-            user_id=user_id,
+            budget_id=str(budget_id),
+            user_id=str(user_id),
             name="Entertainment",
             limit=200.0,
-            currency="USD",
         )
         command_handler, budget_repository, _ = _get_deps(user_id, budget_id)
 
@@ -191,11 +167,10 @@ class TestAddCategoryCommandHandler:
         )
 
         command = AddCategoryCommand(
-            budget_id=budget_id,
-            user_id=user_id,
+            budget_id=str(budget_id),
+            user_id=str(user_id),
             name="Groceries",  # Same name as existing category
             limit=200.0,
-            currency="USD",
         )
         command_handler, _, _ = _get_deps(user_id, budget_id, [existing_category])
 
@@ -218,11 +193,10 @@ class TestAddCategoryCommandHandler:
         ]
 
         command = AddCategoryCommand(
-            budget_id=budget_id,
-            user_id=user_id,
+            budget_id=str(budget_id),
+            user_id=str(user_id),
             name="One Too Many",
             limit=100.0,
-            currency="USD",
         )
         command_handler, _, _ = _get_deps(user_id, budget_id, categories)
 
@@ -237,11 +211,10 @@ class TestAddCategoryCommandHandler:
         """Test that handling fails if category limit would exceed budget limit."""
         # Arrange
         command = AddCategoryCommand(
-            budget_id=budget_id,
-            user_id=user_id,
+            budget_id=str(budget_id),
+            user_id=str(user_id),
             name="Expensive Category",
-            limit=20000.0,  # Exceeds budget limit of 10000
-            currency="USD",
+            limit=2000.0,  # Exceeds budget limit of 1000 USD
         )
         command_handler, _, _ = _get_deps(user_id, budget_id)
 
