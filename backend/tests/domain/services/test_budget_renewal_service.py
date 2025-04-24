@@ -98,6 +98,7 @@ class TestBudgetRenewalService:
             assert category.id != budget.categories[i].id
             assert category.name.value == original_category_names[i]
             assert category.limit.value.amount == original_category_limits[i]
+            assert category.budget_id == new_budget.id
 
     @pytest.mark.asyncio
     async def test_renew_deactivated_budget_raises_error(
