@@ -6,7 +6,7 @@ from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
 from adapters.outbound.persistence.in_memory.budget_repository import (
     InMemoryBudgetRepository,
 )
-from adapters.outbound.uow import InMemoryUnitOfWork
+from adapters.outbound.persistence.in_memory.uow import InMemoryUnitOfWork
 from application.commands import CategoryData, CreateBudgetCommand
 from application.commands.handlers.create_budget_command_handler import (
     CreateBudgetCommandHandler,

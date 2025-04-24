@@ -9,7 +9,7 @@ from adapters.outbound.persistence.in_memory.budget_repository import (
 from adapters.outbound.persistence.in_memory.transaction_repository import (
     InMemoryTransactionRepository,
 )
-from adapters.outbound.uow import InMemoryUnitOfWork
+from adapters.outbound.persistence.in_memory.uow import InMemoryUnitOfWork
 from application.commands import CreateTransactionCommand
 from application.commands.handlers.create_transaction_command_handler import (
     CreateTransactionCommandHandler,

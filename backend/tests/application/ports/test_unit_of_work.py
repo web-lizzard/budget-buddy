@@ -1,7 +1,7 @@
 from typing import Callable
 
 import pytest
-from adapters.outbound.uow import InMemoryUnitOfWork
+from adapters.outbound.persistence.in_memory.uow import InMemoryUnitOfWork
 from domain.events.domain_event import DomainEvent
 from domain.ports.domain_publisher import DomainPublisher
 
