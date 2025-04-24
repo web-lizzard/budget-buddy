@@ -3,6 +3,9 @@ from domain.exceptions.budget_strategy_error import InvalidStrategyParameterErro
 from domain.exceptions.cannot_add_transaction_to_deactivated_budget_error import (
     CannotAddTransactionToDeactivatedBudgetError,
 )
+from domain.exceptions.cannot_renew_deactivated_budget_error import (
+    CannotRenewDeactivatedBudgetError,
+)
 from domain.exceptions.category_limit_exceeds_budget_error import (
     CategoryLimitExceedsBudgetError,
 )
@@ -40,6 +43,7 @@ __all__ = [
     "CategoryNotFoundError",
     "TransactionOutsideBudgetPeriodError",
     "CannotAddTransactionToDeactivatedBudgetError",
+    "CannotRenewDeactivatedBudgetError",
     "NotCompatibleVersionError",
     "BudgetNotFoundError",
     "TransactionNotFoundError",

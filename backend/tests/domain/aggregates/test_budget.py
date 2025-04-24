@@ -15,6 +15,7 @@ from domain.exceptions import (
     TransactionOutsideBudgetPeriodError,
 )
 from domain.value_objects import CategoryName, Limit, Money
+from domain.value_objects.budget_strategy import MonthlyBudgetStrategyInput
 
 
 class TestBudget:
@@ -33,6 +34,7 @@ class TestBudget:
             total_limit=total_limit,
             start_date=start_date,
             end_date=end_date,
+            strategy_input=MonthlyBudgetStrategyInput(start_day=1),
         )
 
     def test_init_valid_budget(self, valid_budget):
@@ -77,6 +79,7 @@ class TestBudget:
             start_date=start_date,
             end_date=end_date,
             categories=[category1, category2],
+            strategy_input=MonthlyBudgetStrategyInput(start_day=1),
         )
 
         # Test that categories were added

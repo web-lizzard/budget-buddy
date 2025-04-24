@@ -3,6 +3,7 @@ from domain.events.budget import (
     BudgetDeactivated,
     BudgetExpired,
     BudgetLimitExceeded,
+    BudgetRenewed,
 )
 from domain.events.category import CategoryAdded, CategoryLimitExceeded, CategoryRemoved
 from domain.events.domain_event import DomainEvent
@@ -19,6 +20,7 @@ __all__ = [
     "BudgetExpired",
     "BudgetDeactivated",
     "BudgetLimitExceeded",
+    "BudgetRenewed",
     "CategoryAdded",
     "CategoryRemoved",
     "CategoryLimitExceeded",
