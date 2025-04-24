@@ -259,6 +259,7 @@ class Budget:
             CategoryNotFoundError: When category is not found in this budget
         """
         category = next((c for c in self._categories if c.id == category_id), None)
+        print(f"Category: {category}")
         if category is None:
             raise CategoryNotFoundError(str(category_id))
         return category

@@ -88,6 +88,7 @@ Defines the interface for storing and retrieving transaction data from the persi
 - save(transaction) -> None
 - delete(transaction) -> None
 - delete_bulk(transactions) -> None
+- save_bulk(transactions) -> None
 
 ### BudgetRepository
 Defines the interface for managing budget data.
