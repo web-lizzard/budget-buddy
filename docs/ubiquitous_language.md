@@ -3,224 +3,170 @@
 ## Aggregates
 
 ### Budget
-
-The main aggregate representing a user's financial plan for a specified period.
+The Budget aggregate represents a user's financial plan for a defined period. It governs overall budgeting operations including category management and transaction validations.
 
 **Attributes:**
-
 - ID (UUID)
-- UserId (User ID)
-- TotalLimit (Money) - total budget limit
-- Currency (String) - budget currency
-- StartDate (Date) - budget start date
-- EndDate (Date) - budget end date (calculated based on strategy)
-- BudgetStrategyInput - budget strategy used to calculated
-- DeactivationDate (Date, optional) - budget deactivation date
+- UserId (UUID)
+- TotalLimit (Money) - The overall budget limit.
+- Currency (String) - Currency used for the budget.
+- StartDate (Date) - Budget start date.
+- EndDate (Date) - Calculated end date based on the applied strategy.
+- DeactivationDate (Date, optional) - Date when the budget was deactivated.
 
 **Methods:**
-
-- AddCategory(name, limit) -> Category - adds a new category with a limit, checking if the limit doesn't exceed the available budget, if the name is unique, and if the category count doesn't exceed the maximum (5)
-- RemoveCategory(Category) - removes a category
-- DeactivateBudget() - deactivates the budget
-- ValidateTransactionDate(Transaction) - checks if the transaction date is within the budget period
+- add_category(name, limit) -> Category: Adds a new spending category ensuring that the cumulative limits and name uniqueness constraints are met.
+- remove_category(category) -> None: Removes an existing category from the budget.
+- deactivate_budget() -> None: Deactivates the budget.
+- validate_transaction_date(transaction) -> bool: Validates if a transaction falls within the defined budget period.
 
 ### Transaction
-
-Represents a single financial operation.
+The Transaction aggregate captures individual financial operations within a budget.
 
 **Attributes:**
-
 - ID (UUID)
-- CategoryId (Category ID)
-- Amount (Money) - transaction amount
-- Type (TransactionType) - transaction type (Income/Expense)
-- Date (DateTime) - transaction date and time
-- Description (String, optional) - transaction description
+- CategoryId (UUID) - The identifier of the category associated with the transaction.
+- Amount (Money) - The transaction amount.
+- Type (TransactionType) - Indicates if the transaction is an Expense or Income.
+- Date (DateTime) - Date and time of the transaction.
+- Description (String, optional) - Additional details regarding the transaction.
 
+**Methods:**
+- (Additional methods can be implemented as necessary to encapsulate behavior.)
 
 ## Entities
 
 ### Category
-
-Part of the Budget aggregate, representing an area of spending.
+Represents a spending category within a budget.
 
 **Attributes:**
-
 - ID (UUID)
-- BudgetId (Budget ID)
-- Name (String) - category name
-- Limit (Money) - spending limit for the category
+- BudgetId (UUID) - The identifier of the associated budget.
+- Name (String) - A unique name within the budget.
+- Limit (Money) - Spending limit assigned to this category.
 
 **Methods:**
-
-- ChangeName(newName) - changes the category name
-- ChangeLimit(newLimit) - changes the category limit
+- change_name(new_name) -> None: Updates the category's name.
+- change_limit(new_limit) -> None: Adjusts the category's spending limit.
 
 ### StatisticsRecord
-
 Stores financial statistics after each operation.
 
 **Attributes:**
-
 - ID (UUID)
-- BudgetId (Budget ID)
-- CategoryId (Category ID)
-- CreationDate (DateTime) - record creation date
-- CurrentBalance (Money) - current balance
-- DailyAvailableAmount (Money) - available daily amount
-- DailyAverage (Money) - daily average for the budget/category
+- BudgetId (UUID) - The identifier of the associated budget.
+- CategoryId (UUID) - The identifier of the associated category.
+- CreationDate (DateTime) - Timestamp of record creation.
+- CurrentBalance (Money) - The current balance.
+- DailyAvailableAmount (Money) - Available amount on a daily basis.
+- DailyAverage (Money) - Average daily spending or income.
 
-## Value Objects
+## Services
 
-### BudgetStrategy
-
-Defines rules regarding the budget lifecycle.
-
-**Attributes:**
-
-- Type (Enum) - strategy type (e.g., monthly, yearly)
-- Parameters (Map<String, Object>) - strategy parameters (e.g., start day)
+### TransactionTransferService
+Handles the logic for transferring or deleting transactions when a category is modified (e.g., removed or merged).
 
 **Methods:**
-
-- CalculateEndDate(startDate) - calculates the budget end date
-- CreateNextBudgetStartDate(endDate) - calculates the start date for the next budget
-
-### Money
-
-Represents an amount in a specific currency.
-
-**Attributes:**
-
-- Amount (int) - amount value
-- Currency (String) - currency code
-
-**Methods:**
-
-- Add(money) - adds the amount
-- Subtract(money) - subtracts the amount
-- MultiplyBy(factor) - multiplies the amount by a factor
-- DivideBy(divisor) - divides the amount by a divisor
-- mint(self, float) - static method to create an object from a float
-
-### Limit
-
-Represents a spending limit.
-
-**Attributes:**
-
-- Value (Money) - limit value
-
-**Methods:**
-
-- IsExceeded(currentSpending) - checks if the limit is exceeded
-- RemainingAmount(currentSpending) - calculates the remaining amount
-
-### TransactionType
-
-Enum representing transaction types.
-
-**Values:**
-
-- EXPENSE
-- INCOME
-
-### TransactionTransferPolicy
-
-Defines how transactions are handled when a category is deleted.
-
-**Values:**
-
-- DELETE_TRANSACTIONS - delete all transactions
-- MOVE_TO_OTHER_CATEGORY - move transactions to another category
-- CategoryID - for MOVE_TO_OTHER_CATEGORY, the target category ID
-
-## Domain Services
-
-### BudgetRenewalService
-
-Responsible for automatically creating new budgets.
-
-**Methods:**
-
-- RenewBudget(expiredBudget) - creates a new budget based on an expired one
-- CopyCategories(sourceBudget, targetBudget) - copies categories from one budget to another
-
-### RemoveCategoryService
-
-Manages moving transactions between categories.
-
-**Methods:**
-
-- RemoveCategory(sourceCategory, targetCategory, budget) - moves transactions from one category to another
-- DeleteTransactions(category) - deletes all transactions from a category
+- transfer_transactions(source_category, target_category) -> None: Moves transactions from the source category to the target category.
+- delete_transactions(category) -> None: Deletes all transactions associated with the given category.
 
 ### StatisticsCalculationService
-
 Calculates statistics based on transactions.
 
 **Methods:**
+- calculate_statistics(budget_id, category_id) -> StatisticsRecord: Calculates statistics for a given budget/category.
+- calculate_daily_available_amount(budget, category, current_date) -> Money: Determines the daily available amount.
 
-- CalculateStatistics(budgetId, categoryId) - calculates statistics for a budget/category
-- CalculateDailyAvailableAmount(budget, category, currentDate) - calculates the daily available amount
-
-## Factories
-
-- CreateBudgetFactory - creates a new budget
-- CreateTransactionFactory - creates a new transaction
-
-## Repositories
-
-### BudgetRepository
-
-**Methods:**
-
-- FindById(id, user_id) -> version, Budget
-- Save(budget) -> None
+## Ports
 
 ### TransactionRepository
+Defines the interface for storing and retrieving transaction data from the persistence layer.
 
 **Methods:**
+- find_by_id(id) -> Transaction
+- find_by_budget_id(budget_id) -> List[Transaction]
+- save(transaction) -> None
+- delete(transaction) -> None
+- delete_bulk(transactions) -> None
 
-- FindById(id)
-- FindByBudgetId(budgetId)
-- Save(transaction)
-- Delete(transaction)
-- DeleteBulk(transactions)
+### BudgetRepository
+Defines the interface for managing budget data.
+
+**Methods:**
+- find_by_id(id, user_id) -> Budget
+- save(budget) -> None
 
 ### StatisticsRepository
+Defines the interface for managing statistics records.
 
 **Methods:**
+- find_by_budget_id(budget_id) -> List[StatisticsRecord]
+- find_by_category_id(category_id) -> List[StatisticsRecord]
+- find_by_date_range(start_date, end_date) -> List[StatisticsRecord]
+- save(statistics_record) -> None
 
-- FindByBudgetId(budgetId)
-- FindByCategoryId(categoryId)
-- FindByDateRange(startDate, endDate)
-- Save(statisticsRecord)
+### DomainPublisher
+Provides an interface for publishing domain events triggered by changes in aggregates.
 
+**Methods:**
+- publish(event) -> None
+
+## Value Objects
+
+### Money
+Represents a monetary amount in a specific currency.
+
+**Attributes:**
+- Amount (int) - The numeric value.
+- Currency (String) - The currency code.
+
+**Methods:**
+- add(money) -> Money: Adds two monetary amounts.
+- subtract(money) -> Money: Subtracts one monetary amount from another.
+- multiply_by(factor) -> Money: Multiplies the amount by a given factor.
+- divide_by(divisor) -> Money: Divides the amount by a divisor.
+- mint(value: float) -> Money: Creates a Money instance from a float value.
+
+### TransactionType
+Enumeration for transaction types.
+
+**Values:**
+- EXPENSE
+- INCOME
+
+### BudgetStrategy
+Encapsulates the rules determining the lifecycle of a budget.
+
+**Attributes:**
+- Type (Enum) - For example, monthly or yearly.
+- Parameters (Map<String, Object>) - Additional strategy parameters (e.g., starting day).
+
+**Methods:**
+- calculate_end_date(start_date) -> Date: Computes the budget's end date based on the strategy.
+- create_next_budget_start_date(end_date) -> Date: Determines the start date for the subsequent budget period.
+
+### Limit
+Represents a spending constraint for a category.
+
+**Attributes:**
+- Value (Money) - The maximum allowed spending amount.
+
+**Methods:**
+- is_exceeded(current_spending) -> bool: Checks if the current spending surpasses the limit.
+- remaining_amount(current_spending) -> Money: Calculates the remaining spendable amount before reaching the limit.
+- add(limit) -> current_spending: Current spending as Money object
 ## Domain Events
 
-1. **BudgetCreated** - a new budget has been created
-    - BudgetId, UserId, TotalLimit, StartDate, Strategy
-2. **BudgetExpired** - budget has completed its lifecycle
-    - BudgetId, EndDate
-3. **BudgetDeactivated** - budget has been deactivated
-    - BudgetId, DeactivationDate
-4. **CategoryAdded** - a new category has been added
-    - CategoryId, BudgetId, Name, Limit
-5. **CategoryRemoved** - a category has been removed
-    - CategoryId, BudgetId, TransferPolicy
-6. **TransactionAdded** - a transaction has been added
-    - TransactionId, CategoryId, Amount, Type, Date
-7. **TransactionUpdated** - a transaction has been updated
-    - TransactionId, CategoryId, Amount, Type, Date
-8. **TransactionRemoved** - a transaction has been removed
-    - TransactionId, CategoryId
-9. **StatisticsUpdated** - statistics have been updated
-    - StatisticsId, BudgetId, CategoryId, CurrentBalance, DailyAvailableAmount
-10. **BudgetLimitExceeded** - budget limit exceeded
-    - BudgetId, CurrentAmount, Limit
-11. **CategoryLimitExceeded** - category limit exceeded
-    - CategoryId, BudgetId, CurrentAmount, Limit
+Domain events capture significant state changes within the system and are communicated via the DomainPublisher.
+
+**Events:**
+- BudgetCreated: Triggered when a new budget is established.
+- BudgetDeactivated: Triggered when a budget is deactivated.
+- CategoryAdded: Triggered upon adding a new category to a budget.
+- CategoryRemoved: Triggered when a category is removed from a budget.
+- TransactionAdded: Triggered when a new transaction is recorded.
+- TransactionDeleted: Triggered when a transaction is removed.
+- TransactionsTransferred: Triggered when transactions are moved between categories.
 
 ## Associations
 

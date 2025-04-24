@@ -4,6 +4,8 @@ from uuid import UUID
 
 from domain.value_objects import BudgetStrategyInput
 
+from .command import Command
+
 
 @dataclass(frozen=True)
 class CategoryData:
@@ -14,7 +16,7 @@ class CategoryData:
 
 
 @dataclass(frozen=True)
-class CreateBudgetCommand:
+class CreateBudgetCommand(Command):
     """Command for creating a new budget."""
 
     user_id: UUID

@@ -7,6 +7,7 @@ from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
 from adapters.outbound.persistence.in_memory.budget_repository import (
     InMemoryBudgetRepository,
 )
+from adapters.outbound.persistence.in_memory.uow import InMemoryUnitOfWork
 from application.commands import AddCategoryCommand
 from application.commands.handlers.add_category_command_handler import (
     AddCategoryCommandHandler,
@@ -47,11 +48,12 @@ def _get_deps(
     """Get dependencies for testing."""
     domain_publisher = InMemoryDomainPublisher()
     budget_repository = _get_budget_repository(user_id, budget_id, categories)
+    unit_of_work = InMemoryUnitOfWork(domain_publisher)
 
     return (
         AddCategoryCommandHandler(
             budget_repository=budget_repository,
-            domain_publisher=domain_publisher,
+            unit_of_work=unit_of_work,
         ),
         budget_repository,
         domain_publisher,
