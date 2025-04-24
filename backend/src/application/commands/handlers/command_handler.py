@@ -4,7 +4,7 @@ from typing import Generic, TypeVar
 from domain.events.domain_event import DomainEvent
 
 from application.commands.command import Command
-from application.commands.ports.uow.uow import UnitOfWork
+from application.ports.uow import UnitOfWork
 
 T = TypeVar("T", bound=Command)
 

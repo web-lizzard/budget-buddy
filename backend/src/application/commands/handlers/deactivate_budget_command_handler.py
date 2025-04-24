@@ -4,7 +4,7 @@ from domain.ports import BudgetRepository
 
 from application.commands import DeactivateBudgetCommand
 from application.commands.handlers.command_handler import CommandHandler
-from application.commands.ports.uow.uow import UnitOfWork
+from application.ports.uow import UnitOfWork
 
 
 class DeactivateBudgetCommandHandler(CommandHandler[DeactivateBudgetCommand]):

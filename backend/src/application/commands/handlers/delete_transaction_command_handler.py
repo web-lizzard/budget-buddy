@@ -5,7 +5,7 @@ from domain.ports.transaction_repository import TransactionRepository
 
 from application.commands.delete_transaction_command import DeleteTransactionCommand
 from application.commands.handlers.command_handler import CommandHandler
-from application.commands.ports.uow.uow import UnitOfWork
+from application.ports.uow import UnitOfWork
 
 
 class DeleteTransactionCommandHandler(CommandHandler[DeleteTransactionCommand]):
