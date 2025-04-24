@@ -16,6 +16,7 @@ from application.commands.handlers.create_transaction_command_handler import (
 )
 from domain.events.transaction import TransactionAdded
 from domain.value_objects import CategoryName, Limit, Money, TransactionType
+from domain.value_objects.budget_strategy import MonthlyBudgetStrategyInput
 
 
 def _get_budget_repository(user_id, budget_id, category_id):
@@ -37,6 +38,7 @@ def _get_budget_repository(user_id, budget_id, category_id):
         start_date=datetime(2023, 1, 1),
         end_date=datetime(2023, 12, 31, 23, 59, 59),
         categories=[category],
+        strategy_input=MonthlyBudgetStrategyInput(start_day=1),
     )
 
     return InMemoryBudgetRepository(

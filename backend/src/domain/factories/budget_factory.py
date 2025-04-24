@@ -62,6 +62,7 @@ class BudgetFactory:
             total_limit=total_limit,
             start_date=start_date,
             end_date=end_date,
+            strategy_input=budget_strategy_input,
         )
 
         for category_input in categories:

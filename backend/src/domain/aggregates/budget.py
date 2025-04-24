@@ -14,6 +14,7 @@ from domain.exceptions import (
     TransactionOutsideBudgetPeriodError,
 )
 from domain.value_objects import CategoryName, Limit, Money
+from domain.value_objects.budget_strategy import BudgetStrategyInput
 
 
 class Budget:
@@ -39,6 +40,7 @@ class Budget:
         total_limit: Limit,
         start_date: datetime,
         end_date: datetime,
+        strategy_input: BudgetStrategyInput,
         categories: list[Category] | None = None,
         deactivation_date: datetime | None = None,
     ):
@@ -62,6 +64,7 @@ class Budget:
         self._end_date = end_date
         self._deactivation_date = deactivation_date
         self._categories = categories or []
+        self._strategy_input = strategy_input
 
     @property
     def id(self) -> UUID:
@@ -107,6 +110,10 @@ class Budget:
     def is_active(self) -> bool:
         """Check if budget is active."""
         return self._deactivation_date is None
+
+    @property
+    def strategy_input(self) -> BudgetStrategyInput:
+        return self._strategy_input
 
     def add_category(self, name: CategoryName, limit: Limit) -> Category:
         """

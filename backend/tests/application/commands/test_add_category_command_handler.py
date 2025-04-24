@@ -15,7 +15,7 @@ from application.commands.handlers.add_category_command_handler import (
 from domain.aggregates.budget import Budget
 from domain.entities.category import Category
 from domain.events.category import CategoryAdded
-from domain.value_objects import CategoryName, Limit, Money
+from domain.value_objects import CategoryName, Limit, Money, MonthlyBudgetStrategyInput
 
 
 def _get_budget_repository(
@@ -24,12 +24,14 @@ def _get_budget_repository(
     categories: Optional[list[Category]] = None,
 ) -> InMemoryBudgetRepository:
     """Create a budget repository with a single budget."""
+    strategy_input = MonthlyBudgetStrategyInput(start_day=1)
     budget = Budget(
         id=budget_id,
         user_id=user_id,
         total_limit=Limit(Money(100000, "USD")),
         start_date=datetime(2023, 1, 1),
         end_date=datetime(2023, 12, 31, 23, 59, 59),
+        strategy_input=strategy_input,
         categories=categories or [],
     )
     return InMemoryBudgetRepository(

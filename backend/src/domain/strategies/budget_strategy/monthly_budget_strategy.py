@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime, timedelta
 
 from domain.strategies.budget_strategy.budget_strategy import BudgetStrategy
@@ -33,14 +34,15 @@ class MonthlyBudgetStrategy(BudgetStrategy):
                 f"Expected MonthlyBudgetStrategyInput, got {type(budget_strategy_input).__name__}"
             )
 
-        # Calculate the end date (one month later from start_date)
-        if start_date.month == 12:
-            end_date = start_date.replace(year=start_date.year + 1, month=1)
-        else:
-            end_date = start_date.replace(month=start_date.month + 1)
-
-        # Subtract 1 second to get the end of the previous day
-        end_date = end_date - timedelta(seconds=1)
+        year = start_date.year
+        month = start_date.month + 1
+        if month > 12:
+            month = 1
+            year += 1
+        last_day_of_next_month = calendar.monthrange(year, month)[1]
+        day = min(start_date.day, last_day_of_next_month)
+        end_date_raw = datetime(year, month, day)
+        end_date = end_date_raw - timedelta(seconds=1)
 
         return end_date
 
