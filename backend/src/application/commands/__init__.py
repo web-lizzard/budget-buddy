@@ -4,6 +4,7 @@ from application.commands.create_budget_command import CategoryData, CreateBudge
 from application.commands.create_transaction_command import CreateTransactionCommand
 from application.commands.deactivate_budget_command import DeactivateBudgetCommand
 from application.commands.edit_category_command import EditCategoryCommand
+from application.commands.remove_category_command import RemoveCategoryCommand
 from application.commands.renew_budget_command import RenewBudgetCommand
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "DeactivateBudgetCommand",
     "RenewBudgetCommand",
     "EditCategoryCommand",
+    "RemoveCategoryCommand",
 ]

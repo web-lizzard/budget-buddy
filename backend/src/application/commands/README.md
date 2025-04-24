@@ -129,7 +129,7 @@ class RemoveCategoryCommand:
     budget_id: str
     user_id: str
     handle_transactions: str  # "delete" or "move"
-    target_category_id: Optional[str]  # Required if handle_transactions="move"
+    target_category_id: str | None  # Required if handle_transactions="move"
 
 # Handlers
 class AddCategoryCommandHandler: ...

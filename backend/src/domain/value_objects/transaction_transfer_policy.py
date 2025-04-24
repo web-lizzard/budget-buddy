@@ -42,7 +42,7 @@ class DeleteTransactionsTransferPolicyInput(TransactionTransferPolicyInput):
 class MoveToOtherCategoryTransferPolicyInput(TransactionTransferPolicyInput):
     """Policy input for moving transactions to another category."""
 
-    target_category_id: UUID
+    target_category_id: UUID | None
 
     def __post_init__(self):
         """Validate policy configuration after initialization."""

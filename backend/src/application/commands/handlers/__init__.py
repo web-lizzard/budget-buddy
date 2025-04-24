@@ -14,6 +14,9 @@ from application.commands.handlers.deactivate_budget_command_handler import (
 from application.commands.handlers.edit_category_command_handler import (
     EditCategoryCommandHandler,
 )
+from application.commands.handlers.remove_category_command_handler import (
+    RemoveCategoryCommandHandler,
+)
 from application.commands.handlers.renew_budget_command_handler import (
     RenewBudgetCommandHandler,
 )
@@ -26,4 +29,5 @@ __all__ = [
     "DeactivateBudgetCommandHandler",
     "RenewBudgetCommandHandler",
     "EditCategoryCommandHandler",
+    "RemoveCategoryCommandHandler",
 ]

@@ -83,6 +83,24 @@ class InMemoryTransactionRepository(TransactionRepository):
             )
         ]
 
+    async def find_by_category_id(
+        self, category_id: UUID, user_id: UUID
+    ) -> List[Transaction]:
+        """Find all transactions for a given category.
+
+        Args:
+            category_id: The ID of the category
+            user_id: The ID of the user who owns the transactions
+
+        Returns:
+            List of transactions
+        """
+        return [
+            transaction
+            for transaction in self._transactions.values()
+            if transaction.user_id == user_id and transaction.category_id == category_id
+        ]
+
     async def save(self, transaction: Transaction) -> None:
         """Save transaction to repository.
 
