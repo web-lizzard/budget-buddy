@@ -1,55 +1,68 @@
-from domain.events.category import CategoryAdded
-from domain.events.domain_event import DomainEvent
-from domain.ports.budget_repository import BudgetRepository
-from domain.value_objects import CategoryName, Limit, Money
+from uuid import UUID
 
-from application.commands import AddCategoryCommand
+from domain.events.category.category_added import CategoryAdded
+from domain.ports.budget_repository import BudgetRepository
+from domain.value_objects.category_name import CategoryName
+from domain.value_objects.limit import Limit
+from domain.value_objects.money import Money
+
+from application.commands.add_category_command import AddCategoryCommand
 from application.commands.handlers.command_handler import CommandHandler
 from application.commands.ports.uow.uow import UnitOfWork
 
 
 class AddCategoryCommandHandler(CommandHandler[AddCategoryCommand]):
-    """Handler for the AddCategoryCommand."""
+    """
+    Command handler for adding a new category to a budget.
 
-    def __init__(
-        self,
-        budget_repository: BudgetRepository,
-        unit_of_work: UnitOfWork,
-    ):
+    This handler orchestrates:
+    1. Retrieving the budget from the repository
+    2. Adding a new category to the budget with specified name and limit
+    3. Saving the updated budget
+    4. Returning a CategoryAdded event
+    """
+
+    def __init__(self, budget_repository: BudgetRepository, unit_of_work: UnitOfWork):
         """
-        Initialize the command handler with dependencies.
+        Initialize the AddCategoryCommandHandler with required repositories and unit of work.
 
         Args:
-            budget_repository: Repository for budget operations
-            unit_of_work: UnitOfWork for transaction management and event publishing
+            budget_repository: Repository for budget aggregate operations
+            unit_of_work: Unit of work for managing transactions and event publishing
         """
         super().__init__(unit_of_work)
         self._budget_repository = budget_repository
 
-    async def _handle(self, command: AddCategoryCommand) -> DomainEvent:
+    async def _handle(self, command: AddCategoryCommand) -> CategoryAdded:
         """
-        Handle the AddCategoryCommand by adding a new category to an existing budget.
+        Process the AddCategoryCommand.
 
         Args:
-            command: The command to handle
+            command: The command to process
 
         Returns:
-            CategoryAdded domain event
+            CategoryAdded event with details of the newly added category
+
+        Raises:
+            BudgetNotFoundError: If the budget is not found or doesn't belong to the user
+            MaxCategoriesReachedError: If the budget already has the maximum number of categories
+            DuplicateCategoryNameError: If a category with the same name already exists
+            CategoryLimitExceedsBudgetError: If the category limit exceeds the available budget limit
         """
-        version, budget = await self._budget_repository.find_by(
-            budget_id=command.budget_id, user_id=command.user_id
-        )
+        budget_id = UUID(command.budget_id)
+        user_id = UUID(command.user_id)
+        version, budget = await self._budget_repository.find_by(budget_id, user_id)
 
         category_name = CategoryName(command.name)
-        category_limit = Limit(Money.mint(command.limit, command.currency))
+        category_limit = Limit(Money.mint(command.limit, budget.currency))
 
-        category = budget.add_category(name=category_name, limit=category_limit)
+        category = budget.add_category(category_name, category_limit)
 
-        await self._budget_repository.save(budget=budget, version=version)
+        await self._budget_repository.save(budget, version)
 
         return CategoryAdded(
             category_id=str(category.id),
             budget_id=str(budget.id),
             name=category.name.value,
-            limit=category_limit.value.amount,
+            limit=int(category.limit.value.amount),
         )

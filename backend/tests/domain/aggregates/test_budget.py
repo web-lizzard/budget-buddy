@@ -161,6 +161,95 @@ class TestBudget:
         assert category in valid_budget.categories
         assert len(valid_budget.categories) == 3
 
+    def test_edit_category_success(self, valid_budget):
+        """Test editing a category successfully."""
+        # Add a category
+        original_name = CategoryName("Original Name")
+        original_limit = Limit(Money(10000, "USD"))
+        category = valid_budget.add_category(original_name, original_limit)
+
+        # Edit the category with new name and limit
+        new_name = CategoryName("New Name")
+        new_limit = Limit(Money(20000, "USD"))
+        updated_category = valid_budget.edit_category(category.id, new_name, new_limit)
+
+        # Check that category was updated
+        assert updated_category.id == category.id
+        assert updated_category.name.value == "New Name"
+        assert updated_category.limit.value.amount == 20000
+        assert len(valid_budget.categories) == 1
+
+    def test_edit_category_name_only(self, valid_budget):
+        """Test editing only a category name."""
+        # Add a category
+        original_limit = Limit(Money(10000, "USD"))
+        category = valid_budget.add_category(
+            CategoryName("Original Name"), original_limit
+        )
+
+        # Edit only the name
+        new_name = CategoryName("New Name")
+        updated_category = valid_budget.edit_category(category.id, new_name)
+
+        # Check that only name was updated
+        assert updated_category.id == category.id
+        assert updated_category.name.value == "New Name"
+        assert updated_category.limit.value.amount == 10000  # Unchanged
+        assert len(valid_budget.categories) == 1
+
+    def test_edit_category_limit_only(self, valid_budget):
+        """Test editing only a category limit."""
+        # Add a category
+        original_name = CategoryName("Category Name")
+        category = valid_budget.add_category(original_name, Limit(Money(10000, "USD")))
+
+        # Edit only the limit
+        new_limit = Limit(Money(20000, "USD"))
+        updated_category = valid_budget.edit_category(category.id, None, new_limit)
+
+        # Check that only limit was updated
+        assert updated_category.id == category.id
+        assert updated_category.name.value == "Category Name"  # Unchanged
+        assert updated_category.limit.value.amount == 20000
+        assert len(valid_budget.categories) == 1
+
+    def test_edit_category_not_found(self, valid_budget):
+        """Test that editing a non-existent category raises an error."""
+        non_existent_id = uuid.uuid4()
+
+        with pytest.raises(CategoryNotFoundError):
+            valid_budget.edit_category(non_existent_id, CategoryName("New Name"))
+
+    def test_edit_category_duplicate_name(self, valid_budget):
+        """Test that editing a category to have the same name as another raises an error."""
+        # Add two categories
+        category1 = valid_budget.add_category(
+            CategoryName("Category 1"), Limit(Money(10000, "USD"))
+        )
+
+        valid_budget.add_category(
+            CategoryName("Category 2"), Limit(Money(10000, "USD"))
+        )
+
+        # Try to rename category1 to "Category 2"
+        with pytest.raises(DuplicateCategoryNameError):
+            valid_budget.edit_category(category1.id, CategoryName("Category 2"))
+
+    def test_edit_category_exceeds_budget_limit(self, valid_budget):
+        """Test that editing a category to exceed budget limit raises an error."""
+        # Add two categories consuming part of the budget
+        category1 = valid_budget.add_category(
+            CategoryName("Category 1"), Limit(Money(10000, "USD"))
+        )
+
+        valid_budget.add_category(
+            CategoryName("Category 2"), Limit(Money(30000, "USD"))
+        )
+
+        # Try to increase category1's limit to exceed budget total
+        with pytest.raises(CategoryLimitExceedsBudgetError):
+            valid_budget.edit_category(category1.id, None, Limit(Money(30000, "USD")))
+
     def test_remove_category_success(self, valid_budget):
         """Test removing a category successfully."""
         # Add a category
