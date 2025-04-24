@@ -37,6 +37,21 @@ class TransactionRepository(ABC):
         pass
 
     @abstractmethod
+    async def find_by_category_id(
+        self, category_id: UUID, user_id: UUID
+    ) -> List[Transaction]:
+        """Find transactions by category ID.
+
+        Args:
+            category_id: ID of the category
+            user_id: ID of the user who owns the transactions
+
+        Returns:
+            List of transactions for the given category
+        """
+        pass
+
+    @abstractmethod
     async def save(self, transaction: Transaction) -> None:
         """Save transaction to repository.
 

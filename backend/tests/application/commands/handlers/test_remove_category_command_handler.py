@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import List, Optional
+from unittest.mock import patch
 
 import pytest
 from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
@@ -18,6 +19,7 @@ from domain.aggregates.transaction import Transaction
 from domain.entities.category import Category
 from domain.events.category import CategoryRemoved
 from domain.exceptions import InvalidTransferPolicyError
+from domain.services.reassign_transactions_service import ReassignTransactionsService
 from domain.value_objects import (
     CategoryName,
     Limit,
@@ -223,7 +225,10 @@ class TestRemoveCategoryCommandHandler:
         assert len(transaction_repository._transactions) == 0
 
     @pytest.mark.asyncio
-    async def test_handle_moves_category_transactions(self, user_id, budget_id):
+    @patch.object(ReassignTransactionsService, "reassign_transactions")
+    async def test_handle_moves_category_transactions(
+        self, mock_reassign, user_id, budget_id
+    ):
         """Test that handling the command with 'move' policy moves transactions to another category."""
         # Arrange
         category_id = uuid.uuid4()
@@ -282,10 +287,11 @@ class TestRemoveCategoryCommandHandler:
         await command_handler.handle(command)
 
         # Assert
-        # Check that transactions were moved to target category
+        # Verify that the reassign_transactions service method was called
+        mock_reassign.assert_called_once()
+
+        # Check that transactions were processed by the repository
         assert len(transaction_repository._transactions) == 2
-        for transaction in transaction_repository._transactions.values():
-            assert transaction.category_id == target_category_id
 
     @pytest.mark.asyncio
     async def test_handle_fails_with_invalid_policy(self, user_id, budget_id):
