@@ -59,11 +59,11 @@ class EditTransactionCommandHandler(CommandHandler[EditTransactionCommand]):
             command.transaction_id, command.user_id
         )
 
-        budget.get_category_by(command.category_id)
+        category = budget.get_category_by(command.category_id)
 
         # Update the transaction
         transaction.update(
-            category_id=command.category_id,
+            category_id=category.id,
             amount=command.amount,
             transaction_type=command.transaction_type,
             description=command.description,
@@ -77,7 +77,7 @@ class EditTransactionCommandHandler(CommandHandler[EditTransactionCommand]):
             transaction_id=command.transaction_id,
             budget_id=command.budget_id,
             user_id=command.user_id,
-            category_id=command.category_id,
+            category_id=category.id,
             amount=command.amount,
             transaction_type=command.transaction_type,
             description=command.description,
