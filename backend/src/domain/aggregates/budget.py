@@ -13,7 +13,7 @@ from domain.exceptions import (
     MaxCategoriesReachedError,
     TransactionOutsideBudgetPeriodError,
 )
-from domain.value_objects import CategoryName, Limit, Money
+from domain.value_objects import BudgetName, CategoryName, Limit, Money
 from domain.value_objects.budget_strategy import BudgetStrategyInput
 
 
@@ -30,7 +30,8 @@ class Budget:
     _end_date: datetime
     _deactivation_date: datetime | None
     _categories: list[Category]
-
+    _strategy_input: BudgetStrategyInput
+    _name: BudgetName
     _MAX_CATEGORIES = 5
 
     def __init__(
@@ -41,6 +42,7 @@ class Budget:
         start_date: datetime,
         end_date: datetime,
         strategy_input: BudgetStrategyInput,
+        name: BudgetName,
         categories: list[Category] | None = None,
         deactivation_date: datetime | None = None,
     ):
@@ -53,6 +55,8 @@ class Budget:
             total_limit: Total budget limit
             start_date: Budget start date
             end_date: Budget end date
+            strategy_input: Budget strategy input
+            name: Budget name
             deactivation_date: Budget deactivation date (optional)
             categories: List of categories (optional)
         """
@@ -65,6 +69,7 @@ class Budget:
         self._deactivation_date = deactivation_date
         self._categories = categories or []
         self._strategy_input = strategy_input
+        self._name = name
 
     @property
     def id(self) -> UUID:
@@ -114,6 +119,11 @@ class Budget:
     @property
     def strategy_input(self) -> BudgetStrategyInput:
         return self._strategy_input
+
+    @property
+    def name(self) -> BudgetName:
+        """Get budget name."""
+        return self._name
 
     def add_category(self, name: CategoryName, limit: Limit) -> Category:
         """
@@ -286,6 +296,7 @@ class Budget:
     def __str__(self) -> str:
         return (
             f"Budget: {self._id}, "
+            f"Name: {self._name}, "
             f"User: {self._user_id}, "
             f"Limit: {self._total_limit}, "
             f"Period: {self._start_date} to {self._end_date}, "

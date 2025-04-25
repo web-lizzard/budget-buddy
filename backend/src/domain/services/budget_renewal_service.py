@@ -42,5 +42,6 @@ class BudgetRenewalService:
             budget_strategy_input=budget.strategy_input,
             start_date=budget.end_date,
             categories=categories_data,
+            name=budget.name,
         )
         return new_budget

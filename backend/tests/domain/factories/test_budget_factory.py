@@ -7,6 +7,7 @@ from domain.factories import BudgetFactory
 from domain.factories.budget_factory import CategoryInput
 from domain.strategies.budget_strategy import create_strategy
 from domain.value_objects import (
+    BudgetName,
     BudgetStrategyType,
     CategoryName,
     Limit,
@@ -40,6 +41,7 @@ class TestBudgetFactory:
         total_limit = Limit(Money.mint(500.00, "USD"))
         strategy_input = MonthlyBudgetStrategyInput(start_day=15)
         start_date = datetime(2023, 5, 15)
+        budget_name = BudgetName("Monthly Budget")
 
         # Act
         budget = await budget_factory.create_budget(
@@ -48,6 +50,7 @@ class TestBudgetFactory:
             budget_strategy_input=strategy_input,
             start_date=start_date,
             categories=[],  # No categories
+            name=budget_name,
         )
 
         # Assert
@@ -59,6 +62,7 @@ class TestBudgetFactory:
         expected_end_date = datetime(2023, 6, 14, 23, 59, 59)
         assert budget.end_date == expected_end_date
         assert budget.categories == []
+        assert budget.name == budget_name
 
     @pytest.mark.asyncio
     async def test_create_budget_with_yearly_strategy(self, budget_factory):
@@ -68,6 +72,7 @@ class TestBudgetFactory:
         total_limit = Limit(Money.mint(5000.00, "USD"))
         strategy_input = YearlyBudgetStrategyInput(start_month=3, start_day=15)
         start_date = datetime(2023, 3, 15)
+        budget_name = BudgetName("Yearly Budget")
 
         # Act
         budget = await budget_factory.create_budget(
@@ -76,6 +81,7 @@ class TestBudgetFactory:
             budget_strategy_input=strategy_input,
             start_date=start_date,
             categories=[],  # No categories
+            name=budget_name,
         )
 
         # Assert
@@ -87,6 +93,7 @@ class TestBudgetFactory:
         expected_end_date = datetime(2024, 3, 14, 23, 59, 59)
         assert budget.end_date == expected_end_date
         assert budget.categories == []
+        assert budget.name == budget_name
 
     @pytest.mark.asyncio
     async def test_create_budget_with_categories(self, budget_factory):
@@ -96,6 +103,7 @@ class TestBudgetFactory:
         total_limit = Limit(Money.mint(500.00, "USD"))
         strategy_input = MonthlyBudgetStrategyInput(start_day=1)
         start_date = datetime(2023, 5, 1)
+        budget_name = BudgetName("Categorized Budget")
 
         # Create category inputs
         category_inputs = [
@@ -116,6 +124,7 @@ class TestBudgetFactory:
             budget_strategy_input=strategy_input,
             start_date=start_date,
             categories=category_inputs,
+            name=budget_name,
         )
 
         # Assert
@@ -128,6 +137,7 @@ class TestBudgetFactory:
         assert len(budget.categories) == 2
         assert budget.categories[0].name.value == "Groceries"
         assert budget.categories[1].name.value == "Entertainment"
+        assert budget.name == budget_name
 
     @pytest.mark.asyncio
     async def test_strategy_selection(self, budget_factory):
@@ -138,6 +148,7 @@ class TestBudgetFactory:
         monthly_input = MonthlyBudgetStrategyInput(start_day=1)
         yearly_input = YearlyBudgetStrategyInput(start_month=1, start_day=1)
         start_date = datetime(2023, 1, 1)
+        budget_name = BudgetName("Strategy Test Budget")
 
         # Act & Assert for monthly
         monthly_budget = await budget_factory.create_budget(
@@ -146,10 +157,12 @@ class TestBudgetFactory:
             budget_strategy_input=monthly_input,
             start_date=start_date,
             categories=[],
+            name=budget_name,
         )
 
         # End date should be end of January
         assert monthly_budget.end_date == datetime(2023, 1, 31, 23, 59, 59)
+        assert monthly_budget.name == budget_name
 
         # Act & Assert for yearly
         yearly_budget = await budget_factory.create_budget(
@@ -158,7 +171,9 @@ class TestBudgetFactory:
             budget_strategy_input=yearly_input,
             start_date=start_date,
             categories=[],
+            name=budget_name,
         )
 
         # End date should be end of the year
         assert yearly_budget.end_date == datetime(2023, 12, 31, 23, 59, 59)
+        assert yearly_budget.name == budget_name

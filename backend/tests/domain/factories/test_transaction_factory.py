@@ -10,11 +10,14 @@ from domain.aggregates.transaction import Transaction
 from domain.entities.category import Category
 from domain.exceptions import BudgetNotFoundError, TransactionOutsideBudgetPeriodError
 from domain.factories.transaction_factory import TransactionFactory
-from domain.value_objects.budget_strategy import MonthlyBudgetStrategyInput
-from domain.value_objects.category_name import CategoryName
-from domain.value_objects.limit import Limit
-from domain.value_objects.money import Money
-from domain.value_objects.transaction_type import TransactionType
+from domain.value_objects import (
+    BudgetName,
+    CategoryName,
+    Limit,
+    Money,
+    MonthlyBudgetStrategyInput,
+    TransactionType,
+)
 
 
 @pytest.fixture
@@ -57,6 +60,7 @@ def budget(budget_id: UUID, user_id: UUID) -> Budget:
         start_date=datetime(2024, 1, 1),
         end_date=datetime(2024, 12, 31),
         strategy_input=MonthlyBudgetStrategyInput(start_day=1),
+        name=BudgetName("Test Budget"),
     )
 
 

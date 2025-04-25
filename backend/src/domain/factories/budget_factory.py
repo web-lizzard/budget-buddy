@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 from domain.aggregates.budget import Budget
 from domain.strategies.budget_strategy import BudgetStrategy
-from domain.value_objects import BudgetStrategyInput, Limit
+from domain.value_objects import BudgetName, BudgetStrategyInput, Limit
 from domain.value_objects.category_name import CategoryName
 
 
@@ -35,6 +35,7 @@ class BudgetFactory:
         budget_strategy_input: BudgetStrategyInput,
         start_date: datetime,
         categories: list[CategoryInput],
+        name: BudgetName,
     ) -> Budget:
         """
         Create a budget using the factory's strategy.
@@ -44,6 +45,8 @@ class BudgetFactory:
             total_limit: Total budget limit
             budget_strategy_input: Strategy input parameters
             start_date: Start date for the budget
+            categories: List of category inputs
+            name: Budget name
 
         Returns:
             A new Budget aggregate
@@ -63,6 +66,7 @@ class BudgetFactory:
             start_date=start_date,
             end_date=end_date,
             strategy_input=budget_strategy_input,
+            name=name,
         )
 
         for category_input in categories:

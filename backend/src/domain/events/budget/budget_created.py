@@ -11,6 +11,7 @@ class BudgetCreated(DomainEvent):
     total_limit: int
     start_date: datetime
     strategy: str
+    name: str
 
     def __post_init__(self):
         # Call parent __init__ since dataclass doesn't do it automatically

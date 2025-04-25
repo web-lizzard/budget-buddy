@@ -20,7 +20,13 @@ from domain.strategies.budget_strategy import (
     MonthlyBudgetStrategy,
     YearlyBudgetStrategy,
 )
-from domain.value_objects import CategoryName, Limit, Money, MonthlyBudgetStrategyInput
+from domain.value_objects import (
+    BudgetName,
+    CategoryName,
+    Limit,
+    Money,
+    MonthlyBudgetStrategyInput,
+)
 
 
 def _create_category(budget_id: uuid.UUID, name: str, limit: int) -> Category:
@@ -45,6 +51,7 @@ def _create_budget(
         start_date=datetime(2023, 1, 1),
         end_date=datetime(2023, 1, 31, 23, 59, 59),
         strategy_input=MonthlyBudgetStrategyInput(start_day=1),
+        name=BudgetName("Test Budget"),
     )
 
     if categories:

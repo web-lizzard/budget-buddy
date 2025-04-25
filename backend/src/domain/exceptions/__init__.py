@@ -1,3 +1,5 @@
+from domain.exceptions.budget_name_too_long_error import BudgetNameTooLongError
+from domain.exceptions.budget_name_too_short_error import BudgetNameTooShortError
 from domain.exceptions.budget_not_found_error import BudgetNotFoundError
 from domain.exceptions.budget_strategy_error import InvalidStrategyParameterError
 from domain.exceptions.cannot_add_transaction_to_deactivated_budget_error import (
@@ -14,6 +16,7 @@ from domain.exceptions.category_name_too_short_error import CategoryNameTooShort
 from domain.exceptions.category_not_found_error import CategoryNotFoundError
 from domain.exceptions.domain_exception import DomainError
 from domain.exceptions.duplicate_category_name_error import DuplicateCategoryNameError
+from domain.exceptions.empty_budget_name_error import EmptyBudgetNameError
 from domain.exceptions.empty_category_name_error import EmptyCategoryNameError
 from domain.exceptions.limit_error import InvalidLimitValueError
 from domain.exceptions.max_categories_reached_error import MaxCategoriesReachedError
@@ -47,4 +50,7 @@ __all__ = [
     "NotCompatibleVersionError",
     "BudgetNotFoundError",
     "TransactionNotFoundError",
+    "BudgetNameTooLongError",
+    "BudgetNameTooShortError",
+    "EmptyBudgetNameError",
 ]

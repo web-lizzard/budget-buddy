@@ -25,6 +25,7 @@ from domain.value_objects import (
     MonthlyBudgetStrategyInput,
     TransactionType,
 )
+from domain.value_objects.budget_name import BudgetName
 
 # Define a placeholder UUID for transactions without a real category
 NULL_CATEGORY_UUID = uuid.UUID(int=0)
@@ -65,6 +66,7 @@ def _create_test_budget(user_id: uuid.UUID, budget_id: uuid.UUID) -> Budget:
         end_date=end_date,
         strategy_input=strategy_input,
         categories=[groceries_cat, transport_cat],
+        name=BudgetName("Test Budget"),
     )
 
 

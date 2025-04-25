@@ -3,7 +3,7 @@ from domain.events.domain_event import DomainEvent
 from domain.factories import BudgetFactory
 from domain.factories.budget_factory import CategoryInput
 from domain.ports import BudgetRepository
-from domain.value_objects import CategoryName, Limit, Money
+from domain.value_objects import BudgetName, CategoryName, Limit, Money
 
 from application.commands import CategoryData, CreateBudgetCommand
 from application.commands.handlers.command_handler import CommandHandler
@@ -48,6 +48,7 @@ class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
         ]
 
         total_limit = Limit(self._get_money(command.total_limit, command.currency))
+        budget_name = BudgetName(command.name)
 
         budget = await self._budget_factory.create_budget(
             user_id=command.user_id,
@@ -55,6 +56,7 @@ class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
             budget_strategy_input=command.strategy_input,
             start_date=command.start_date,
             categories=category_inputs,
+            name=budget_name,
         )
 
         await self._budget_repository.save(budget=budget, version=0)
@@ -65,6 +67,7 @@ class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
             total_limit=total_limit.value.amount,
             start_date=budget.start_date,
             strategy=str(command.strategy_input.strategy_type),
+            name=budget_name.value,
         )
 
     def _get_category_input(

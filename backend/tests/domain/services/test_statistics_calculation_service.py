@@ -10,6 +10,7 @@ from domain.aggregates.transaction import Transaction
 from domain.entities.category import Category
 from domain.services.statistics_calculation_service import StatisticsCalculationService
 from domain.value_objects import (
+    BudgetName,
     CategoryName,
     Limit,
     Money,
@@ -118,6 +119,7 @@ def default_budget() -> Budget:
         end_date=end_date,
         strategy_input=strategy_input,
         categories=categories,
+        name=BudgetName("Test Budget"),
     )
 
 

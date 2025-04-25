@@ -3,18 +3,108 @@ description:
 globs: *.py
 alwaysApply: false
 ---
+## 1. Coding Style and Conventions
+
 1. **Use Meaningful Names**: Choose descriptive variable, function, and class names.
 2. **Follow PEP 8**: Adhere to the Python Enhancement Proposal 8 style guide for formatting.
-3. **Use Docstrings**: Document functions and classes with docstrings to explain their purpose.
-4. **Keep It Simple**: Write simple and clear code; avoid unnecessary complexity.
-5. **Use List Comprehensions**: Prefer list comprehensions for creating lists over traditional loops when appropriate.
-6. **Handle Exceptions**: Use try-except blocks to handle exceptions gracefully.
-7. **Write Tests**: Implement unit tests to ensure code reliability. Write it to correspond module in `backend/tests/**`
-8. **Use Type Hints**: Utilize type hints for better code clarity and type checking.
-9. **Avoid Global Variables**: Limit the use of global variables to reduce side effects.
-10. **Create Separete Files**: Always create a file for a new class function in correspond folder
-11. **Public methods**: Always add public methods on the top of the class declaration
-12. **Tests**: Use pytest.mark.paramtrerize for differentiate the test cases
-13. **Run Tests Command**: Use make test command to run backend unit tests
-14. **Type Annotations**: Use type annoations from python 3.8+ e.g list except List
-15. **Version**: Use modern python feature related to python 3.13 version
+3. **Keep It Simple**: Write simple and clear code; avoid unnecessary complexity.
+4. **Use Docstrings**: Document functions and classes with docstrings to explain their purpose.
+5. **Use f-strings**: Prefer f-strings over older string formatting methods.
+
+```python
+name = "John"
+f"Hello, {name}!"  # preferred
+```
+
+
+## 2. Type System
+
+6. **Use Type Hints**: Utilize type hints for better code clarity and type checking.
+7. **Type Annotations**: Use type annotations from Python 3.8+ (e.g., `list` instead of `List`).
+
+```python
+def process_items(items: list[int]) -> dict[str, int]:
+    # function body
+```
+
+
+## 3. Project Structure
+
+8. **Create Separate Files**: Always create a file for a new class or function in the corresponding folder.
+9. **Public Methods**: Always add public methods at the top of the class declaration.
+
+```python
+class User:
+    def __init__(self): pass
+
+    # Public methods first
+    def get_data(self): pass
+
+    # Private methods after
+    def _process(self): pass
+```
+
+10. **Avoid Global Variables**: Limit the use of global variables to reduce side effects.
+11. **Avoid Circular Imports**: Design your module structure to prevent circular dependencies.
+
+## 4. Functional Programming
+
+12. **Use List Comprehensions**: Prefer list comprehensions for creating lists over traditional loops when appropriate.
+
+```python
+squares = [x**2 for x in range(10)]  # preferred
+```
+
+13. **Use Generators**: For large datasets, use generators instead of creating full lists in memory.
+
+```python
+def get_items():
+    for i in range(1000000):
+        yield process(i)
+```
+
+
+## 5. Error Handling
+
+14. **Handle Exceptions**: Use try-except blocks to handle exceptions gracefully.
+
+```python
+try:
+    result = perform_operation()
+except OperationError as e:
+    logger.error(f"Operation failed: {e}")
+```
+
+15. **Use Context Managers**: Use `with` blocks to manage resources (files, connections).
+
+```python
+with open('file.txt', 'r') as f:
+    content = f.read()
+```
+
+
+## 6. Testing
+
+16. **Write Tests**: Implement unit tests to ensure code reliability. Write them in `backend/tests/**`.
+17. **Tests**: Use `pytest.mark.parameterize` for differentiating test cases.
+
+```python
+@pytest.mark.parametrize("input,expected", [(1, 1), (2, 4)])
+def test_square(input, expected):
+    assert input**2 == expected
+```
+
+18. **Run Tests Command**: Use `make test` command to run backend unit tests.
+19. **Code Coverage**: Strive for high test coverage, especially for critical functionality.
+
+## 7. Compatibility and Versioning
+
+20. **Version**: Use modern Python features related to Python 3.13 version.
+21. **Project Dependencies**: Clearly document required dependencies in  `pyproject.toml`.
+22. **Use Static Analysis Tools**: Employ tools like mypy, pylint, or flake8 to maintain code quality.
+
+## 8. Advanced Features
+
+23. **Consider Asynchronous Programming**: Use async/await for I/O-bound operations when appropriate.
+24. **Prefer Built-in Functions**: Use built-in functions instead of writing custom implementations when possible.
+25. **Follow the Zen of Python**: Adhere to the principles in PEP 20 ("import this").
