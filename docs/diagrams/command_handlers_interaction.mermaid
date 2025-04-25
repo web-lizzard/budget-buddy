@@ -1,0 +1,17 @@
+%% Interaction Diagram for CreateBudgetCommandHandler
+sequenceDiagram
+    participant U as User/API
+    participant CB as CreateBudgetCommandHandler
+    participant BF as BudgetFactory
+    participant BR as BudgetRepository
+    participant UoW as UnitOfWork
+    participant DEP as DomainEventPublisher
+
+    U->>CB: Send CreateBudgetCommand
+    CB->>BF: Create budget aggregate
+    BF-->>CB: Return Budget
+    CB->>BR: Save Budget
+    CB->>UoW: Commit()
+    UoW->>DEP: Publish BudgetCreated event
+    DEP-->>UoW: Acknowledge publish
+    UoW-->>CB: Acknowledge commit

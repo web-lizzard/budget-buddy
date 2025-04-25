@@ -16,6 +16,7 @@ class InMemoryUnitOfWork(UnitOfWork):
 
         Args:
             event_publisher: The publisher that will handle domain events
+            # Remove repository args from docstring
         """
         super().__init__(event_publisher)
         self.is_committed = False

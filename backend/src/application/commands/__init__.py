@@ -1,4 +1,5 @@
 from application.commands.add_category_command import AddCategoryCommand
+from application.commands.calculate_statistics_command import CalculateStatisticsCommand
 from application.commands.command import Command
 from application.commands.create_budget_command import CategoryData, CreateBudgetCommand
 from application.commands.create_transaction_command import CreateTransactionCommand
@@ -17,4 +18,5 @@ __all__ = [
     "RenewBudgetCommand",
     "EditCategoryCommand",
     "RemoveCategoryCommand",
+    "CalculateStatisticsCommand",
 ]
