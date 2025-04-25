@@ -5,6 +5,8 @@ from domain.aggregates.statistics_record import StatisticsRecord
 from domain.exceptions.statistics_not_found_exceptions import StatisticsNotFoundError
 from domain.ports.outbound.statistics_repository import StatisticsRepository
 
+from .database import IN_MEMORY_DATABASE
+
 
 class InMemoryStatisticsRepository(StatisticsRepository):
     """In-memory implementation of the StatisticsRepository port."""
@@ -15,7 +17,9 @@ class InMemoryStatisticsRepository(StatisticsRepository):
     ) -> None:
         # Store records indexed by user_id, then statistic_id for efficient lookup
         self._records: dict[uuid.UUID, StatisticsRecord] = (
-            records if records is not None else {}
+            records
+            if records is not None
+            else IN_MEMORY_DATABASE.get_database()["statistic_records"]
         )
 
     async def save(self, statistics_record: StatisticsRecord) -> None:

@@ -15,6 +15,7 @@ This document outlines the aggregates, entities, value objects, and domain event
 - EndDate (DateTime) - budget end date
 - DeactivationDate (DateTime, optional) - budget deactivation date
 - Categories (List[Category]) - list of budget categories
+- Name (BudgetName) - validated name of the budget
 
 ### Transaction
 
@@ -91,6 +92,10 @@ Statistics specific to a single category within a budget.
 - DELETE_TRANSACTIONS - delete all transactions
 - MOVE_TO_OTHER_CATEGORY - move transactions to another category
 - CategoryID - for MOVE_TO_OTHER_CATEGORY, the target category ID
+
+### BudgetName
+**Attributes:**
+- Value (String) - Validated budget name (must be between 3-100 characters)
 
 ### CategoryName
 
