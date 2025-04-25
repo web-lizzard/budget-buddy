@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from domain.events.statistics import StatisticsCalculated
 from domain.ports import (
     BudgetRepository,
@@ -51,10 +53,9 @@ class CalculateStatisticsCommandHandler(CommandHandler[CalculateStatisticsComman
 
         await self._statistics_repository.save(statistics_record)
 
-        print(statistics_record.id)
-
-        return StatisticsCalculated.create(
+        return StatisticsCalculated(
             budget_id=budget.id,
             user_id=budget.user_id,
             statistics_record_id=statistics_record.id,
+            calculated_at=datetime.now(),
         )

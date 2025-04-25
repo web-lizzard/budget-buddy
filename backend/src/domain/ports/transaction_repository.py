@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 from uuid import UUID
 
 from domain.aggregates.transaction import Transaction
@@ -24,7 +23,7 @@ class TransactionRepository(ABC):
     @abstractmethod
     async def find_by_budget_id(
         self, budget_id: UUID, user_id: UUID
-    ) -> List[Transaction]:
+    ) -> list[Transaction]:
         """Find transactions by budget ID.
 
         Args:
@@ -39,7 +38,7 @@ class TransactionRepository(ABC):
     @abstractmethod
     async def find_by_category_id(
         self, category_id: UUID, user_id: UUID
-    ) -> List[Transaction]:
+    ) -> list[Transaction]:
         """Find transactions by category ID.
 
         Args:
@@ -71,7 +70,7 @@ class TransactionRepository(ABC):
         pass
 
     @abstractmethod
-    async def save_bulk(self, transactions: List[Transaction]) -> None:
+    async def save_bulk(self, transactions: list[Transaction]) -> None:
         """Save multiple transactions to repository.
 
         Args:
@@ -80,7 +79,7 @@ class TransactionRepository(ABC):
         pass
 
     @abstractmethod
-    async def delete_bulk(self, transactions: List[Transaction]) -> None:
+    async def delete_bulk(self, transactions: list[Transaction]) -> None:
         """Delete multiple transactions from repository.
 
         Args:

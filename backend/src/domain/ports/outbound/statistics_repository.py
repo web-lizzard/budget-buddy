@@ -47,8 +47,3 @@ class StatisticsRepository(ABC):
     async def save(self, statistics_record: StatisticsRecord) -> None:
         """Saves (creates or updates) a statistics record."""
         pass
-
-    # Consider adding a delete method if necessary in the future
-    # @abstractmethod
-    # async def delete(self, statistic_id: uuid.UUID, user_id: uuid.UUID) -> None:
-    #     pass
