@@ -12,6 +12,7 @@ class InMemoryDatabase:
         "budgets": {},  # UUID -> Tuple[int, Budget]
         "users": {DEFAULT_USER_ID: {"user_id": DEFAULT_USER_ID}},
         "transactions": {},  # UUID -> Transaction
+        "statistic_records": {},  # UUID -> StatisticsRecord
     }
 
     def __new__(cls) -> "InMemoryDatabase":

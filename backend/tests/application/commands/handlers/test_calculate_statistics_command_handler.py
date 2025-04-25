@@ -55,9 +55,6 @@ def _create_test_budget(user_id: uuid.UUID, budget_id: uuid.UUID) -> Budget:
     )
     strategy_input = MonthlyBudgetStrategyInput(start_day=1)
 
-    # Debug print for category IDs
-    print(f"DEBUG: Created categories with IDs: {groceries_cat_id}, {transport_cat_id}")
-
     return Budget(
         id=budget_id,
         user_id=user_id,
@@ -78,13 +75,9 @@ def _create_test_transactions(
     if not budget.categories or len(budget.categories) < 2:
         cat_groceries_id = uuid.UUID("ecc557c7-7481-4e89-ad5c-0cc143f9d6c0")
         cat_transport_id = uuid.UUID("6565e619-9c2b-4250-a606-05f059192ab0")
-        print("DEBUG: Using hardcoded category IDs because budget.categories is empty")
     else:
         cat_groceries_id = budget.categories[0].id
         cat_transport_id = budget.categories[1].id
-        print(
-            f"DEBUG: Using budget category IDs: {cat_groceries_id}, {cat_transport_id}"
-        )
 
     transactions = [
         Transaction(
@@ -108,9 +101,7 @@ def _create_test_transactions(
         Transaction(
             id=uuid.uuid4(),
             user_id=user_id,
-            # For income transactions without a category, use the first category's ID
-            # to ensure it's not filtered out by the repository
-            category_id=cat_groceries_id,  # Changed from NULL_CATEGORY_UUID
+            category_id=cat_groceries_id,
             amount=Money.mint(1500.0, "USD"),
             transaction_type=TransactionType.INCOME,
             description="Salary",
@@ -127,12 +118,6 @@ def _create_test_transactions(
         ),
     ]
 
-    # Debug print transaction details
-    for i, tx in enumerate(transactions):
-        print(
-            f"DEBUG: Created test transaction {i+1}: type={tx.transaction_type}, amount={tx.amount}, category_id={tx.category_id}"
-        )
-
     return transactions
 
 
@@ -146,9 +131,6 @@ def _convert_transactions_to_dict(
     result = {}
     for tx in transactions:
         result[tx.id] = tx
-        print(
-            f"DEBUG: Added transaction {tx.id} to dictionary with category {tx.category_id}"
-        )
 
     return result
 
@@ -161,11 +143,9 @@ def _get_deps(
     """Sets up dependencies for the command handler tests."""
     # Convert transactions list to dictionary expected by repository
     tx_dict = _convert_transactions_to_dict(transactions)
-    print(f"DEBUG: Created transaction dictionary with {len(tx_dict)} transactions")
 
     # Create a shared budget dictionary that both repositories will use
     budget_dict = {budget.id: (0, budget)}
-    print(f"DEBUG: Created budget dictionary with ID {budget.id}")
 
     # Initialize repositories with the same budget reference
     budget_repo = InMemoryBudgetRepository(
@@ -177,14 +157,6 @@ def _get_deps(
         transactions=tx_dict,
         budgets=budget_dict,  # Use the same budget dict to ensure consistency
     )
-
-    # Add debug print to directly verify the budget in the tx_repo
-    print(f"DEBUG: Budget dict in tx_repo: {list(tx_repo._budgets.keys())}")
-    if budget.id in tx_repo._budgets:
-        budget_data = tx_repo._budgets[budget.id]
-        print(
-            f"DEBUG: Budget data type: {type(budget_data)}, is tuple: {isinstance(budget_data, tuple)}"
-        )
 
     stats_repo = InMemoryStatisticsRepository()
     publisher = InMemoryDomainPublisher()

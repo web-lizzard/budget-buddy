@@ -58,7 +58,7 @@ class TestBudgetFactory:
         assert budget.user_id == user_id
         assert budget.total_limit == total_limit
         assert budget.start_date == start_date
-        # Końcowa data powinna być około miesiąc później (14 czerwca 23:59:59)
+        # End date should be approximately one month later (14 June 23:59:59)
         expected_end_date = datetime(2023, 6, 14, 23, 59, 59)
         assert budget.end_date == expected_end_date
         assert budget.categories == []
