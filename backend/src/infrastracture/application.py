@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 
-from .container import Container
+from .container import AppContainer
 
 
 class ContainerizedFastAPI(FastAPI):
     """Custom FastAPI application with dependency container support."""
 
-    def __init__(self, container: Container, **kwargs):
+    def __init__(self, container: AppContainer, **kwargs):
         """Initialize the application.
 
         Args:

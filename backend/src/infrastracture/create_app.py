@@ -2,7 +2,7 @@ from adapters.inbound.api.routers import create_monitoring_router, create_v0_rou
 from fastapi import FastAPI
 
 from .application import ContainerizedFastAPI
-from .container import Container
+from .container import AppContainer
 from .logging import configure_logging
 from .settings import get_settings
 
@@ -17,12 +17,8 @@ def create_app() -> FastAPI:
 
     configure_logging(settings)
 
-    container = Container()
-    container.wire(
-        packages=[
-            "adapters.inbound.api",
-        ]
-    )
+    container = AppContainer()
+    container.config.from_pydantic(get_settings())
 
     app = ContainerizedFastAPI(
         container=container,

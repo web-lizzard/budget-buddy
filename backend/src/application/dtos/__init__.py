@@ -6,6 +6,7 @@ from .dto import DTO
 from .money_dto import MoneyDTO
 from .paginated_item_dto import PaginatedItemDTO
 from .statistics_record_dto import StatisticsRecordDTO
+from .transaction_dto import TransactionDTO, TransactionTypeEnum
 
 __all__ = [
     "BudgetDTO",
@@ -16,4 +17,6 @@ __all__ = [
     "MoneyDTO",
     "PaginatedItemDTO",
     "StatisticsRecordDTO",
+    "TransactionDTO",
+    "TransactionTypeEnum",
 ]

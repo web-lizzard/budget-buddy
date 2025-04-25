@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 
+
 from .query import Query
 
 
-@dataclass
-class GetBudgetsQuery(Query):
+# Define the query for getting all budgets for a user.
+@dataclass(frozen=True)
+class GetBudgetsQuery(Query):  # Query is not generic, remove type argument
     """
     Query to retrieve a list of budgets with filtering, pagination, and sorting options.
 
