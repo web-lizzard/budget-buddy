@@ -1,3 +1,4 @@
+from domain.value_objects.budget_name import BudgetName
 from domain.value_objects.budget_strategy import (
     BudgetStrategyInput,
     BudgetStrategyType,
@@ -28,4 +29,5 @@ __all__ = [
     "DeleteTransactionsTransferPolicyInput",
     "MoveToOtherCategoryTransferPolicyInput",
     "CategoryName",
+    "BudgetName",
 ]

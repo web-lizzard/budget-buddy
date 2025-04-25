@@ -25,3 +25,4 @@ class CreateBudgetCommand(Command):
     strategy_input: BudgetStrategyInput
     start_date: datetime
     categories: list[CategoryData]
+    name: str

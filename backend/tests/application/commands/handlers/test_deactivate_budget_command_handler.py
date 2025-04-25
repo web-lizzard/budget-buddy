@@ -14,7 +14,7 @@ from application.commands.handlers.deactivate_budget_command_handler import (
 )
 from domain.aggregates.budget import Budget
 from domain.events import BudgetDeactivated
-from domain.value_objects import Limit, Money, MonthlyBudgetStrategyInput
+from domain.value_objects import BudgetName, Limit, Money, MonthlyBudgetStrategyInput
 
 
 def _create_budget(user_id: uuid.UUID) -> tuple[uuid.UUID, Budget]:
@@ -27,6 +27,7 @@ def _create_budget(user_id: uuid.UUID) -> tuple[uuid.UUID, Budget]:
         start_date=datetime(2023, 1, 1),
         end_date=datetime(2023, 1, 31, 23, 59, 59),
         strategy_input=MonthlyBudgetStrategyInput(start_day=1),
+        name=BudgetName("Test Budget"),
     )
     return budget_id, budget
 

@@ -1,6 +1,6 @@
 # Domain Model - Minimal Version of the Budget Management Application
 
-This document outlines only the aggregates, entities, and value objects with their attributes in the application domain. Methods and operational details are excluded.
+This document outlines the aggregates, entities, value objects, and domain events in the application domain. Methods and operational details are excluded.
 
 ## Aggregates
 
@@ -27,6 +27,19 @@ This document outlines only the aggregates, entities, and value objects with the
 - Description (String, optional) - transaction description
 - UserId (UUID) - identifier of the user associated with the transaction
 
+### StatisticsRecord
+Represents overall financial statistics for a budget.
+**Attributes:**
+- ID (UUID)
+- UserId (UUID) - Identifier of the user
+- BudgetId (UUID)
+- CurrentBalance (Money) - Current balance amount across all categories
+- DailyAvailableAmount (Money) - Available daily amount for spending
+- DailyAverage (Money) - Daily average expenditure
+- UsedLimit (Money) - Total amount of limit used
+- CreationDate (DateTime) - Record creation date
+- CategoriesStatistics (List[CategoryStatisticsRecord]) - Statistics details per category
+
 ## Entities
 
 ### Category
@@ -37,16 +50,15 @@ This document outlines only the aggregates, entities, and value objects with the
 - Name (CategoryName) - category name
 - Limit (Limit) - spending limit for the category
 
-### StatisticsRecord
-
+### CategoryStatisticsRecord
+Statistics specific to a single category within a budget.
 **Attributes:**
 - ID (UUID)
-- BudgetId (UUID)
 - CategoryId (UUID)
-- CreationDate (DateTime) - record creation date
-- CurrentBalance (Money) - current balance amount
-- DailyAvailableAmount (Money) - available daily amount
-- DailyAverage (Money) - daily average expenditure
+- CurrentBalance (Money) - Current balance for the category
+- DailyAvailableAmount (Money) - Available daily amount for the category
+- DailyAverage (Money) - Daily average expenditure in the category
+- UsedLimit (Money) - Amount of limit used in the category
 
 ## Value Objects
 
@@ -84,3 +96,21 @@ This document outlines only the aggregates, entities, and value objects with the
 
 **Attributes:**
 - Value (String) - validated category name
+
+## Domain Events
+
+These events represent significant actions or changes within the domain.
+
+### TransactionEditedEvent
+Event triggered when a transaction is modified.
+**Attributes:**
+- TransactionId (UUID)
+- ModifiedFields (Dict[String, Any]) – Changes made to the transaction details
+
+### TransactionDeletedEvent
+Event triggered when a transaction is deleted.
+**Attributes:**
+- TransactionId (UUID)
+- Reason (String) – Reason for deletion
+
+Additional events for Budget and Category operations may be defined in their respective contexts.

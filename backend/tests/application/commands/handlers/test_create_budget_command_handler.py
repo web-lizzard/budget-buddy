@@ -77,6 +77,7 @@ class TestCreateBudgetCommandHandler:
                 CategoryData(name="Groceries", limit=300.0),
                 CategoryData(name="Entertainment", limit=200.0),
             ],
+            name="Monthly Budget with Categories",
         )
         command_handler, budget_repository, domain_publisher = _get_deps(user_id)
 
@@ -104,6 +105,7 @@ class TestCreateBudgetCommandHandler:
         assert budget.user_id == user_id
         assert budget.total_limit.value.amount == Money.mint(1000.0, "USD").amount
         assert budget.start_date == start_date
+        assert budget.name.value == "Monthly Budget with Categories"
 
         # Check categories
         assert len(budget.categories) == 2
@@ -124,6 +126,7 @@ class TestCreateBudgetCommandHandler:
         assert event.total_limit == Money.mint(1000.0, "USD").amount
         assert event.start_date == start_date
         assert event.strategy == str(BudgetStrategyType.MONTHLY)
+        assert event.name == "Monthly Budget with Categories"
 
     @pytest.mark.asyncio
     async def test_handle_creates_budget_with_yearly_strategy(self, user_id):
@@ -141,6 +144,7 @@ class TestCreateBudgetCommandHandler:
                 CategoryData(name="Housing", limit=6000.0),
                 CategoryData(name="Food", limit=3000.0),
             ],
+            name="Yearly Budget",
         )
         command_handler, budget_repository, _ = _get_deps(user_id)
 
@@ -157,6 +161,7 @@ class TestCreateBudgetCommandHandler:
         # End date should be 1 year (365 days) after start date
         expected_end_date = datetime(2023, 12, 31, 23, 59, 59)
         assert budget.end_date.date() == expected_end_date.date()
+        assert budget.name.value == "Yearly Budget"
 
     @pytest.mark.asyncio
     async def test_handle_creates_budget_without_categories(self, user_id):
@@ -171,6 +176,7 @@ class TestCreateBudgetCommandHandler:
             strategy_input=strategy_input,
             start_date=start_date,
             categories=[],
+            name="Budget Without Categories",
         )
         command_handler, budget_repository, _ = _get_deps(user_id)
 
@@ -184,6 +190,7 @@ class TestCreateBudgetCommandHandler:
 
         # Check that no categories were created
         assert len(budget.categories) == 0
+        assert budget.name.value == "Budget Without Categories"
 
     @pytest.mark.asyncio
     async def test_handle_with_monthly_strategy_input(self, user_id):
@@ -199,6 +206,7 @@ class TestCreateBudgetCommandHandler:
             strategy_input=strategy_input,
             start_date=start_date,
             categories=[],
+            name="Monthly Budget with Custom Start Day",
         )
         command_handler, budget_repository, _ = _get_deps(user_id)
 
@@ -210,18 +218,18 @@ class TestCreateBudgetCommandHandler:
 
     @pytest.mark.asyncio
     async def test_handle_with_yearly_strategy_input(self, user_id):
-        """Test handling command with explicit yearly strategy input instance."""
+        """Test handling command with explicit yearly strategy input."""
         # Arrange
         start_date = datetime(2023, 5, 1)
-        strategy_input = YearlyBudgetStrategyInput(start_month=3, start_day=15)
-
+        strategy_input = YearlyBudgetStrategyInput(start_month=1, start_day=1)
         command = CreateBudgetCommand(
             user_id=user_id,
-            total_limit=5000.0,
-            currency="USD",
+            total_limit=12000.0,
+            currency="EUR",
             strategy_input=strategy_input,
             start_date=start_date,
             categories=[],
+            name="Yearly Budget with Custom Input",
         )
         command_handler, budget_repository, _ = _get_deps(user_id)
         # Act

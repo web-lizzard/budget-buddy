@@ -14,7 +14,7 @@ from domain.exceptions import (
     MaxCategoriesReachedError,
     TransactionOutsideBudgetPeriodError,
 )
-from domain.value_objects import CategoryName, Limit, Money
+from domain.value_objects import BudgetName, CategoryName, Limit, Money
 from domain.value_objects.budget_strategy import MonthlyBudgetStrategyInput
 
 
@@ -35,6 +35,7 @@ class TestBudget:
             start_date=start_date,
             end_date=end_date,
             strategy_input=MonthlyBudgetStrategyInput(start_day=1),
+            name=BudgetName("Monthly Budget"),
         )
 
     def test_init_valid_budget(self, valid_budget):
@@ -48,6 +49,7 @@ class TestBudget:
         assert valid_budget.deactivation_date is None
         assert valid_budget.is_active is True
         assert valid_budget.categories == []
+        assert valid_budget.name.value == "Monthly Budget"
 
     def test_init_with_categories(self):
         """Test creating Budget with initial categories."""
@@ -80,12 +82,14 @@ class TestBudget:
             end_date=end_date,
             categories=[category1, category2],
             strategy_input=MonthlyBudgetStrategyInput(start_day=1),
+            name=BudgetName("Budget with Categories"),
         )
 
         # Test that categories were added
         assert len(budget.categories) == 2
         assert category1 in budget.categories
         assert category2 in budget.categories
+        assert budget.name.value == "Budget with Categories"
 
     def test_add_category_success(self, valid_budget):
         """Test adding a category successfully."""

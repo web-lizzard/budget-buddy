@@ -21,6 +21,7 @@ from domain.events.category import CategoryRemoved
 from domain.exceptions import InvalidTransferPolicyError
 from domain.services.reassign_transactions_service import ReassignTransactionsService
 from domain.value_objects import (
+    BudgetName,
     CategoryName,
     Limit,
     Money,
@@ -44,6 +45,7 @@ def _get_budget_repository(
         end_date=datetime(2023, 12, 31, 23, 59, 59),
         strategy_input=strategy_input,
         categories=categories or [],
+        name=BudgetName("Test Budget"),
     )
     return InMemoryBudgetRepository(
         budgets={budget_id: (0, budget)},

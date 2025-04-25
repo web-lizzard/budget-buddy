@@ -24,6 +24,7 @@ from domain.exceptions import (
     TransactionNotFoundError,
 )
 from domain.value_objects import (
+    BudgetName,
     CategoryName,
     Limit,
     Money,
@@ -43,6 +44,7 @@ def _create_test_budget(budget_id, user_id, categories=None):
         end_date=datetime(2023, 12, 31, 23, 59, 59),
         strategy_input=strategy_input,
         categories=categories or [],
+        name=BudgetName("Test Budget"),
     )
 
 
