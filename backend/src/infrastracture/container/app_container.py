@@ -1,6 +1,5 @@
 from dependency_injector import containers, providers
 
-from ..settings import get_settings
 from .persistence_container import PersistenceContainer
 from .publisher_container import PublisherContainer
 
@@ -16,7 +15,7 @@ class AppContainer(containers.DeclarativeContainer):
     )
 
     # Configuration
-    config = providers.Configuration(default=get_settings())
+    config = providers.Configuration()
 
     # Persistence
     persistence_container: providers.Singleton[PersistenceContainer] = (
