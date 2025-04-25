@@ -1,5 +1,3 @@
-from domain.events.statistics.statistics_updated import StatisticsUpdated
+from .statistics_calculated_event import StatisticsCalculated
 
-__all__ = [
-    "StatisticsUpdated",
-]
+__all__ = ["StatisticsCalculated"]

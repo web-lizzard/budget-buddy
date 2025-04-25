@@ -1,0 +1,51 @@
+flowchart TD
+    %% Domain Layer
+    subgraph Domain [DOMAIN LAYER]
+      BudgetAggregate[Budget Aggregate]
+      CategoryEntity[Category Entity]
+      EventPublisher["EventPublisher Port: publish(event)"]
+      DomainEvents[Domain Events]
+    end
+
+    %% Application Layer
+    subgraph Application [APPLICATION LAYER]
+      CommandHandlers["Command Handlers<br>(entry points)"]
+      QueryHandlers[Query Handlers]
+    end
+
+    %% Adapters Layer
+    subgraph Adapters [ADAPTERS LAYER]
+      RabbitMQAdapter[RabbitMQ Adapter]
+      SQLAlchemyRepository[SQLAlchemy Repository]
+      EventPublisherImpl[Event Publisher Implementation]
+      APIControllers[API Controllers]
+    end
+
+    %% External Systems
+    subgraph ExternalSystems [EXTERNAL SYSTEMS]
+      RabbitMQ[RabbitMQ]
+      Celery[Celery]
+      FastAPI[FastAPI]
+      Database[(Database)]
+    end
+
+    %% Layer Connections
+    CommandHandlers --> BudgetAggregate
+    CommandHandlers --> CategoryEntity
+    BudgetAggregate --> DomainEvents
+    CategoryEntity --> DomainEvents
+    DomainEvents --> EventPublisher
+
+    Services --> CommandHandlers
+    QueryHandlers --> SQLAlchemyRepository
+
+    EventPublisher -.implements.-> EventPublisherImpl
+    EventPublisherImpl --> RabbitMQAdapter
+    SQLAlchemyRepository --> Database
+    APIControllers --> CommandHandlers
+    APIControllers --> QueryHandlers
+
+    RabbitMQAdapter --> RabbitMQ
+    FastAPI --> APIControllers
+    RabbitMQ <--> Celery
+    Celery --> CommandHandlers

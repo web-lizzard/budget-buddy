@@ -1,5 +1,7 @@
 # Domain Model of the Budget Management Application
 
+This document outlines the core concepts of the application's domain using Domain-Driven Design principles along with robust error handling and clean coding practices. It is maintained to reflect the current state of the domain implementation.
+
 ## Aggregates
 
 ### Budget
@@ -8,31 +10,49 @@ The Budget aggregate represents a user's financial plan for a defined period. It
 **Attributes:**
 - ID (UUID)
 - UserId (UUID)
-- TotalLimit (Money) - The overall budget limit.
-- Currency (String) - Currency used for the budget.
-- StartDate (Date) - Budget start date.
-- EndDate (Date) - Calculated end date based on the applied strategy.
-- DeactivationDate (Date, optional) - Date when the budget was deactivated.
+- TotalLimit (Money) – The overall budget limit.
+- Currency (String) – Currency used for the budget.
+- StartDate (Date) – Budget start date.
+- EndDate (Date) – Calculated end date based on the applicable strategy.
+- DeactivationDate (Date, optional) – Date when the budget was deactivated.
 
 **Methods:**
-- add_category(name, limit) -> Category: Adds a new spending category ensuring that the cumulative limits and name uniqueness constraints are met.
-- remove_category(category) -> None: Removes an existing category from the budget.
+- add_category(name: str, limit: Money) -> Category: Adds a new spending category ensuring that the cumulative limits and name uniqueness constraints are met.
+- remove_category(category: Category) -> None: Removes an existing category from the budget.
 - deactivate_budget() -> None: Deactivates the budget.
-- validate_transaction_date(transaction) -> bool: Validates if a transaction falls within the defined budget period.
+- validate_transaction_date(transaction: Transaction) -> bool: Validates if a transaction falls within the defined budget period.
+- edit_category(category: Category, new_name: str, new_limit: Money) -> Category: Edits an existing category's details, ensuring uniqueness and that the new limit complies with overall budget constraints.
 
 ### Transaction
 The Transaction aggregate captures individual financial operations within a budget.
 
 **Attributes:**
 - ID (UUID)
-- CategoryId (UUID) - The identifier of the category associated with the transaction.
-- Amount (Money) - The transaction amount.
-- Type (TransactionType) - Indicates if the transaction is an Expense or Income.
-- Date (DateTime) - Date and time of the transaction.
-- Description (String, optional) - Additional details regarding the transaction.
+- CategoryId (UUID) – An identifier for the associated category.
+- Amount (Money) – The transaction amount.
+- Type (TransactionType) – Indicates if the transaction is an Expense or Income.
+- Date (DateTime) – Timestamp of the transaction.
+- Description (Optional String) – Additional details regarding the transaction.
 
 **Methods:**
-- (Additional methods can be implemented as necessary to encapsulate behavior.)
+- Additional behaviors may be implemented to enforce business rules as needed.
+- update_transaction(new_amount: Optional[Money], new_date: Optional[DateTime], new_description: Optional[str]) -> None: Updates the transaction's details while ensuring consistency with the associated budget.
+
+### StatisticsRecord
+The StatisticsRecord aggregate stores financial statistics resulting from budget operations. It is generated independently and provides an overview of the budget's performance and trends.
+
+**Attributes:**
+- ID (UUID)
+- BudgetId (UUID) – Identifier for the associated budget.
+- CategoryId (UUID) – Identifier for an associated category, if applicable.
+- CreationDate (DateTime) – Timestamp when the record was created.
+- CurrentBalance (Money) – The current balance after operations.
+- DailyAvailableAmount (Money) – The available amount for the day.
+- DailyAverage (Money) – The average daily spending or income.
+- UsedLimit(Money) - The Used limit from the budget
+
+**Methods:**
+- (Additional behaviors may be implemented as necessary to calculate and update statistics.)
 
 ## Entities
 
@@ -41,76 +61,13 @@ Represents a spending category within a budget.
 
 **Attributes:**
 - ID (UUID)
-- BudgetId (UUID) - The identifier of the associated budget.
-- Name (String) - A unique name within the budget.
-- Limit (Money) - Spending limit assigned to this category.
+- BudgetId (UUID) – Identifier of the associated budget.
+- Name (String) – Unique name within the budget.
+- Limit (Money) – Assigned spending limit.
 
 **Methods:**
-- change_name(new_name) -> None: Updates the category's name.
-- change_limit(new_limit) -> None: Adjusts the category's spending limit.
-
-### StatisticsRecord
-Stores financial statistics after each operation.
-
-**Attributes:**
-- ID (UUID)
-- BudgetId (UUID) - The identifier of the associated budget.
-- CategoryId (UUID) - The identifier of the associated category.
-- CreationDate (DateTime) - Timestamp of record creation.
-- CurrentBalance (Money) - The current balance.
-- DailyAvailableAmount (Money) - Available amount on a daily basis.
-- DailyAverage (Money) - Average daily spending or income.
-
-## Services
-
-### TransactionTransferService
-Handles the logic for transferring or deleting transactions when a category is modified (e.g., removed or merged).
-
-**Methods:**
-- transfer_transactions(source_category, target_category) -> None: Moves transactions from the source category to the target category.
-- delete_transactions(category) -> None: Deletes all transactions associated with the given category.
-
-### StatisticsCalculationService
-Calculates statistics based on transactions.
-
-**Methods:**
-- calculate_statistics(budget_id, category_id) -> StatisticsRecord: Calculates statistics for a given budget/category.
-- calculate_daily_available_amount(budget, category, current_date) -> Money: Determines the daily available amount.
-
-## Ports
-
-### TransactionRepository
-Defines the interface for storing and retrieving transaction data from the persistence layer.
-
-**Methods:**
-- find_by_id(id) -> Transaction
-- find_by_budget_id(budget_id) -> List[Transaction]
-- save(transaction) -> None
-- delete(transaction) -> None
-- delete_bulk(transactions) -> None
-- save_bulk(transactions) -> None
-
-### BudgetRepository
-Defines the interface for managing budget data.
-
-**Methods:**
-- find_by_id(id, user_id) -> Budget
-- save(budget) -> None
-
-### StatisticsRepository
-Defines the interface for managing statistics records.
-
-**Methods:**
-- find_by_budget_id(budget_id) -> List[StatisticsRecord]
-- find_by_category_id(category_id) -> List[StatisticsRecord]
-- find_by_date_range(start_date, end_date) -> List[StatisticsRecord]
-- save(statistics_record) -> None
-
-### DomainPublisher
-Provides an interface for publishing domain events triggered by changes in aggregates.
-
-**Methods:**
-- publish(event) -> None
+- change_name(new_name: str) -> None: Updates the category's name.
+- change_limit(new_limit: Money) -> None: Adjusts the spending limit.
 
 ## Value Objects
 
@@ -118,15 +75,15 @@ Provides an interface for publishing domain events triggered by changes in aggre
 Represents a monetary amount in a specific currency.
 
 **Attributes:**
-- Amount (int) - The numeric value.
-- Currency (String) - The currency code.
+- Amount (int) – The numeric value.
+- Currency (String) – The currency code.
 
 **Methods:**
-- add(money) -> Money: Adds two monetary amounts.
-- subtract(money) -> Money: Subtracts one monetary amount from another.
-- multiply_by(factor) -> Money: Multiplies the amount by a given factor.
-- divide_by(divisor) -> Money: Divides the amount by a divisor.
-- mint(value: float) -> Money: Creates a Money instance from a float value.
+- add(money: Money) -> Money: Returns a Money object representing the summed value.
+- subtract(money: Money) -> Money: Returns a Money object representing the difference.
+- multiply_by(factor: float) -> Money: Scales the amount by the given factor.
+- divide_by(divisor: float) -> Money: Divides the amount while ensuring division safety.
+- mint(value: float) -> Money: Instantiates a Money object from a float value.
 
 ### TransactionType
 Enumeration for transaction types.
@@ -136,59 +93,135 @@ Enumeration for transaction types.
 - INCOME
 
 ### BudgetStrategy
-Encapsulates the rules determining the lifecycle of a budget.
+Encapsulates the rules for determining a budget's lifecycle.
 
 **Attributes:**
-- Type (Enum) - For example, monthly or yearly.
-- Parameters (Map<String, Object>) - Additional strategy parameters (e.g., starting day).
-
-**Methods:**
-- calculate_end_date(start_date) -> Date: Computes the budget's end date based on the strategy.
-- create_next_budget_start_date(end_date) -> Date: Determines the start date for the subsequent budget period.
+- Type (Enum) – For example, Monthly, Yearly, etc.
+- Parameters (dict) – Additional strategy parameters.
 
 ### Limit
 Represents a spending constraint for a category.
 
 **Attributes:**
-- Value (Money) - The maximum allowed spending amount.
+- Value (Money) – The maximum allowed spending amount.
 
 **Methods:**
-- is_exceeded(current_spending) -> bool: Checks if the current spending surpasses the limit.
-- remaining_amount(current_spending) -> Money: Calculates the remaining spendable amount before reaching the limit.
-- add(limit) -> current_spending: Current spending as Money object
+- is_exceeded(current_spending: Money) -> bool: Checks if the spending limit is exceeded.
+- remaining_amount(current_spending: Money) -> Money: Computes the remaining allowable amount before reaching the limit.
+
+## Domain Services
+
+### TransactionTransferService
+Handles the logic for transferring or deleting transactions when a category is modified (e.g., removed or merged).
+
+**Methods:**
+- transfer_transactions(source_category: Category, target_category: Category) -> None: Moves transactions from the source category to the target category.
+- delete_transactions(category: Category) -> None: Deletes all transactions associated with the given category.
+
+### StatisticsCalculationService
+Calculates statistical data based on transactions. (Note: Implementation is not yet complete.)
+
+**Methods:**
+- calculate_statistics(budget, transactions) -> StatisticsRecord: Calculates statistics for a given budget/category.
+
+
+## Factories
+
+Factories are responsible for creating instances of aggregates and value objects while enforcing invariants and preconditions.
+
+Examples include BudgetFactory and TransactionFactory, which ensure correct instantiation and validation of domain objects.
+
+## Exceptions
+
+Domain exceptions are defined to handle business rule violations and system errors. They provide early error detection, proper error logging, and user-friendly error messages.
+
+Common exceptions include:
+- InvalidTransactionException
+- BudgetLimitExceededException
+- DuplicateCategoryException
+- CategoryNotFoundException
+
+## Ports (Interfaces)
+
+Interfaces define contracts for external operations, usually implemented in the infrastructure layer.
+
+### TransactionRepository
+Interface for managing transaction persistence.
+
+**Methods:**
+- find_by_id(id: UUID, user_id: UUID) -> Transaction
+- find_by_budget_id(budget_id: UUID, user_id: UUID) -> List[Transaction]
+- save(transaction: Transaction) -> None
+- delete(transaction: Transaction) -> None
+- delete_bulk(transactions: List[Transaction]) -> None
+- save_bulk(transactions: List[Transaction]) -> None
+
+### BudgetRepository
+Interface for managing budget persistence.
+
+**Methods:**
+- find_by_id(id: UUID, user_id: UUID) -> Budget
+- save(budget: Budget) -> None
+
+### StatisticsRepository
+Interface for managing statistics records.
+
+**Methods:**
+- find_by_id(statistic_id: UUID, user_id: UUID) -> StatisticsRecord
+- find_by_budget_id(budget_id: UUID, user_id: UUID) -> List[StatisticsRecord]
+- find_by_category_id(category_id: UUID, user_id: UUID) -> List[StatisticsRecord]
+- find_by_date_range(start_date: date, end_date: date, user_id: UUID) -> List[StatisticsRecord]
+- find_by_budget_id_and_date_range(budget_id: UUID, start_date: date, end_date: date, user_id: UUID) -> List[StatisticsRecord]
+- save(statistics_record: StatisticsRecord) -> None
+
+### DomainPublisher
+Interface for publishing domain events triggered by changes in aggregates.
+
+**Methods:**
+- publish(event: DomainEvent) -> None
+
 ## Domain Events
 
-Domain events capture significant state changes within the system and are communicated via the DomainPublisher.
+Domain events capture significant state changes within the system and are communicated via the DomainPublisher. They facilitate decoupling and event-driven integrations.
 
-**Events:**
-- BudgetCreated: Triggered when a new budget is established.
-- BudgetDeactivated: Triggered when a budget is deactivated.
-- CategoryAdded: Triggered upon adding a new category to a budget.
-- CategoryRemoved: Triggered when a category is removed from a budget.
-- TransactionAdded: Triggered when a new transaction is recorded.
-- TransactionDeleted: Triggered when a transaction is removed.
-- TransactionsTransferred: Triggered when transactions are moved between categories.
+**Events Include:**
+- BudgetCreated
+- BudgetDeactivated
+- CategoryAdded
+- CategoryRemoved
+- TransactionAdded
+- TransactionDeleted
+- TransactionsTransferred
+
+## Strategies
+
+Strategies encapsulate the rules that determine the lifecycle of a budget. They handle the computation of start and end dates and can incorporate custom parameters.
+
+Implemented strategies include those managing monthly and yearly budget cycles, ensuring that budgets adhere to predefined durations and transitions.
 
 ## Associations
 
-1. **User → Budget**: one-to-many (a user can have multiple budgets)
-2. **Budget → Category**: one-to-many (a budget can have up to 5 categories)
-3. **Category → Transaction**: one-to-many (a category can have many transactions)
-4. **Budget → StatisticsRecord**: one-to-many (a budget has many statistical records)
-5. **Category → StatisticsRecord**: one-to-many (a category has many statistical records)
+- User → Budget: one-to-many (a user can have multiple budgets).
+- Budget → StatisticsRecord Aggregate: one-to-many (a budget can generate multiple statistical records).
+- Category → StatisticsRecord Aggregate: one-to-many (a category can be associated with multiple statistical records).
+- Budget → Category: one-to-many (a budget can have up to 5 categories).
+- Category → Transaction: one-to-many (a category can have many transactions).
 
 ## Business Rules
 
-1. Users can only view their own budgets
-2. A budget has a limit and a start date
-3. A budget has a strategy defining its length
-4. When a budget ends, a new one is created automatically (if active)
-5. A budget can have a maximum of 5 categories
-6. The sum of category limits cannot exceed the budget limit
-7. Category names must be unique within a budget
-8. Transactions may exceed category limits (the system logs the excess)
-9. When deleting a category, either all transactions are deleted or moved to another category
-10. Each operation generates a statistical record
-11. Transactions can only be added to a deactivated budget if they have a date before deactivation
-12. A deactivated budget does not auto-generate a new budget
-13. Transaction currency must match the budget currency
+1. Users can only access their own budgets.
+2. A budget must have a defined limit and start date.
+3. A budget employs a strategy that determines its duration.
+4. When a budget period ends, an active budget may trigger the creation of a new budget.
+5. A budget can have a maximum of 5 categories.
+6. The sum of category spending limits must not exceed the overall budget limit.
+7. Category names must be unique within a budget.
+8. Transactions may exceed category limits; excessive amounts are logged for review.
+9. When a category is deleted, its transactions are either removed or transferred.
+10. Each budget operation can generate a statistical record (with statistics entities/services remaining to be fully implemented).
+11. Transactions added to a deactivated budget must have dates preceding deactivation.
+12. A deactivated budget does not auto-generate subsequent budgets.
+13. The currency for transactions must match the budget's currency.
+14. Robust error handling, including early returns and proper logging, is implemented throughout the domain.
+
+*This document is continuously updated to mirror the evolution of the domain model, ensuring that aggregates, entities, value objects, services, events, repositories, and strategies remain accurately documented.*

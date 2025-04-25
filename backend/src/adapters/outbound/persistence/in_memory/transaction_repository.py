@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID
 
 from domain.aggregates.transaction import Transaction
@@ -57,7 +56,7 @@ class InMemoryTransactionRepository(TransactionRepository):
 
     async def find_by_budget_id(
         self, budget_id: UUID, user_id: UUID
-    ) -> List[Transaction]:
+    ) -> list[Transaction]:
         """Find all transactions for a given budget.
 
         Args:
@@ -70,11 +69,17 @@ class InMemoryTransactionRepository(TransactionRepository):
         if budget_id not in self._budgets:
             return []
 
-        _, budget = self._budgets[budget_id]
+        budget_data = self._budgets[budget_id]
+        # Check if the budget data is a tuple (version, budget) or just a budget
+        if isinstance(budget_data, tuple):
+            _, budget = budget_data
+        else:
+            budget = budget_data
+
         if budget.user_id != user_id:
             return []
 
-        return [
+        result = [
             transaction
             for transaction in self._transactions.values()
             if transaction.user_id == user_id
@@ -83,9 +88,11 @@ class InMemoryTransactionRepository(TransactionRepository):
             )
         ]
 
+        return result
+
     async def find_by_category_id(
         self, category_id: UUID, user_id: UUID
-    ) -> List[Transaction]:
+    ) -> list[Transaction]:
         """Find all transactions for a given category.
 
         Args:
@@ -123,7 +130,7 @@ class InMemoryTransactionRepository(TransactionRepository):
 
         del self._transactions[transaction.id]
 
-    async def save_bulk(self, transactions: List[Transaction]) -> None:
+    async def save_bulk(self, transactions: list[Transaction]) -> None:
         """Save multiple transactions to repository.
 
         Args:
@@ -132,7 +139,7 @@ class InMemoryTransactionRepository(TransactionRepository):
         for transaction in transactions:
             self._transactions[transaction.id] = transaction
 
-    async def delete_bulk(self, transactions: List[Transaction]) -> None:
+    async def delete_bulk(self, transactions: list[Transaction]) -> None:
         """Delete multiple transactions from repository.
 
         Args:

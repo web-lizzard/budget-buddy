@@ -1,13 +1,7 @@
-from domain.events.budget import (
-    BudgetCreated,
-    BudgetDeactivated,
-    BudgetExpired,
-    BudgetLimitExceeded,
-    BudgetRenewed,
-)
-from domain.events.category import CategoryAdded, CategoryLimitExceeded, CategoryRemoved
+from domain.events.budget import BudgetCreated, BudgetDeactivated, BudgetRenewed
+from domain.events.category import CategoryAdded, CategoryRemoved
 from domain.events.domain_event import DomainEvent
-from domain.events.statistics import StatisticsUpdated
+from domain.events.statistics import StatisticsCalculated
 from domain.events.transaction import (
     TransactionAdded,
     TransactionRemoved,
@@ -17,15 +11,12 @@ from domain.events.transaction import (
 __all__ = [
     "DomainEvent",
     "BudgetCreated",
-    "BudgetExpired",
     "BudgetDeactivated",
-    "BudgetLimitExceeded",
     "BudgetRenewed",
     "CategoryAdded",
     "CategoryRemoved",
-    "CategoryLimitExceeded",
     "TransactionAdded",
     "TransactionUpdated",
     "TransactionRemoved",
-    "StatisticsUpdated",
+    "StatisticsCalculated",
 ]
