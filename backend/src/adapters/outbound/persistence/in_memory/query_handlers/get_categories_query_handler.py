@@ -1,13 +1,10 @@
-from typing import List
-
 from application.dtos import CategoryDTO, CategoryListDTO
 from application.queries import GetCategoriesQuery
 from application.queries.handlers import QueryHandler
 from domain.exceptions import BudgetNotFoundError
 
-# Assuming domain Budget/Category exists and IN_MEMORY_DATABASE structure
 from adapters.outbound.persistence.in_memory.database import (
-    DEFAULT_USER_ID,  # Using default user ID for this handler
+    DEFAULT_USER_ID,
     IN_MEMORY_DATABASE,
 )
 
@@ -50,7 +47,7 @@ class GetCategoriesQueryHandler(QueryHandler[GetCategoriesQuery, CategoryListDTO
 
         # Assuming budget domain object has a 'categories' list attribute
         domain_categories = getattr(budget, "categories", [])
-        category_dtos: List[CategoryDTO] = []
+        category_dtos: list[CategoryDTO] = []
 
         for category in domain_categories:
             category_dtos.append(map_category_to_dto(category))

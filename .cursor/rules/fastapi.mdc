@@ -1,0 +1,78 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+## Handler Decoration
+
+- Always add the `@inject` decorator to route handlers (endpoints)
+- Place the `@inject` decorator after FastAPI route decorators but before the function definition
+
+
+## Dependency Injection
+
+- Use the `Annotated` type with `Depends` to inject dependencies into route handlers
+- Inject dependencies from the container using `Provide[Container.service]` pattern
+- Example:
+
+```python
+from typing import Annotated
+from fastapi import Depends, FastAPI
+from dependency_injector.wiring import Provide
+from your_app.containers import Container
+
+@app.get("/items/")
+@inject
+async def read_items(service: Annotated[ItemService, Depends(Provide[Container.service])]):
+    return await service.get_items()
+```
+
+- Combine dependency-injection framework with FastAPI's built-in `Depends` for cleaner code
+- Create reusable dependencies as functions that can be shared across multiple endpoints
+
+
+## Asynchronous Programming
+
+- Use `async def` for route handlers and `await` for asynchronous operations
+- Follow these rules for async/await:
+    - Use `async def` for I/O-bound operations (database queries, HTTP requests)
+    - Use regular `def` for CPU-bound operations (calculations, processing)
+    - Never use blocking code inside async functions as it will block the entire event loop
+    - For synchronous operations within async functions, use `run_in_threadpool`
+
+
+## Payload Structure
+
+- Store all endpoint request and response models in the `api/payloads` module
+- Use Pydantic models to define payload structures
+- Example:
+
+```python
+# api/payloads/items.py
+from pydantic import BaseModel
+
+class ItemCreate(BaseModel):
+    name: str
+    description: str
+    price: float
+    tax: float = None
+```
+
+
+## Naming Conventions
+
+- Follow Python naming conventions while respecting FastAPI specifics:
+    - Use snake_case for function names, variables, and parameters
+    - Use PascalCase for class names (including Pydantic models)
+    - Use plural form for resource names in API paths
+    - Internally use snake_case for FastAPI parameters
+
+
+## General FastAPI Practices
+
+- Structure your application in layers (controllers, services, repositories)
+- Use dependency injection to create a chain of dependencies between layers
+- Consider using event dispatching for handling side effects
+- Validate request payloads using Pydantic models
+- Use type hints consistently throughout the codebase
+- Keep route handlers thin, delegating business logic to service layer

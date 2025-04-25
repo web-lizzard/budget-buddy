@@ -1,6 +1,7 @@
 from .budget_dto import BudgetDTO
 from .budget_strategy_dto import BudgetStrategyDTO
 from .category_dto import CategoryDTO
+from .category_list_dto import CategoryListDTO
 from .category_statistics_record_dto import CategoryStatisticsRecordDTO
 from .dto import DTO
 from .money_dto import MoneyDTO
@@ -12,6 +13,7 @@ __all__ = [
     "BudgetDTO",
     "BudgetStrategyDTO",
     "CategoryDTO",
+    "CategoryListDTO",
     "CategoryStatisticsRecordDTO",
     "DTO",
     "MoneyDTO",
