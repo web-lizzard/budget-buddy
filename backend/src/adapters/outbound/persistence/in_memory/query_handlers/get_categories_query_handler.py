@@ -1,3 +1,5 @@
+from typing import Any
+
 from application.dtos import CategoryDTO, CategoryListDTO
 from application.queries import GetCategoriesQuery
 from application.queries.handlers import QueryHandler
@@ -16,6 +18,19 @@ class GetCategoriesQueryHandler(QueryHandler[GetCategoriesQuery, CategoryListDTO
     NOTE: Uses DEFAULT_USER_ID as user_id is not part of the query.
     """
 
+    def __init__(self, database_dict: dict[str, dict[Any, Any]] | None = None) -> None:
+        """Initializes the handler, optionally injecting a database dictionary.
+
+        Args:
+            database_dict: An optional dictionary representing the database tables.
+                         If None, uses the default IN_MEMORY_DATABASE.
+        """
+        self._db = (
+            database_dict
+            if database_dict is not None
+            else IN_MEMORY_DATABASE.get_database()
+        )
+
     async def handle(self, query: GetCategoriesQuery) -> CategoryListDTO:
         """Retrieves all categories for a specific budget owned by the default user.
 
@@ -31,7 +46,7 @@ class GetCategoriesQueryHandler(QueryHandler[GetCategoriesQuery, CategoryListDTO
         """
         user_id_to_check = DEFAULT_USER_ID
 
-        budgets_table = IN_MEMORY_DATABASE.get_database().get("budgets", {})
+        budgets_table = self._db.get("budgets", {})
         budget_data = budgets_table.get(query.budget_id)
 
         if not budget_data:

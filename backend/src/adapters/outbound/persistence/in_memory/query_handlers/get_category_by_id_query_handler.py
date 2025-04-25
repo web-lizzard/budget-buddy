@@ -1,9 +1,11 @@
+# Assuming domain Budget/Category exists and IN_MEMORY_DATABASE structure
+from typing import Any
+
 from application.dtos import CategoryDTO
 from application.queries import GetCategoryByIdQuery
 from application.queries.handlers import QueryHandler
 from domain.exceptions import BudgetNotFoundError, CategoryNotFoundError
 
-# Assuming domain Budget/Category exists and IN_MEMORY_DATABASE structure
 from adapters.outbound.persistence.in_memory.database import (
     DEFAULT_USER_ID,  # Using default user ID for this handler
     IN_MEMORY_DATABASE,
@@ -16,6 +18,19 @@ class GetCategoryByIdQueryHandler(QueryHandler[GetCategoryByIdQuery, CategoryDTO
     """Handles the GetCategoryByIdQuery for the in-memory repository.
     NOTE: Uses DEFAULT_USER_ID as user_id is not part of the query.
     """
+
+    def __init__(self, database_dict: dict[str, dict[Any, Any]] | None = None) -> None:
+        """Initializes the handler, optionally injecting a database dictionary.
+
+        Args:
+            database_dict: An optional dictionary representing the database tables.
+                         If None, uses the default IN_MEMORY_DATABASE.
+        """
+        self._db = (
+            database_dict
+            if database_dict is not None
+            else IN_MEMORY_DATABASE.get_database()
+        )
 
     async def handle(self, query: GetCategoryByIdQuery) -> CategoryDTO:
         """Retrieves a specific category by its ID within a budget owned by the default user.
@@ -32,7 +47,7 @@ class GetCategoryByIdQueryHandler(QueryHandler[GetCategoryByIdQuery, CategoryDTO
         """
         user_id_to_check = DEFAULT_USER_ID
 
-        budgets_table = IN_MEMORY_DATABASE.get_database().get("budgets", {})
+        budgets_table = self._db.get("budgets", {})
         budget_data = budgets_table.get(query.budget_id)
 
         if not budget_data:

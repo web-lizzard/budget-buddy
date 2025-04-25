@@ -1,8 +1,7 @@
-# NOTE: Linter might complain about DTOs, assume they exist
-from application.dtos import BudgetDTO  # Removed BudgetListDTO
-from application.dtos.paginated_item_dto import (
-    PaginatedItemDTO,  # Import PaginatedItemDTO
-)
+from typing import Any
+
+from application.dtos import BudgetDTO
+from application.dtos.paginated_item_dto import PaginatedItemDTO
 from application.queries import GetBudgetsQuery
 from application.queries.handlers import QueryHandler
 
@@ -23,6 +22,19 @@ class GetBudgetsQueryHandler(
           Performs pagination in memory.
     """
 
+    def __init__(self, database_dict: dict[str, dict[Any, Any]] | None = None) -> None:
+        """Initializes the handler, optionally injecting a database dictionary.
+
+        Args:
+            database_dict: An optional dictionary representing the database tables.
+                         If None, uses the default IN_MEMORY_DATABASE.
+        """
+        self._db = (
+            database_dict
+            if database_dict is not None
+            else IN_MEMORY_DATABASE.get_database()
+        )
+
     async def handle(self, query: GetBudgetsQuery) -> PaginatedItemDTO[BudgetDTO]:
         """Retrieves budgets for the default user with pagination.
 
@@ -34,7 +46,7 @@ class GetBudgetsQueryHandler(
         """
         user_id_to_check = DEFAULT_USER_ID
 
-        budgets_table = IN_MEMORY_DATABASE.get_database().get("budgets", {})
+        budgets_table = self._db.get("budgets", {})
         all_user_budgets_domain = []
 
         for _budget_id, budget_data in budgets_table.items():

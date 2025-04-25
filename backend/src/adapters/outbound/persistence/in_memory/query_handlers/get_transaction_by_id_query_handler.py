@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 from application.dtos import TransactionDTO
 from application.queries import GetTransactionByIdQuery
@@ -23,6 +24,19 @@ class GetTransactionByIdQueryHandler(
           Does not validate budget_id against the found transaction.
     """
 
+    def __init__(self, database_dict: dict[str, dict[Any, Any]] | None = None) -> None:
+        """Initializes the handler, optionally injecting a database dictionary.
+
+        Args:
+            database_dict: An optional dictionary representing the database tables.
+                         If None, uses the default IN_MEMORY_DATABASE.
+        """
+        self._db = (
+            database_dict
+            if database_dict is not None
+            else IN_MEMORY_DATABASE.get_database()
+        )
+
     async def handle(self, query: GetTransactionByIdQuery) -> TransactionDTO:
         """Retrieves a specific transaction by its ID for the default user.
 
@@ -39,7 +53,7 @@ class GetTransactionByIdQueryHandler(
 
         transaction_uuid = uuid.UUID(query.transaction_id)
 
-        transactions_table = IN_MEMORY_DATABASE.get_database().get("transactions", {})
+        transactions_table = self._db.get("transactions", {})
         transaction = transactions_table.get(transaction_uuid)
 
         if not transaction or transaction.user_id != user_id_to_check:

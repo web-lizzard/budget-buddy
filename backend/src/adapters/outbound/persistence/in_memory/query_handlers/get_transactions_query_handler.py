@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 # NOTE: Linter might complain about DTOs, assume they exist in dtos.py
 from application.dtos import TransactionDTO
@@ -25,6 +26,19 @@ class GetTransactionsQueryHandler(
           Requires fetching budget categories to filter transactions.
     """
 
+    def __init__(self, database_dict: dict[str, dict[Any, Any]] | None = None) -> None:
+        """Initializes the handler, optionally injecting a database dictionary.
+
+        Args:
+            database_dict: An optional dictionary representing the database tables.
+                         If None, uses the default IN_MEMORY_DATABASE.
+        """
+        self._db = (
+            database_dict
+            if database_dict is not None
+            else IN_MEMORY_DATABASE.get_database()
+        )
+
     async def handle(
         self, query: GetTransactionsQuery
     ) -> PaginatedItemDTO[TransactionDTO]:
@@ -42,7 +56,7 @@ class GetTransactionsQueryHandler(
         user_id_to_check = DEFAULT_USER_ID
 
         # 1. Fetch the budget and its category IDs for the default user
-        budgets_table = IN_MEMORY_DATABASE.get_database().get("budgets", {})
+        budgets_table = self._db.get("budgets", {})
         budget_data = budgets_table.get(query.budget_id)
         if not budget_data or budget_data[1].user_id != user_id_to_check:
             raise BudgetNotFoundError(
@@ -55,7 +69,7 @@ class GetTransactionsQueryHandler(
         }
         budget_category_ids.discard(None)  # Remove None if getattr failed
 
-        transactions_table = IN_MEMORY_DATABASE.get_database().get("transactions", {})
+        transactions_table = self._db.get("transactions", {})
         all_transactions = list(transactions_table.values())
 
         filtered_transactions = []

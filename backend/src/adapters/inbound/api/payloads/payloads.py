@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 from enum import Enum
-from typing import List, Literal, Optional, Union
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -40,7 +40,7 @@ class CreateBudgetRequestPayload(BaseModel):
     start_date: date
     end_date: date
     name: str = Field(..., min_length=3, max_length=100)
-    categories: List[CreateCategoryRequestPayload] = Field(default_factory=list)
+    categories: list[CreateCategoryRequestPayload] = Field(default_factory=list)
     strategy: StrategyPayload
 
 
@@ -65,9 +65,7 @@ class HandleTransactionMovePayload(BaseModel):
 
 
 # Union type for handling transaction during category deletion.
-HandleTransactionPayload = Union[
-    HandleTransactionDeletePayload, HandleTransactionMovePayload
-]
+HandleTransactionPayload = HandleTransactionDeletePayload | HandleTransactionMovePayload
 
 
 # Main payload for deleting a category, including common fields and nested handle_transaction info.
@@ -87,7 +85,7 @@ class CreateTransactionRequestPayload(BaseModel):
     amount: MoneyPayload
     transaction_type: TransactionTypeEnumPayload
     occurred_date: datetime
-    description: Optional[str] = None
+    description: str | None = None
     user_id: uuid.UUID
 
 
@@ -97,4 +95,4 @@ class UpdateTransactionRequestPayload(BaseModel):
     amount: MoneyPayload
     transaction_type: TransactionTypeEnumPayload
     occurred_date: datetime
-    description: Optional[str] = None
+    description: str | None = None
