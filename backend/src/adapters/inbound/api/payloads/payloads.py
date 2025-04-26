@@ -71,9 +71,6 @@ HandleTransactionPayload = HandleTransactionDeletePayload | HandleTransactionMov
 
 # Main payload for deleting a category, including common fields and nested handle_transaction info.
 class DeleteCategoryRequestPayload(BaseModel):
-    budget_id: uuid.UUID
-    category_id: uuid.UUID
-    user_id: uuid.UUID
     handle_transaction: HandleTransactionPayload
 
 

@@ -201,7 +201,7 @@ async def delete_category(
     """
     # TODO: Replace with actual authenticated user ID later
     # User ID from payload might be redundant if we use authenticated user context
-    user_id = payload.user_id  # Or use authenticated user ID
+    user_id = DEFAULT_USER_ID  # Or use authenticated user ID
 
     target_category_id_str = None
     if payload.handle_transaction.type == "move":
@@ -210,15 +210,8 @@ async def delete_category(
 
     command = RemoveCategoryCommand(
         user_id=str(user_id),
-        budget_id=str(
-            payload.budget_id
-        ),  # Use IDs from payload or path? Path seems more RESTful
-        category_id=str(
-            payload.category_id
-        ),  # Use IDs from payload or path? Path seems more RESTful
-        # Let's use path parameters for consistency
-        # budget_id=str(budget_id),
-        # category_id=str(category_id),
+        budget_id=str(budget_id),
+        category_id=str(category_id),
         handle_transactions=payload.handle_transaction.type,
         target_category_id=target_category_id_str,
     )
