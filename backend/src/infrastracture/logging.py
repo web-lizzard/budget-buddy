@@ -20,7 +20,3 @@ def configure_logging(settings: Settings) -> None:
         format=settings.logger.format,
         handlers=handlers,
     )
-
-    # Set log level for external libraries
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-    logging.getLogger("uvicorn.error").setLevel(logging.WARNING)

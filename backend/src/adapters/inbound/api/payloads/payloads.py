@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 # Local payload definition for Money
 class MoneyPayload(BaseModel):
-    amount: int
+    amount: float
     currency: str
 
 
