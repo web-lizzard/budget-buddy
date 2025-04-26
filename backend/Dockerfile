@@ -21,13 +21,14 @@ RUN uv pip compile pyproject.toml --output-file requirements.txt
 FROM base AS deps
 WORKDIR /app
 COPY --from=requirements /app/requirements.txt .
-RUN uv pip install -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Production build
 FROM deps AS production
 WORKDIR /app
-# Copy only src folder
+# Copy src folder and alembic config
 COPY backend/src ./src
+COPY backend/alembic.ini .
 EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
@@ -36,16 +37,18 @@ FROM base AS development
 WORKDIR /app
 COPY backend/pyproject.toml .
 # Install in dev mode with uv
-RUN uv pip install -e .
-# Copy only src folder
+RUN uv sync
+# Copy src folder and alembic config
 COPY backend/src ./src
+COPY backend/alembic.ini .
 EXPOSE 8000
 CMD ["uv", "run", "src/main.py"]
 
 # Subscriber build
 FROM deps AS subscriber
 WORKDIR /app
-# Copy only src folder
+# Copy src folder and alembic config
 COPY backend/src ./src
+COPY backend/alembic.ini .
 # Placeholder for subscriber script that doesn't exist yet
 CMD ["echo", "Subscriber service would run here"]

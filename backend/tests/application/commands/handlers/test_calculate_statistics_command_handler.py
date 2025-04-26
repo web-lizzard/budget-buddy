@@ -158,7 +158,7 @@ def _get_deps(
         budgets=budget_dict,  # Use the same budget dict to ensure consistency
     )
 
-    stats_repo = InMemoryStatisticsRepository()
+    stats_repo = InMemoryStatisticsRepository({})
     publisher = InMemoryDomainPublisher()
     uow = InMemoryUnitOfWork(event_publisher=publisher)
     handler = CalculateStatisticsCommandHandler(

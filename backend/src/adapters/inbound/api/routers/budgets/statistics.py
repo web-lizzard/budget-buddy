@@ -6,7 +6,7 @@ from application.queries.get_budget_statistics_query import GetBudgetStatisticsQ
 from application.queries.handlers.query_handler import QueryHandler
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends
-from infrastracture.container.app_container import AppContainer
+from infrastructure.container.app_container import AppContainer
 
 router = APIRouter(tags=["statistics"])
 

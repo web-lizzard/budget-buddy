@@ -27,6 +27,35 @@ class LoggerSettings(BaseModel):
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 
+class DatabaseSettings(BaseModel):
+    """Database configuration settings."""
+
+    user: str = "budget_buddy"
+    password: str = "budget_buddy"
+    host: str = "postgres"  # Service name in Docker network
+    port: int = 5432
+    db_name: str = "budget_buddy"
+    echo: bool = False
+
+    @property
+    def url(self) -> str:
+        """Get database URL.
+
+        Returns:
+            str: Database URL
+        """
+        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}"
+
+    @property
+    def async_url(self) -> str:
+        """Get async database URL.
+
+        Returns:
+            str: Async database URL
+        """
+        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}"
+
+
 class Settings(BaseSettings):
     """Application settings."""
 
@@ -36,6 +65,7 @@ class Settings(BaseSettings):
     # Feature specific configuration
     api: APISettings = APISettings()
     logger: LoggerSettings = LoggerSettings()
+    database: DatabaseSettings = DatabaseSettings()
 
     model_config = SettingsConfigDict(
         env_file=".env",

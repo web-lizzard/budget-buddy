@@ -12,9 +12,9 @@ services:
       - ./backend/src:/app/src
     env_file:
       - .env
-    environment:
-      - PYTHONPATH=/app/src
     restart: unless-stopped
+    depends_on:
+      - postgres
 
   subscriber:
     build:
@@ -23,36 +23,27 @@ services:
       target: subscriber
     env_file:
       - .env
-    environment:
-      - PYTHONPATH=/app/src
-    restart: unless-stopped
     depends_on:
       - api
-# Production deployment example (uncomment when needed)
-#
-# services:
-#   api-prod:
-#     build:
-#       context: .
-#       dockerfile: backend/Dockerfile
-#       target: production
-#     ports:
-#       - "8000:8000"
-#     env_file:
-#       - .env
-#     environment:
-#       - PYTHONPATH=/app/src
-#     restart: unless-stopped
-#
-#   subscriber-prod:
-#     build:
-#       context: .
-#       dockerfile: backend/Dockerfile
-#       target: subscriber
-#     env_file:
-#       - .env
-#     environment:
-#       - PYTHONPATH=/app/src
-#     restart: unless-stopped
-#     depends_on:
-#       - api-prod
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: budget_buddy
+      POSTGRES_PASSWORD: budget_buddy
+      POSTGRES_DB: budget_buddy
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

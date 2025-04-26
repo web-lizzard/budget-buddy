@@ -1,6 +1,6 @@
 import uvicorn
-from infrastracture.create_app import create_app
-from infrastracture.settings import get_settings
+from infrastructure.create_app import create_app
+from infrastructure.settings import get_settings
 
 app = create_app()
 

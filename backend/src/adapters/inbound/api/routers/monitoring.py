@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response
-from infrastracture.settings import Environment, get_settings
+from infrastructure.settings import Environment, get_settings
 
 
 def create_monitoring_router() -> APIRouter:
