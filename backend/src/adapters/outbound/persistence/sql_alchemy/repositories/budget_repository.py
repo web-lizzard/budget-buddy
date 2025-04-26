@@ -40,27 +40,21 @@ class SQLAlchemyBudgetRepository(BudgetRepository):
 
     async def save(self, budget: Budget, version: int) -> None:
         """Save budget to repository, checking for version conflicts."""
-        # Try to get the existing model to check its version
         existing_model = await self._session.get(
             BudgetModel, budget.id, options=[selectinload(BudgetModel.categories)]
         )
 
         if existing_model:
-            # Budget exists, check version for optimistic locking
             if existing_model.version != version:
                 raise NotCompatibleVersionError(
                     str(budget.id),
                     expected_version=version,
                     actual_version=existing_model.version,
                 )
-            # Map domain to the existing model for update
             budget_model = map_budget_domain_to_model(budget, existing_model)
-            # Increment version before saving
             budget_model.version = version + 1
             await self._session.merge(budget_model)
         else:
-            # Budget doesn't exist, treat as insert
-            # Conventionally, the expected version for a new aggregate is 0
             if version != 0:
                 raise NotCompatibleVersionError(
                     f"Budget with ID {budget.id} not found, but expected version was {version}. Cannot create.",
@@ -69,10 +63,6 @@ class SQLAlchemyBudgetRepository(BudgetRepository):
                 )
 
             budget_model = map_budget_domain_to_model(budget)
-            # Set initial version (SQLAlchemy model has server_default='1',
-            # but we explicitly set it based on our domain logic)
-            budget_model.version = 1  # Initial version is 1 after creation
-            self._session.add(budget_model)
 
-        # Flush changes to apply them and detect potential concurrent updates early
-        # await self._session.flush()
+            budget_model.version = 1
+            self._session.add(budget_model)

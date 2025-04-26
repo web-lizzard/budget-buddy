@@ -16,14 +16,12 @@ class SQLGetCategoryByIdQueryHandler(QueryHandler[GetCategoryByIdQuery, Category
         stmt = select(CategoryModel).where(
             CategoryModel.id == query.category_id,
             CategoryModel.budget_id == query.budget_id,
-            # Add user_id check here
             CategoryModel.user_id == query.user_id,
         )
 
         result = await self._session.scalar(stmt)
 
         if not result:
-            # If category doesn't exist or user_id doesn't match, raise error
             raise CategoryNotFoundError(
                 f"Category with id {query.category_id} not found for budget {query.budget_id} and user {query.user_id}."
             )

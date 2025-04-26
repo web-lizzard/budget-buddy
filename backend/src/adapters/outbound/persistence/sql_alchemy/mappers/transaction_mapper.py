@@ -1,4 +1,3 @@
-# Assuming absolute import is correct based on previous correction
 from adapters.outbound.persistence.sql_alchemy.models import TransactionModel
 from domain.aggregates.transaction import Transaction
 
@@ -9,7 +8,7 @@ def map_transaction_model_to_domain(model: TransactionModel) -> Transaction:
         id=model.id,
         category_id=model.category_id,
         user_id=model.user_id,
-        amount=model.amount,  # ORMMoney is compatible
+        amount=model.amount,
         transaction_type=model.transaction_type,
         occurred_date=model.occurred_date,
         description=model.description,
@@ -22,7 +21,6 @@ def map_transaction_domain_to_model(domain: Transaction) -> TransactionModel:
         id=domain.id,
         category_id=domain.category_id,
         user_id=domain.user_id,
-        # Map Money domain object back to composite structure
         _amount_amount=domain.amount.amount,
         _amount_currency=domain.amount.currency,
         amount=domain.amount,
@@ -30,6 +28,4 @@ def map_transaction_domain_to_model(domain: Transaction) -> TransactionModel:
         occurred_date=domain.occurred_date,
         description=domain.description,
     )
-    # Version is handled automatically by the model's server_default for creation
-    # If updates needed optimistic locking, version would need handling here too.
     return model

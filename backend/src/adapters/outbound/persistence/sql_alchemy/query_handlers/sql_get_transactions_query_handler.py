@@ -24,10 +24,8 @@ class SQLGetTransactionsQueryHandler(
     async def handle(
         self, query: GetTransactionsQuery
     ) -> PaginatedItemDTO[TransactionDTO]:
-        # Calculate offset
         skip = (query.page - 1) * query.limit
 
-        # First, check if the budget exists and belongs to the user
         budget_check_stmt = select(BudgetModel.id).where(
             BudgetModel.id == query.budget_id, BudgetModel.user_id == query.user_id
         )
@@ -38,40 +36,21 @@ class SQLGetTransactionsQueryHandler(
                 f"Budget with id {query.budget_id} not found for user {query.user_id}."
             )
 
-        # Base query for transactions
-        base_where = (
-            TransactionModel.user_id == query.user_id,
-            # Join condition might be needed if filtering directly on budget_id is not possible
-            # TransactionModel.category.has(budget_id=query.budget_id) # Or use join
-            # Assuming user_id check is sufficient or category FK implies budget
-        )
+        base_where = (TransactionModel.user_id == query.user_id,)
 
         stmt = select(TransactionModel).where(*base_where)
         count_stmt = select(func.count(TransactionModel.id)).where(*base_where)
 
-        # Apply date filters
         if query.date_from:
-            try:
-                date_from = datetime.fromisoformat(query.date_from)
-                stmt = stmt.where(TransactionModel.occurred_date >= date_from)
-                count_stmt = count_stmt.where(
-                    TransactionModel.occurred_date >= date_from
-                )
-            except ValueError:
-                # Handle invalid date format if necessary, e.g., raise BadRequestError
-                pass  # Or raise specific error
+            date_from = datetime.fromisoformat(query.date_from)
+            stmt = stmt.where(TransactionModel.occurred_date >= date_from)
+            count_stmt = count_stmt.where(TransactionModel.occurred_date >= date_from)
         if query.date_to:
-            try:
-                date_to = datetime.fromisoformat(query.date_to)
-                stmt = stmt.where(TransactionModel.occurred_date <= date_to)
-                count_stmt = count_stmt.where(TransactionModel.occurred_date <= date_to)
-            except ValueError:
-                # Handle invalid date format
-                pass  # Or raise specific error
+            date_to = datetime.fromisoformat(query.date_to)
+            stmt = stmt.where(TransactionModel.occurred_date <= date_to)
+            count_stmt = count_stmt.where(TransactionModel.occurred_date <= date_to)
 
-        # Apply sorting
         if query.sort:
-            # Basic sorting, sanitize input if needed
             sort_field = query.sort.lstrip("-")
             sort_column = getattr(TransactionModel, sort_field, None)
             if sort_column:
@@ -80,17 +59,13 @@ class SQLGetTransactionsQueryHandler(
                 else:
                     stmt = stmt.order_by(sort_column.asc())
         else:
-            # Default sort
             stmt = stmt.order_by(TransactionModel.occurred_date.desc())
 
-        # Apply pagination to the main query
         stmt = stmt.offset(skip).limit(query.limit)
 
-        # Execute queries
         result = await self._session.scalars(stmt)
         total_count = await self._session.scalar(count_stmt) or 0
 
-        # Map to DTOs
         transaction_dtos = [
             TransactionDTO(
                 id=tx.id,

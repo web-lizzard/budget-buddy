@@ -40,7 +40,7 @@ class SQLGetBudgetByIdQueryHandler(QueryHandler[GetBudgetByIdQuery, BudgetDTO]):
                 type=result.strategy.strategy_input.strategy_type.value,
             ),
             deactivation_date=result.deactivation_date,
-            categories=[  # Map categories
+            categories=[
                 CategoryDTO(
                     id=cat.id,
                     name=cat.name,

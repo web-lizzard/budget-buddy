@@ -22,7 +22,7 @@ class SQLGetBudgetStatisticsQueryHandler(
         stmt = (
             select(StatisticsRecordModel)
             .where(StatisticsRecordModel.budget_id == query.budget_id)
-            # .where(StatisticsRecordModel.user_id == query.user_id) # Add user_id check
+            .where(StatisticsRecordModel.user_id == query.user_id)  # Add user_id check
             .options(selectinload(StatisticsRecordModel.category_statistics))
             .order_by(StatisticsRecordModel.creation_date.desc())
             .limit(1)

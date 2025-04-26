@@ -17,14 +17,12 @@ class SQLGetTransactionByIdQueryHandler(
     async def handle(self, query: GetTransactionByIdQuery) -> TransactionDTO:
         stmt = select(TransactionModel).where(
             TransactionModel.id == query.transaction_id,
-            # TransactionModel.category.has(budget_id=query.budget_id), # Need to check budget indirectly if needed
-            TransactionModel.user_id == query.user_id,  # Direct user_id check
+            TransactionModel.user_id == query.user_id,
         )
 
         result = await self._session.scalar(stmt)
 
         if not result:
-            # If transaction doesn't exist or user_id doesn't match, raise error
             raise TransactionNotFoundError(
                 f"Transaction with id {query.transaction_id} not found for user {query.user_id}."
             )

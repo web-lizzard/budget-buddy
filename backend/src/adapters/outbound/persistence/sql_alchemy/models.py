@@ -41,12 +41,10 @@ class ORMLimit(Limit):
     @classmethod
     def from_composite(cls, amount: int, currency: str) -> "ORMLimit":
         """Factory method for SQLAlchemy composite."""
-        # Use ORMMoney here to ensure type consistency if Limit expects Money
         return cls(value=ORMMoney(amount=amount, currency=currency))
 
     def __composite_values__(self):
         """Return values for SQLAlchemy composite persistence."""
-        # Assuming Limit internally holds Money and we need its values
         return self.value.amount, self.value.currency
 
 
@@ -196,7 +194,7 @@ class CategoryModel(Base):
     _limit_currency: Mapped[str] = mapped_column(
         "limit_currency", String(3), nullable=False
     )
-    limit: Mapped[Limit] = composite(  # Corrected: Map to Limit using ORMLimit
+    limit: Mapped[Limit] = composite(
         ORMLimit.from_composite,
         _limit_amount,
         _limit_currency,
