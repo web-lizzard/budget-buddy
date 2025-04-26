@@ -1,5 +1,5 @@
 import uuid
-from datetime import date
+from datetime import datetime
 from typing import Any
 
 from domain.value_objects import BudgetStrategyType, Limit, Money, TransactionType
@@ -8,7 +8,7 @@ from domain.value_objects.budget_strategy import (
     MonthlyBudgetStrategyInput,
     YearlyBudgetStrategyInput,
 )
-from sqlalchemy import Date, ForeignKey, Integer, String, Text, func, text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func, text
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import (
@@ -144,21 +144,21 @@ class BudgetModel(Base):
         _strategy_parameters,
     )
 
-    start_date: Mapped[date] = mapped_column(Date, nullable=False)
-    end_date: Mapped[date] = mapped_column(Date, nullable=False)
-    deactivation_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    start_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    deactivation_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Versioning
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
 
-    # Timestamps (as Date)
-    created_at: Mapped[date] = mapped_column(
-        Date, server_default=text("CURRENT_DATE"), nullable=False
+    # Timestamps (as DateTime)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
-    updated_at: Mapped[date] = mapped_column(
-        Date,
-        server_default=text("CURRENT_DATE"),
-        onupdate=func.current_date,
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=text("CURRENT_TIMESTAMP"),
+        onupdate=func.current_timestamp,
         nullable=False,
     )
 
@@ -205,14 +205,14 @@ class CategoryModel(Base):
     # Versioning
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
 
-    # Timestamps (as Date)
-    created_at: Mapped[date] = mapped_column(
-        Date, server_default=text("CURRENT_DATE"), nullable=False
+    # Timestamps (as DateTime)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
-    updated_at: Mapped[date] = mapped_column(
-        Date,
-        server_default=text("CURRENT_DATE"),
-        onupdate=func.current_date,
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=text("CURRENT_TIMESTAMP"),
+        onupdate=func.current_timestamp,
         nullable=False,
     )
 
@@ -270,20 +270,22 @@ class TransactionModel(Base):
         ),
         nullable=False,
     )
-    occurred_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    occurred_date: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, index=True
+    )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Versioning
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
 
-    # Timestamps (as Date)
-    created_at: Mapped[date] = mapped_column(
-        Date, server_default=text("CURRENT_DATE"), nullable=False
+    # Timestamps (as DateTime)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
-    updated_at: Mapped[date] = mapped_column(
-        Date,
-        server_default=text("CURRENT_DATE"),
-        onupdate=func.current_date,
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=text("CURRENT_TIMESTAMP"),
+        onupdate=func.current_timestamp,
         nullable=False,
     )
 
@@ -354,14 +356,14 @@ class StatisticsRecordModel(Base):
         ORMMoney.from_composite, _used_limit_amount, _used_limit_currency
     )
 
-    creation_date: Mapped[date] = mapped_column(Date, nullable=False)
+    creation_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     # Versioning
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
 
-    # Timestamps (as Date)
-    created_at: Mapped[date] = mapped_column(
-        Date, server_default=text("CURRENT_DATE"), nullable=False
+    # Timestamps (as DateTime)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
 
     # Relationships
@@ -446,9 +448,9 @@ class CategoryStatisticsRecordModel(Base):
     # Versioning
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
 
-    # Timestamps (as Date)
-    created_at: Mapped[date] = mapped_column(
-        Date, server_default=text("CURRENT_DATE"), nullable=False
+    # Timestamps (as DateTime)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
 
     # Relationships

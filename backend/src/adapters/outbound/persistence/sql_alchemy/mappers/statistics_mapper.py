@@ -1,0 +1,107 @@
+import uuid
+
+from adapters.outbound.persistence.sql_alchemy.models import (
+    CategoryStatisticsRecordModel,
+    StatisticsRecordModel,
+)
+from domain.aggregates.statistics_record import StatisticsRecord
+from domain.entities import CategoryStatisticsRecord
+
+
+# --- Category Statistics Record Mappers ---
+def map_category_statistics_record_model_to_domain(
+    model: CategoryStatisticsRecordModel,
+) -> CategoryStatisticsRecord:
+    """Maps CategoryStatisticsRecordModel SQLAlchemy object to CategoryStatisticsRecord domain entity."""
+    return CategoryStatisticsRecord(
+        id=model.id,
+        category_id=model.category_id,
+        current_balance=model.current_balance,  # ORMMoney is compatible
+        daily_available_amount=model.daily_available_amount,  # ORMMoney is compatible
+        daily_average=model.daily_average,  # ORMMoney is compatible
+        used_limit=model.used_limit,  # ORMMoney is compatible
+    )
+
+
+def map_category_statistics_record_domain_to_model(
+    domain: CategoryStatisticsRecord,
+    statistics_record_model_id: uuid.UUID,
+    user_id: uuid.UUID,
+) -> CategoryStatisticsRecordModel:
+    """Maps CategoryStatisticsRecord domain entity to CategoryStatisticsRecordModel SQLAlchemy object."""
+    # Note: statistics_record_model_id and user_id might be needed for consistency
+    return CategoryStatisticsRecordModel(
+        id=domain.id,
+        statistics_record_id=statistics_record_model_id,
+        category_id=domain.category_id,
+        user_id=user_id,  # Assuming user_id is needed here
+        # Map Money domain objects back to composite structure
+        _cat_current_balance_amount=domain.current_balance.amount,
+        _cat_current_balance_currency=domain.current_balance.currency,
+        current_balance=domain.current_balance,
+        _cat_daily_available_amount_amount=domain.daily_available_amount.amount,
+        _cat_daily_available_amount_currency=domain.daily_available_amount.currency,
+        daily_available_amount=domain.daily_available_amount,
+        _cat_daily_average_amount=domain.daily_average.amount,
+        _cat_daily_average_currency=domain.daily_average.currency,
+        daily_average=domain.daily_average,
+        _cat_used_limit_amount=domain.used_limit.amount,
+        _cat_used_limit_currency=domain.used_limit.currency,
+        used_limit=domain.used_limit,
+    )
+
+
+# --- Statistics Record Mappers ---
+def map_statistics_record_model_to_domain(
+    model: StatisticsRecordModel,
+) -> StatisticsRecord:
+    """Maps StatisticsRecordModel SQLAlchemy object to StatisticsRecord domain aggregate."""
+    return StatisticsRecord(
+        id=model.id,
+        user_id=model.user_id,
+        budget_id=model.budget_id,
+        current_balance=model.current_balance,  # ORMMoney is compatible
+        daily_available_amount=model.daily_available_amount,  # ORMMoney is compatible
+        daily_average=model.daily_average,  # ORMMoney is compatible
+        used_limit=model.used_limit,  # ORMMoney is compatible
+        creation_date=model.creation_date,
+        categories_statistics=[
+            map_category_statistics_record_model_to_domain(cs)
+            for cs in model.category_statistics
+        ],
+    )
+
+
+def map_statistics_record_domain_to_model(
+    domain: StatisticsRecord,
+) -> StatisticsRecordModel:
+    """Maps StatisticsRecord domain aggregate to StatisticsRecordModel SQLAlchemy object."""
+    model = StatisticsRecordModel(
+        id=domain.id,
+        user_id=domain.user_id,
+        budget_id=domain.budget_id,
+        # Map Money domain objects back to composite structure
+        _current_balance_amount=domain.current_balance.amount,
+        _current_balance_currency=domain.current_balance.currency,
+        current_balance=domain.current_balance,
+        _daily_available_amount_amount=domain.daily_available_amount.amount,
+        _daily_available_amount_currency=domain.daily_available_amount.currency,
+        daily_available_amount=domain.daily_available_amount,
+        _daily_average_amount=domain.daily_average.amount,
+        _daily_average_currency=domain.daily_average.currency,
+        daily_average=domain.daily_average,
+        _used_limit_amount=domain.used_limit.amount,
+        _used_limit_currency=domain.used_limit.currency,
+        used_limit=domain.used_limit,
+        creation_date=domain.creation_date,
+        # Map category statistics
+        category_statistics=[
+            map_category_statistics_record_domain_to_model(
+                cs, domain.id, domain.user_id
+            )
+            for cs in domain.categories_statistics
+        ],
+    )
+    # Version is handled automatically by the model's server_default for creation
+    # If updates needed optimistic locking, version would need handling here too.
+    return model
