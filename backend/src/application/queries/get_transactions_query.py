@@ -19,6 +19,7 @@ class GetTransactionsQuery(Query):
     """
 
     budget_id: UUID
+    user_id: UUID
     date_from: str | None = None
     date_to: str | None = None
     page: int = 1

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Annotated
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from application.commands import (
     CategoryData,
@@ -18,10 +18,12 @@ from application.commands.handlers.renew_budget_command_handler import (
     RenewBudgetCommandHandler,
 )
 from application.dtos import BudgetDTO
+from application.dtos.category_list_dto import CategoryListDTO
 from application.dtos.paginated_item_dto import PaginatedItemDTO
 from application.ports.uow.uow import UnitOfWork
 from application.queries.get_budget_by_id_query import GetBudgetByIdQuery
 from application.queries.get_budgets_query import GetBudgetsQuery
+from application.queries.get_categories_query import GetCategoriesQuery
 from application.queries.handlers.query_handler import QueryHandler
 from dependency_injector.wiring import Provide, inject
 from domain.factories.budget_factory import BudgetFactory
@@ -32,6 +34,7 @@ from domain.value_objects import (
     MonthlyBudgetStrategyInput,
     YearlyBudgetStrategyInput,
 )
+from domain.value_objects.budget_strategy import BudgetStrategyType
 from fastapi import APIRouter, Depends, Query
 from fastapi import status as http_status
 from infrastracture.container.app_container import AppContainer
@@ -57,18 +60,17 @@ def _map_strategy_to_input(
     strategy_payload: StrategyPayload,
 ) -> BudgetStrategyInput:
     """Map strategy payload to domain BudgetStrategyInput."""
-    # TODO: Handle strategy parameters properly based on type
-    if strategy_payload.type == "monthly":
-        return MonthlyBudgetStrategyInput(
-            start_day=strategy_payload.parameters.get(
-                "start_day", 1
+    match strategy_payload.budget_strategy_type:
+        case BudgetStrategyType.MONTHLY:
+            return MonthlyBudgetStrategyInput(
+                start_day=strategy_payload.parameters.get("start_day", 1)
             )  # Default start day
-        )
-    elif strategy_payload.type == "yearly":
-        return YearlyBudgetStrategyInput()
-    else:
-        # Handle unknown strategy type, maybe raise an error or default
-        raise ValueError(f"Unknown budget strategy type: {strategy_payload.type}")
+        case BudgetStrategyType.YEARLY:
+            return YearlyBudgetStrategyInput()
+        case _:
+            raise ValueError(
+                f"Unsupported strategy type: {strategy_payload.budget_strategy_type}"
+            )
 
 
 @router.get("/")
@@ -105,7 +107,6 @@ async def get_budgets(
         limit=limit,
         sort=sort,
     )
-    print(query_handler)
     return await query_handler.handle(query)
 
 
@@ -140,9 +141,7 @@ async def create_budget(
         budget_factory: Factory for creating budget entities.
         unit_of_work: Unit of work for transaction management.
     """
-    # TODO: Replace with actual authenticated user ID
-    user_id = uuid4()
-
+    user_id = DEFAULT_USER_ID
     command = CreateBudgetCommand(
         user_id=user_id,
         total_limit=payload.total_limit.amount,
@@ -258,3 +257,29 @@ async def renew_budget(
         strategies=strategies,
     )
     await command_handler.handle(command)
+
+
+@router.get("/{budget_id}/categories")
+@inject
+async def get_categories(
+    budget_id: UUID,
+    query_handler: Annotated[
+        QueryHandler[GetCategoriesQuery, CategoryListDTO],
+        Depends(
+            Provide[
+                AppContainer.persistence_container.provided.get_query_handler.call(
+                    GetCategoriesQuery
+                )
+            ]
+        ),
+    ],
+) -> CategoryListDTO:
+    """
+    Retrieve all categories associated with a specific budget.
+
+    Args:
+        budget_id: The UUID of the budget.
+        query_handler: Injected query handler for retrieving categories.
+    """
+    query = GetCategoriesQuery(budget_id=budget_id)
+    return await query_handler.handle(query)

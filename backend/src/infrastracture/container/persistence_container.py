@@ -4,6 +4,9 @@ from adapters.outbound.persistence.in_memory.budget_repository import (
 from adapters.outbound.persistence.in_memory.query_handlers.get_budget_by_id_query_handler import (
     GetBudgetByIdQueryHandler,
 )
+from adapters.outbound.persistence.in_memory.query_handlers.get_budget_statistics_query_handler import (
+    GetBudgetStatisticsQueryHandler,
+)
 from adapters.outbound.persistence.in_memory.query_handlers.get_budgets_query_handler import (
     GetBudgetsQueryHandler,
 )
@@ -12,6 +15,9 @@ from adapters.outbound.persistence.in_memory.query_handlers.get_categories_query
 )
 from adapters.outbound.persistence.in_memory.query_handlers.get_category_by_id_query_handler import (
     GetCategoryByIdQueryHandler,
+)
+from adapters.outbound.persistence.in_memory.query_handlers.get_transaction_by_id_query_handler import (
+    GetTransactionByIdQueryHandler,
 )
 from adapters.outbound.persistence.in_memory.query_handlers.get_transactions_query_handler import (
     GetTransactionsQueryHandler,
@@ -25,9 +31,11 @@ from adapters.outbound.persistence.in_memory.transaction_repository import (
 from adapters.outbound.persistence.in_memory.uow import InMemoryUnitOfWork
 from application.ports.uow.uow import UnitOfWork
 from application.queries.get_budget_by_id_query import GetBudgetByIdQuery
+from application.queries.get_budget_statistics_query import GetBudgetStatisticsQuery
 from application.queries.get_budgets_query import GetBudgetsQuery
 from application.queries.get_categories_query import GetCategoriesQuery
 from application.queries.get_category_by_id_query import GetCategoryByIdQuery
+from application.queries.get_transaction_by_id_query import GetTransactionByIdQuery
 from application.queries.get_transactions_query import GetTransactionsQuery
 from dependency_injector import containers, providers
 from domain.ports.budget_repository import BudgetRepository
@@ -51,6 +59,10 @@ class PersistenceContainer(containers.DeclarativeContainer):
             GetCategoriesQuery: providers.Factory(GetCategoriesQueryHandler),
             GetCategoryByIdQuery: providers.Factory(GetCategoryByIdQueryHandler),
             GetTransactionsQuery: providers.Factory(GetTransactionsQueryHandler),
+            GetTransactionByIdQuery: providers.Factory(GetTransactionByIdQueryHandler),
+            GetBudgetStatisticsQuery: providers.Factory(
+                GetBudgetStatisticsQueryHandler
+            ),
         }
     )
 

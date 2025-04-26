@@ -3,6 +3,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Literal
 
+from domain.value_objects import BudgetStrategyType
 from pydantic import BaseModel, Field
 
 
@@ -14,7 +15,7 @@ class MoneyPayload(BaseModel):
 
 # Local payload definition for Strategy
 class StrategyPayload(BaseModel):
-    type: str  # e.g., 'monthly' or 'yearly'
+    budget_strategy_type: BudgetStrategyType
     parameters: dict = Field(default_factory=dict)
 
 
