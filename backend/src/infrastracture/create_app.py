@@ -1,3 +1,4 @@
+from adapters.inbound.api.middlewares import ExceptionHandlerMiddleware
 from adapters.inbound.api.routers import create_monitoring_router, create_v0_router
 from fastapi import FastAPI
 
@@ -18,7 +19,8 @@ def create_app() -> FastAPI:
     configure_logging(settings)
 
     container = AppContainer()
-    container.config.from_pydantic(get_settings())
+    container.wire(packages=["adapters.inbound.api"])
+    container.config.from_pydantic(settings)
 
     app = ContainerizedFastAPI(
         container=container,
@@ -30,5 +32,7 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(create_monitoring_router())
     app.include_router(create_v0_router())
+
+    app.add_middleware(ExceptionHandlerMiddleware)
 
     return app

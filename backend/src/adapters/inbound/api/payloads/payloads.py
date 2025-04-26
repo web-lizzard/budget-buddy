@@ -3,18 +3,19 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Literal
 
+from domain.value_objects import BudgetStrategyType
 from pydantic import BaseModel, Field
 
 
 # Local payload definition for Money
 class MoneyPayload(BaseModel):
-    amount: int
+    amount: float
     currency: str
 
 
 # Local payload definition for Strategy
 class StrategyPayload(BaseModel):
-    type: str  # e.g., 'monthly' or 'yearly'
+    budget_strategy_type: BudgetStrategyType
     parameters: dict = Field(default_factory=dict)
 
 
@@ -70,9 +71,6 @@ HandleTransactionPayload = HandleTransactionDeletePayload | HandleTransactionMov
 
 # Main payload for deleting a category, including common fields and nested handle_transaction info.
 class DeleteCategoryRequestPayload(BaseModel):
-    budget_id: uuid.UUID
-    category_id: uuid.UUID
-    user_id: uuid.UUID
     handle_transaction: HandleTransactionPayload
 
 

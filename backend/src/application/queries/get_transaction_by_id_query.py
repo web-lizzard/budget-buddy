@@ -15,4 +15,5 @@ class GetTransactionByIdQuery(Query):
     """
 
     budget_id: UUID
+    user_id: UUID
     transaction_id: str

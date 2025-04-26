@@ -81,6 +81,6 @@ class BudgetFactory:
         self, budget_strategy_input: BudgetStrategyInput
     ) -> BudgetStrategy:
         for strategy in self._strategies:
-            if strategy.is_active(budget_strategy_input):
+            if strategy.is_active(budget_strategy_input=budget_strategy_input):
                 return strategy
         raise ValueError(f"No strategy found for {budget_strategy_input}")

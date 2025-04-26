@@ -13,18 +13,105 @@ alwaysApply: false
 
 - Use the `Annotated` type with `Depends` to inject dependencies into route handlers
 - Inject dependencies from the container using `Provide[Container.service]` pattern
-- Example:
+- Examples:
 
 ```python
+# Modifiying state operation
 from typing import Annotated
 from fastapi import Depends, FastAPI
 from dependency_injector.wiring import Provide
 from your_app.containers import Container
 
-@app.get("/items/")
+@router.post("/", status_code=http_status.HTTP_201_CREATED)
 @inject
-async def read_items(service: Annotated[ItemService, Depends(Provide[Container.service])]):
-    return await service.get_items()
+async def create_budget(
+    payload: CreateBudgetRequestPayload,
+    budget_repository: Annotated[
+        BudgetRepository,
+        Depends(
+            Provide[
+                AppContainer.persistence_container.provided.get_repository.call(
+                    BudgetRepository
+                )
+            ]
+        ),
+    ],
+    budget_factory: Annotated[
+        BudgetFactory,
+        Depends(Provide[AppContainer.domain_container.budget_factory]),
+    ],
+    unit_of_work: Annotated[
+        UnitOfWork, Depends(Provide[AppContainer.persistence_container.uow])
+    ],
+):
+    """
+    Create a new budget.
+
+    Args:
+        payload: Budget creation data.
+        budget_repository: Repository for budget persistence.
+        budget_factory: Factory for creating budget entities.
+        unit_of_work: Unit of work for transaction management.
+    """
+    # TODO: Replace with actual authenticated user ID
+    user_id = uuid4()
+
+    command = CreateBudgetCommand(
+        user_id=user_id,
+        total_limit=payload.total_limit.amount,
+        currency=payload.total_limit.currency,
+        strategy_input=_map_strategy_to_input(payload.strategy),
+        start_date=datetime.combine(payload.start_date, datetime.min.time()),
+        categories=[_map_category_create_to_data(cat) for cat in payload.categories],
+        name=payload.name,
+    )
+    command_handler = CreateBudgetCommandHandler(
+        budget_repository=budget_repository,
+        budget_factory=budget_factory,
+        unit_of_work=unit_of_work,
+    )
+    await command_handler.handle(command)
+```
+
+
+```python
+### Query handler
+### ...imports
+@router.get("/")
+@inject
+async def get_budgets(
+    query_handler: Annotated[
+        QueryHandler[GetBudgetsQuery, PaginatedItemDTO[BudgetDTO]],
+        Depends(
+            Provide[
+                AppContainer.persistence_container.provided.get_query_handler.call(
+                    GetBudgetsQuery
+                )
+            ]
+        ),
+    ],
+    status: str | None = Query(None, description="Filter by 'active' or 'expired'"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    sort: str | None = Query(None, description="Field to sort by"),
+) -> PaginatedItemDTO[BudgetDTO]:
+    """
+    Retrieve a list of budgets with pagination and filtering options.
+
+    Args:
+        status: Optional filter for budget status ('active' or 'expired')
+        page: Page number for pagination
+        limit: Number of items per page
+        sort: Field to sort results by
+        query_handler: Injected query handler for retrieving budgets
+    """
+    query = GetBudgetsQuery(
+        status=status,
+        page=page,
+        limit=limit,
+        sort=sort,
+    )
+    return await query_handler.handle(query)
 ```
 
 - Combine dependency-injection framework with FastAPI's built-in `Depends` for cleaner code
