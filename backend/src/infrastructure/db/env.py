@@ -3,7 +3,7 @@ from logging.config import fileConfig
 
 from adapters.outbound.persistence.sql_alchemy import models
 from alembic import context
-from infrastracture.settings import get_settings
+from infrastructure.settings import get_settings
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config

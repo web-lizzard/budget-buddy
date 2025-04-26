@@ -1,6 +1,6 @@
 from dependency_injector import containers, providers
 
-from infrastracture.container.domain_container import DomainContainer
+from infrastructure.container.domain_container import DomainContainer
 
 from .persistence_container import PersistenceContainer
 from .publisher_container import PublisherContainer
