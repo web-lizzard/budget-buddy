@@ -22,7 +22,7 @@ from domain.ports.budget_repository import BudgetRepository
 from domain.ports.transaction_repository import TransactionRepository
 from fastapi import APIRouter, Depends
 from fastapi import status as http_status
-from infrastracture.container.app_container import AppContainer
+from infrastructure.container.app_container import AppContainer
 
 from adapters.inbound.api.payloads.payloads import (
     CreateCategoryRequestPayload,
