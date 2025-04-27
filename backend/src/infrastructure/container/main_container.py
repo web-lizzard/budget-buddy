@@ -12,6 +12,13 @@ from .publisher_container import PublisherContainer
 class MainContainer(containers.DeclarativeContainer):
     """Dependency injection container."""
 
+    wiring_config = containers.WiringConfiguration(
+        packages=[
+            "adapters.inbound.api",
+            "adapters.inbound.subscribers",
+            "adapters.inbound.tasks",
+        ]
+    )
     # Configuration
     config = providers.Configuration()
 

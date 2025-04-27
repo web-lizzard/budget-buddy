@@ -43,6 +43,19 @@ class DatabaseSettings(BaseModel):
     )
 
 
+class RabbitMQSettings(BaseModel):
+    """RabbitMQ configuration settings."""
+
+    host: str = "rabbitmq"  # Service name in Docker network
+    port: int = 5672
+    user: str = "guest"
+    password: str = "guest"
+    vhost: str = "/"
+    exchange_name: str = "domain_events"
+
+    url: str = f"amqp://{user}:{password}@{host}:{port}{vhost}"
+
+
 class Settings(BaseSettings):
     """Application settings."""
 
@@ -53,6 +66,7 @@ class Settings(BaseSettings):
     api: APISettings = APISettings()
     logger: LoggerSettings = LoggerSettings()
     database: DatabaseSettings = DatabaseSettings()
+    rabbitmq: RabbitMQSettings = RabbitMQSettings()
 
     model_config = SettingsConfigDict(
         env_file=".env",

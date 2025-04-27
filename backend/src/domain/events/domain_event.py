@@ -1,8 +1,16 @@
-from abc import ABC
+import uuid
 from datetime import datetime
 
+import pydantic
 
-class DomainEvent(ABC):
-    @property
-    def occurred_on(self) -> datetime:
-        return datetime.now()
+
+class DomainEvent(pydantic.BaseModel):
+    event_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4)
+    occurred_on: datetime = pydantic.Field(default_factory=datetime.now)
+    version: int = 1
+
+    def to_dict(self) -> dict:
+        return self.model_dump(mode="json")
+
+    def get_event_name(self) -> str:
+        return self.__class__.__name__

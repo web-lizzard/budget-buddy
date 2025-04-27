@@ -67,4 +67,6 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
             amount=amount.amount,
             type=str(transaction.transaction_type),
             date=transaction.occurred_date,
+            budget_id=str(command.budget_id),
+            user_id=str(command.user_id),
         )

@@ -44,11 +44,29 @@ COPY backend/alembic.ini .
 EXPOSE 8000
 CMD ["uv", "run", "src/main.py"]
 
-# Subscriber build
+# Subscriber build for RabbitMQ event processing
 FROM deps AS subscriber
 WORKDIR /app
 # Copy src folder and alembic config
 COPY backend/src ./src
 COPY backend/alembic.ini .
-# Placeholder for subscriber script that doesn't exist yet
-CMD ["echo", "Subscriber service would run here"]
+# Run the subscriber main script
+CMD ["python", "-m", "src.subscriber_main"]
+
+# Celery worker build
+FROM deps AS celeryworker
+WORKDIR /app
+# Copy src folder and alembic config
+COPY backend/src ./src
+COPY backend/alembic.ini .
+# Run celery worker for budget_buddy_tasks
+CMD ["celery", "-A", "src.celery_app.app", "worker", "--loglevel=INFO"]
+
+# Flower build for monitoring Celery tasks
+FROM deps AS flower
+WORKDIR /app
+# Copy src folder and alembic config
+COPY backend/src ./src
+COPY backend/alembic.ini .
+# Run flower with connection to RabbitMQ
+CMD ["celery", "-A", "src.celery_app.app", "flower", "--port=5555", "--broker=amqp://guest:guest@rabbitmq:5672//"]
