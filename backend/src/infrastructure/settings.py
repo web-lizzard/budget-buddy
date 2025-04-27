@@ -37,23 +37,10 @@ class DatabaseSettings(BaseModel):
     db_name: str = "budget_buddy"
     echo: bool = False
 
-    @property
-    def url(self) -> str:
-        """Get database URL.
-
-        Returns:
-            str: Database URL
-        """
-        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}"
-
-    @property
-    def async_url(self) -> str:
-        """Get async database URL.
-
-        Returns:
-            str: Async database URL
-        """
-        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}"
+    # async_url: str = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db_name}"
+    async_url: str = (
+        "postgresql+asyncpg://budget_buddy:budget_buddy@postgres:5432/budget_buddy"
+    )
 
 
 class Settings(BaseSettings):

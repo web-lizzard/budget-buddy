@@ -2,6 +2,7 @@ import uuid
 
 from adapters.outbound.persistence.sql_alchemy.models import (
     CategoryStatisticsRecordModel,
+    ORMMoney,
     StatisticsRecordModel,
 )
 from domain.aggregates.statistics_record import StatisticsRecord
@@ -36,16 +37,28 @@ def map_category_statistics_record_domain_to_model(
         user_id=user_id,
         _cat_current_balance_amount=domain.current_balance.amount,
         _cat_current_balance_currency=domain.current_balance.currency,
-        current_balance=domain.current_balance,
+        current_balance=ORMMoney(
+            amount=domain.current_balance.amount,
+            currency=domain.current_balance.currency,
+        ),
         _cat_daily_available_amount_amount=domain.daily_available_amount.amount,
         _cat_daily_available_amount_currency=domain.daily_available_amount.currency,
-        daily_available_amount=domain.daily_available_amount,
+        daily_available_amount=ORMMoney(
+            amount=domain.daily_available_amount.amount,
+            currency=domain.daily_available_amount.currency,
+        ),
         _cat_daily_average_amount=domain.daily_average.amount,
         _cat_daily_average_currency=domain.daily_average.currency,
-        daily_average=domain.daily_average,
+        daily_average=ORMMoney(
+            amount=domain.daily_average.amount,
+            currency=domain.daily_average.currency,
+        ),
         _cat_used_limit_amount=domain.used_limit.amount,
         _cat_used_limit_currency=domain.used_limit.currency,
-        used_limit=domain.used_limit,
+        used_limit=ORMMoney(
+            amount=domain.used_limit.amount,
+            currency=domain.used_limit.currency,
+        ),
     )
 
 
@@ -79,17 +92,27 @@ def map_statistics_record_domain_to_model(
         budget_id=domain.budget_id,
         _current_balance_amount=domain.current_balance.amount,
         _current_balance_currency=domain.current_balance.currency,
-        current_balance=domain.current_balance,
+        current_balance=ORMMoney(
+            amount=domain.current_balance.amount,
+            currency=domain.current_balance.currency,
+        ),
         _daily_available_amount_amount=domain.daily_available_amount.amount,
         _daily_available_amount_currency=domain.daily_available_amount.currency,
-        daily_available_amount=domain.daily_available_amount,
+        daily_available_amount=ORMMoney(
+            amount=domain.daily_available_amount.amount,
+            currency=domain.daily_available_amount.currency,
+        ),
         _daily_average_amount=domain.daily_average.amount,
         _daily_average_currency=domain.daily_average.currency,
-        daily_average=domain.daily_average,
+        daily_average=ORMMoney(
+            amount=domain.daily_average.amount,
+            currency=domain.daily_average.currency,
+        ),
         _used_limit_amount=domain.used_limit.amount,
         _used_limit_currency=domain.used_limit.currency,
-        used_limit=domain.used_limit,
-        creation_date=domain.creation_date,
+        used_limit=ORMMoney(
+            amount=domain.used_limit.amount, currency=domain.used_limit.currency
+        ),
         category_statistics=[
             map_category_statistics_record_domain_to_model(
                 cs, domain.id, domain.user_id

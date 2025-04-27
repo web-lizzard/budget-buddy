@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from uuid import UUID
 
@@ -19,11 +20,19 @@ class Category:
     _budget_id: UUID
     _name: CategoryName
     _limit: Limit
+    _user_id: UUID
 
     _MAX_NAME_LENGTH = 255
     _MIN_NAME_LENGTH = 3
 
-    def __init__(self, id: UUID, budget_id: UUID, name: CategoryName, limit: Limit):
+    def __init__(
+        self,
+        id: UUID,
+        budget_id: UUID,
+        name: CategoryName,
+        limit: Limit,
+        user_id: UUID | None = None,
+    ):
         """
         Initialize a Category entity.
 
@@ -41,6 +50,7 @@ class Category:
         self._budget_id = budget_id
         self._name = name
         self._limit = limit
+        self._user_id = user_id or uuid.uuid4()
 
     @property
     def id(self) -> UUID:

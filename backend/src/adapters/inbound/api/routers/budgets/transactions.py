@@ -1,32 +1,22 @@
+from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
 from application.commands.create_transaction_command import CreateTransactionCommand
 from application.commands.delete_transaction_command import DeleteTransactionCommand
 from application.commands.edit_transaction_command import EditTransactionCommand
-from application.commands.handlers.create_transaction_command_handler import (
-    CreateTransactionCommandHandler,
-)
-from application.commands.handlers.delete_transaction_command_handler import (
-    DeleteTransactionCommandHandler,
-)
-from application.commands.handlers.edit_transaction_command_handler import (
-    EditTransactionCommandHandler,
-)
+from application.commands.handlers.command_handler import CommandHandler
 from application.dtos.paginated_item_dto import PaginatedItemDTO
 from application.dtos.transaction_dto import TransactionDTO
-from application.ports.uow.uow import UnitOfWork
 from application.queries.get_transaction_by_id_query import GetTransactionByIdQuery
 from application.queries.get_transactions_query import GetTransactionsQuery
 from application.queries.handlers.query_handler import QueryHandler
 from dependency_injector.wiring import Provide, inject
-from domain.ports.budget_repository import BudgetRepository
-from domain.ports.transaction_repository import TransactionRepository
 from domain.value_objects.money import Money
 from domain.value_objects.transaction_type import TransactionType
 from fastapi import APIRouter, Depends, Query
 from fastapi import status as http_status
-from infrastructure.container.app_container import AppContainer
+from infrastructure.container.main_container import MainContainer
 
 from adapters.inbound.api.payloads.payloads import (
     CreateTransactionRequestPayload,
@@ -47,7 +37,7 @@ async def get_transactions(
         QueryHandler[GetTransactionsQuery, PaginatedItemDTO[TransactionDTO]],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_query_handler.call(
+                MainContainer.application_container.provided.get_query_handler.call(
                     GetTransactionsQuery
                 )
             ]
@@ -100,7 +90,7 @@ async def get_transaction_by_id(
         QueryHandler[GetTransactionByIdQuery, TransactionDTO],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_query_handler.call(
+                MainContainer.application_container.provided.get_query_handler.call(
                     GetTransactionByIdQuery
                 )
             ]
@@ -127,28 +117,15 @@ async def get_transaction_by_id(
 async def create_transaction(
     budget_id: UUID,
     payload: CreateTransactionRequestPayload,
-    budget_repository: Annotated[
-        BudgetRepository,
+    command_handler: Annotated[
+        CommandHandler[CreateTransactionCommand],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    BudgetRepository
+                MainContainer.application_container.provided.get_command_handler.call(
+                    CreateTransactionCommand
                 )
             ]
         ),
-    ],
-    transaction_repository: Annotated[
-        TransactionRepository,
-        Depends(
-            Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    TransactionRepository
-                )
-            ]
-        ),
-    ],
-    unit_of_work: Annotated[
-        UnitOfWork, Depends(Provide[AppContainer.persistence_container.uow])
     ],
 ):
     """
@@ -157,9 +134,7 @@ async def create_transaction(
     Args:
         budget_id: The UUID of the budget.
         payload: Transaction creation data.
-        budget_repository: Repository for budget persistence.
-        transaction_repository: Repository for transaction persistence.
-        unit_of_work: Unit of work for transaction management.
+        command_handler: Injected handler for CreateTransactionCommand.
     """
     # TODO: Replace with actual authenticated user ID later
     # user_id should come from payload or auth context
@@ -175,14 +150,8 @@ async def create_transaction(
         transaction_type=domain_transaction_type,  # Use domain enum
         budget_id=budget_id,
         user_id=user_id,
-        occurred_date=payload.occurred_date,
+        occurred_date=datetime.now(),
         description=payload.description,
-    )
-
-    command_handler = CreateTransactionCommandHandler(
-        budget_repository=budget_repository,
-        transaction_repository=transaction_repository,
-        unit_of_work=unit_of_work,
     )
     await command_handler.handle(command)
 
@@ -195,28 +164,15 @@ async def update_transaction(
     budget_id: UUID,
     transaction_id: UUID,
     payload: UpdateTransactionRequestPayload,
-    budget_repository: Annotated[
-        BudgetRepository,
+    command_handler: Annotated[
+        CommandHandler[EditTransactionCommand],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    BudgetRepository
+                MainContainer.application_container.provided.get_command_handler.call(
+                    EditTransactionCommand
                 )
             ]
         ),
-    ],
-    transaction_repository: Annotated[
-        TransactionRepository,
-        Depends(
-            Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    TransactionRepository
-                )
-            ]
-        ),
-    ],
-    unit_of_work: Annotated[
-        UnitOfWork, Depends(Provide[AppContainer.persistence_container.uow])
     ],
 ):
     """
@@ -226,9 +182,7 @@ async def update_transaction(
         budget_id: The UUID of the budget containing the transaction.
         transaction_id: The UUID of the transaction to update.
         payload: Updated transaction data.
-        budget_repository: Repository for budget persistence.
-        transaction_repository: Repository for transaction persistence.
-        unit_of_work: Unit of work for transaction management.
+        command_handler: Injected handler for EditTransactionCommand.
     """
     user_id = DEFAULT_USER_ID
 
@@ -245,12 +199,6 @@ async def update_transaction(
         transaction_type=domain_transaction_type,
         description=payload.description,
     )
-
-    command_handler = EditTransactionCommandHandler(
-        unit_of_work=unit_of_work,
-        transaction_repository=transaction_repository,
-        budget_repository=budget_repository,
-    )
     await command_handler.handle(command)
 
 
@@ -261,28 +209,15 @@ async def update_transaction(
 async def delete_transaction(
     budget_id: UUID,
     transaction_id: UUID,
-    budget_repository: Annotated[
-        BudgetRepository,
+    command_handler: Annotated[
+        CommandHandler[DeleteTransactionCommand],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    BudgetRepository
+                MainContainer.application_container.provided.get_command_handler.call(
+                    DeleteTransactionCommand
                 )
             ]
         ),
-    ],
-    transaction_repository: Annotated[
-        TransactionRepository,
-        Depends(
-            Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    TransactionRepository
-                )
-            ]
-        ),
-    ],
-    unit_of_work: Annotated[
-        UnitOfWork, Depends(Provide[AppContainer.persistence_container.uow])
     ],
 ):
     """
@@ -291,9 +226,7 @@ async def delete_transaction(
     Args:
         budget_id: The UUID of the budget containing the transaction.
         transaction_id: The UUID of the transaction to delete.
-        budget_repository: Repository for budget persistence.
-        transaction_repository: Repository for transaction persistence.
-        unit_of_work: Unit of work for transaction management.
+        command_handler: Injected handler for DeleteTransactionCommand.
     """
     user_id = DEFAULT_USER_ID
 
@@ -303,9 +236,4 @@ async def delete_transaction(
         user_id=user_id,
     )
 
-    command_handler = DeleteTransactionCommandHandler(
-        unit_of_work=unit_of_work,
-        transaction_repository=transaction_repository,
-        budget_repository=budget_repository,
-    )
     await command_handler.handle(command)

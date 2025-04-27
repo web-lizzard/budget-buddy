@@ -1,3 +1,3 @@
-from .app_container import AppContainer
+from .main_container import MainContainer
 
-__all__ = ["AppContainer"]
+__all__ = ["MainContainer"]

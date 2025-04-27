@@ -7,8 +7,8 @@ from .money_dto import MoneyDTO
 
 
 class TransactionTypeEnum(Enum):
-    INCOME = "income"
-    EXPENSE = "expense"
+    INCOME = "INCOME"
+    EXPENSE = "EXPENSE"
 
 
 class TransactionDTO(DTO):

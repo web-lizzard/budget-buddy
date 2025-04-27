@@ -234,6 +234,7 @@ class Budget:
             DeactivatedBudgetError: When budget is deactivated and transaction date is after deactivation date
         """
         # Check if transaction date is within budget period
+        print(type(transaction_date), type(self._start_date), type(self._end_date))
         if transaction_date < self._start_date or transaction_date > self._end_date:
             raise TransactionOutsideBudgetPeriodError()
 

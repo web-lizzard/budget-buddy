@@ -1,7 +1,11 @@
+from uuid import UUID
+
 from adapters.outbound.persistence.sql_alchemy.models import (
     BudgetModel,
     CategoryModel,
     ORMBudgetStrategy,
+    ORMLimit,
+    ORMMoney,
 )
 from domain.aggregates.budget import Budget
 from domain.entities.category import Category
@@ -19,21 +23,30 @@ def map_category_model_to_domain(model: CategoryModel) -> Category:
     )
 
 
-def map_category_domain_to_model(domain: Category) -> CategoryModel:
+def map_category_domain_to_model(domain: Category, user_id: UUID) -> CategoryModel:
     """Maps Category domain entity to CategoryModel SQLAlchemy object."""
     return CategoryModel(
         id=domain.id,
         budget_id=domain.budget_id,
         name=domain.name.value,
+        user_id=user_id,
         _limit_amount=domain.limit.value.amount,
         _limit_currency=domain.limit.value.currency,
-        limit=domain.limit,
+        limit=ORMLimit(
+            value=ORMMoney(
+                amount=domain.limit.value.amount,
+                currency=domain.limit.value.currency,
+            ),
+        ),
     )
 
 
 # --- Budget Mappers ---
 def map_budget_model_to_domain(model: BudgetModel) -> Budget:
     """Maps BudgetModel SQLAlchemy object to Budget domain aggregate."""
+    print("--------------------------------")
+    print(type(model.start_date), type(model.end_date))
+    print("--------------------------------")
     return Budget(
         id=model.id,
         user_id=model.user_id,
@@ -68,7 +81,12 @@ def map_budget_domain_to_model(
 
     model._total_limit_amount = domain.total_limit.value.amount
     model._total_limit_currency = domain.total_limit.value.currency
-    model.total_limit = domain.total_limit
+    model.total_limit = ORMLimit(
+        value=ORMMoney(
+            amount=domain.total_limit.value.amount,
+            currency=domain.total_limit.value.currency,
+        ),
+    )
 
     orm_strategy = ORMBudgetStrategy(domain.strategy_input)
     model._strategy_type_db, model._strategy_parameters = (
@@ -81,7 +99,8 @@ def map_budget_domain_to_model(
     model.deactivation_date = domain.deactivation_date
 
     model.categories = [
-        map_category_domain_to_model(cat_domain) for cat_domain in domain.categories
+        map_category_domain_to_model(cat_domain, model.user_id)
+        for cat_domain in domain.categories
     ]
 
     return model

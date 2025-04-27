@@ -1,4 +1,4 @@
-from adapters.outbound.persistence.sql_alchemy.models import TransactionModel
+from adapters.outbound.persistence.sql_alchemy.models import ORMMoney, TransactionModel
 from domain.aggregates.transaction import Transaction
 
 
@@ -23,7 +23,10 @@ def map_transaction_domain_to_model(domain: Transaction) -> TransactionModel:
         user_id=domain.user_id,
         _amount_amount=domain.amount.amount,
         _amount_currency=domain.amount.currency,
-        amount=domain.amount,
+        amount=ORMMoney(
+            amount=domain.amount.amount,
+            currency=domain.amount.currency,
+        ),
         transaction_type=domain.transaction_type,
         occurred_date=domain.occurred_date,
         description=domain.description,

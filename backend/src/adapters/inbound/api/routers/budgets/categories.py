@@ -3,26 +3,15 @@ from uuid import UUID
 
 from application.commands.add_category_command import AddCategoryCommand
 from application.commands.edit_category_command import EditCategoryCommand
-from application.commands.handlers.add_category_command_handler import (
-    AddCategoryCommandHandler,
-)
-from application.commands.handlers.edit_category_command_handler import (
-    EditCategoryCommandHandler,
-)
-from application.commands.handlers.remove_category_command_handler import (
-    RemoveCategoryCommandHandler,
-)
+from application.commands.handlers.command_handler import CommandHandler
 from application.commands.remove_category_command import RemoveCategoryCommand
 from application.dtos.category_dto import CategoryDTO
-from application.ports.uow.uow import UnitOfWork
 from application.queries.get_category_by_id_query import GetCategoryByIdQuery
 from application.queries.handlers.query_handler import QueryHandler
 from dependency_injector.wiring import Provide, inject
-from domain.ports.budget_repository import BudgetRepository
-from domain.ports.transaction_repository import TransactionRepository
 from fastapi import APIRouter, Depends
 from fastapi import status as http_status
-from infrastructure.container.app_container import AppContainer
+from infrastructure.container.main_container import MainContainer
 
 from adapters.inbound.api.payloads.payloads import (
     CreateCategoryRequestPayload,
@@ -43,7 +32,7 @@ async def get_category_by_id(
         QueryHandler[GetCategoryByIdQuery, CategoryDTO],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_query_handler.call(
+                MainContainer.application_container.provided.get_query_handler.call(
                     GetCategoryByIdQuery
                 )
             ]
@@ -58,7 +47,10 @@ async def get_category_by_id(
         category_id: The UUID of the category to retrieve.
         query_handler: Injected query handler for retrieving category details.
     """
-    query = GetCategoryByIdQuery(budget_id=budget_id, category_id=category_id)
+    user_id = DEFAULT_USER_ID
+    query = GetCategoryByIdQuery(
+        budget_id=budget_id, category_id=category_id, user_id=user_id
+    )
     return await query_handler.handle(query)
 
 
@@ -67,18 +59,15 @@ async def get_category_by_id(
 async def create_category(
     budget_id: UUID,
     payload: CreateCategoryRequestPayload,
-    budget_repository: Annotated[
-        BudgetRepository,
+    command_handler: Annotated[
+        CommandHandler[AddCategoryCommand],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    BudgetRepository
+                MainContainer.application_container.provided.get_command_handler.call(
+                    AddCategoryCommand
                 )
             ]
         ),
-    ],
-    unit_of_work: Annotated[
-        UnitOfWork, Depends(Provide[AppContainer.persistence_container.uow])
     ],
 ):
     """
@@ -87,8 +76,7 @@ async def create_category(
     Args:
         budget_id: The UUID of the budget to add the category to.
         payload: Category creation data.
-        budget_repository: Repository for budget persistence.
-        unit_of_work: Unit of work for transaction management.
+        command_handler: Injected handler for AddCategoryCommand.
     """
     # TODO: Replace with actual authenticated user ID later
     user_id = DEFAULT_USER_ID
@@ -97,10 +85,6 @@ async def create_category(
         budget_id=str(budget_id),
         name=payload.name,
         limit=payload.limit.amount,
-    )
-    command_handler = AddCategoryCommandHandler(
-        budget_repository=budget_repository,
-        unit_of_work=unit_of_work,
     )
     await command_handler.handle(command)
 
@@ -113,18 +97,15 @@ async def update_category(
     budget_id: UUID,
     category_id: UUID,
     payload: UpdateCategoryRequestPayload,
-    budget_repository: Annotated[
-        BudgetRepository,
+    command_handler: Annotated[
+        CommandHandler[EditCategoryCommand],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    BudgetRepository
+                MainContainer.application_container.provided.get_command_handler.call(
+                    EditCategoryCommand
                 )
             ]
         ),
-    ],
-    unit_of_work: Annotated[
-        UnitOfWork, Depends(Provide[AppContainer.persistence_container.uow])
     ],
 ):
     """
@@ -134,8 +115,7 @@ async def update_category(
         budget_id: The UUID of the budget containing the category.
         category_id: The UUID of the category to update.
         payload: Updated category data.
-        budget_repository: Repository for budget persistence.
-        unit_of_work: Unit of work for transaction management.
+        command_handler: Injected handler for EditCategoryCommand.
     """
     # TODO: Replace with actual authenticated user ID later
     user_id = DEFAULT_USER_ID
@@ -146,9 +126,6 @@ async def update_category(
         name=payload.name,
         limit=payload.limit.amount,
         # Currency is handled by the domain based on budget
-    )
-    command_handler = EditCategoryCommandHandler(
-        budget_repository=budget_repository, unit_of_work=unit_of_work
     )
     await command_handler.handle(command)
 
@@ -162,28 +139,15 @@ async def delete_category(
     category_id: UUID,
     # Using payload instead of query param based on payloads.py and handler structure
     payload: DeleteCategoryRequestPayload,
-    budget_repository: Annotated[
-        BudgetRepository,
+    command_handler: Annotated[
+        CommandHandler[RemoveCategoryCommand],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    BudgetRepository
+                MainContainer.application_container.provided.get_command_handler.call(
+                    RemoveCategoryCommand
                 )
             ]
         ),
-    ],
-    transaction_repository: Annotated[
-        TransactionRepository,
-        Depends(
-            Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    TransactionRepository
-                )
-            ]
-        ),
-    ],
-    unit_of_work: Annotated[
-        UnitOfWork, Depends(Provide[AppContainer.persistence_container.uow])
     ],
 ):
     """
@@ -195,9 +159,7 @@ async def delete_category(
         budget_id: The UUID of the budget containing the category.
         category_id: The UUID of the category to delete.
         payload: Payload specifying the transfer policy for transactions.
-        budget_repository: Repository for budget persistence.
-        transaction_repository: Repository for transaction operations.
-        unit_of_work: Unit of work for transaction management.
+        command_handler: Injected handler for RemoveCategoryCommand.
     """
     # TODO: Replace with actual authenticated user ID later
     # User ID from payload might be redundant if we use authenticated user context
@@ -214,10 +176,5 @@ async def delete_category(
         category_id=str(category_id),
         handle_transactions=payload.handle_transaction.type,
         target_category_id=target_category_id_str,
-    )
-    command_handler = RemoveCategoryCommandHandler(
-        unit_of_work=unit_of_work,
-        budget_repository=budget_repository,
-        transaction_repository=transaction_repository,
     )
     await command_handler.handle(command)
