@@ -23,23 +23,19 @@ class SQLGetBudgetsQueryHandler(
         self._session = session
 
     async def handle(self, query: GetBudgetsQuery) -> PaginatedItemDTO[BudgetDTO]:
-        # Calculate offset
         skip = (query.page - 1) * query.limit
 
-        # Base query
         stmt = (
             select(BudgetModel)
             .where(BudgetModel.user_id == query.user_id)
-            .options(selectinload(BudgetModel.categories))  # Eager load categories
+            .options(selectinload(BudgetModel.categories))
             .offset(skip)
             .limit(query.limit)
         )
 
-        # Total count query - using standard syntax
         count_stmt = select(func.count(BudgetModel.id)).where(
             BudgetModel.user_id == query.user_id
         )
-        # Apply status filter correctly to count query
         if query.status:
             now = datetime.now()
             if query.status.lower() == "active":
@@ -60,20 +56,15 @@ class SQLGetBudgetsQueryHandler(
                 stmt = stmt.where(expired_filter)
                 count_stmt = count_stmt.where(expired_filter)
 
-        # Apply sorting
         if query.sort:
             sort_column = getattr(BudgetModel, query.sort, None)
             if sort_column:
                 stmt = stmt.order_by(sort_column)
         else:
-            # Default sort
             stmt = stmt.order_by(BudgetModel.created_at.desc())
 
-        # Execute queries
         result = await self._session.scalars(stmt)
         total_count = await self._session.scalar(count_stmt) or 0
-
-        # Map to DTOs
         budget_dtos = [
             BudgetDTO(
                 id=budget.id,
@@ -90,7 +81,7 @@ class SQLGetBudgetsQueryHandler(
                     type=budget.strategy.strategy_input.strategy_type.value,
                 ),
                 deactivation_date=budget.deactivation_date,
-                categories=[  # Map categories
+                categories=[
                     CategoryDTO(
                         id=cat.id,
                         name=cat.name,

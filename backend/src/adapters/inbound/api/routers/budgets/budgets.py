@@ -8,27 +8,15 @@ from application.commands import (
     DeactivateBudgetCommand,
     RenewBudgetCommand,
 )
-from application.commands.handlers.create_budget_command_handler import (
-    CreateBudgetCommandHandler,
-)
-from application.commands.handlers.deactivate_budget_command_handler import (
-    DeactivateBudgetCommandHandler,
-)
-from application.commands.handlers.renew_budget_command_handler import (
-    RenewBudgetCommandHandler,
-)
+from application.commands.handlers.command_handler import CommandHandler
 from application.dtos import BudgetDTO
 from application.dtos.category_list_dto import CategoryListDTO
 from application.dtos.paginated_item_dto import PaginatedItemDTO
-from application.ports.uow.uow import UnitOfWork
 from application.queries.get_budget_by_id_query import GetBudgetByIdQuery
 from application.queries.get_budgets_query import GetBudgetsQuery
 from application.queries.get_categories_query import GetCategoriesQuery
 from application.queries.handlers.query_handler import QueryHandler
 from dependency_injector.wiring import Provide, inject
-from domain.factories.budget_factory import BudgetFactory
-from domain.ports.budget_repository import BudgetRepository
-from domain.strategies.budget_strategy.budget_strategy import BudgetStrategy
 from domain.value_objects import (
     BudgetStrategyInput,
     MonthlyBudgetStrategyInput,
@@ -37,7 +25,7 @@ from domain.value_objects import (
 from domain.value_objects.budget_strategy import BudgetStrategyType
 from fastapi import APIRouter, Depends, Query
 from fastapi import status as http_status
-from infrastructure.container.app_container import AppContainer
+from infrastructure.container.main_container import MainContainer
 
 from adapters.inbound.api.payloads.payloads import (
     CreateBudgetRequestPayload,
@@ -80,7 +68,7 @@ async def get_budgets(
         QueryHandler[GetBudgetsQuery, PaginatedItemDTO[BudgetDTO]],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_query_handler.call(
+                MainContainer.application_container.provided.get_query_handler.call(
                     GetBudgetsQuery
                 )
             ]
@@ -101,11 +89,13 @@ async def get_budgets(
         sort: Field to sort results by
         query_handler: Injected query handler for retrieving budgets
     """
+    user_id = DEFAULT_USER_ID
     query = GetBudgetsQuery(
         status=status,
         page=page,
         limit=limit,
         sort=sort,
+        user_id=user_id,
     )
     return await query_handler.handle(query)
 
@@ -114,22 +104,15 @@ async def get_budgets(
 @inject
 async def create_budget(
     payload: CreateBudgetRequestPayload,
-    budget_repository: Annotated[
-        BudgetRepository,
+    command_handler: Annotated[
+        CommandHandler[CreateBudgetCommand],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    BudgetRepository
+                MainContainer.application_container.provided.get_command_handler.call(
+                    CreateBudgetCommand
                 )
             ]
         ),
-    ],
-    budget_factory: Annotated[
-        BudgetFactory,
-        Depends(Provide[AppContainer.domain_container.budget_factory]),
-    ],
-    unit_of_work: Annotated[
-        UnitOfWork, Depends(Provide[AppContainer.persistence_container.uow])
     ],
 ):
     """
@@ -137,9 +120,7 @@ async def create_budget(
 
     Args:
         payload: Budget creation data.
-        budget_repository: Repository for budget persistence.
-        budget_factory: Factory for creating budget entities.
-        unit_of_work: Unit of work for transaction management.
+        command_handler: Injected handler for the CreateBudgetCommand.
     """
     user_id = DEFAULT_USER_ID
     command = CreateBudgetCommand(
@@ -150,11 +131,6 @@ async def create_budget(
         start_date=datetime.combine(payload.start_date, datetime.min.time()),
         categories=[_map_category_create_to_data(cat) for cat in payload.categories],
         name=payload.name,
-    )
-    command_handler = CreateBudgetCommandHandler(
-        budget_repository=budget_repository,
-        budget_factory=budget_factory,
-        unit_of_work=unit_of_work,
     )
     await command_handler.handle(command)
 
@@ -167,7 +143,7 @@ async def get_budget_by_id(
         QueryHandler[GetBudgetByIdQuery, BudgetDTO],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_query_handler.call(
+                MainContainer.application_container.provided.get_query_handler.call(
                     GetBudgetByIdQuery
                 )
             ]
@@ -181,7 +157,8 @@ async def get_budget_by_id(
         budget_id: The UUID of the budget to retrieve.
         query_handler: Injected query handler for retrieving budget details.
     """
-    query = GetBudgetByIdQuery(budget_id=budget_id)
+    user_id = DEFAULT_USER_ID
+    query = GetBudgetByIdQuery(budget_id=budget_id, user_id=user_id)
     return await query_handler.handle(query)
 
 
@@ -189,18 +166,15 @@ async def get_budget_by_id(
 @inject
 async def deactivate_budget(
     budget_id: UUID,
-    budget_repository: Annotated[
-        BudgetRepository,
+    command_handler: Annotated[
+        CommandHandler[DeactivateBudgetCommand],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    BudgetRepository
+                MainContainer.application_container.provided.get_command_handler.call(
+                    DeactivateBudgetCommand
                 )
             ]
         ),
-    ],
-    unit_of_work: Annotated[
-        UnitOfWork, Depends(Provide[AppContainer.persistence_container.provided.uow])
     ],
 ):
     """
@@ -208,15 +182,10 @@ async def deactivate_budget(
 
     Args:
         budget_id: The UUID of the budget to deactivate.
-        budget_repository: Repository for budget persistence.
-        unit_of_work: Unit of work for transaction management.
+        command_handler: Injected handler for the DeactivateBudgetCommand.
     """
     user_id = DEFAULT_USER_ID
     command = DeactivateBudgetCommand(user_id=user_id, budget_id=budget_id)
-    command_handler = DeactivateBudgetCommandHandler(
-        budget_repository=budget_repository,
-        unit_of_work=unit_of_work,
-    )
     await command_handler.handle(command)
 
 
@@ -224,21 +193,15 @@ async def deactivate_budget(
 @inject
 async def renew_budget(
     budget_id: UUID,
-    budget_repository: Annotated[
-        BudgetRepository,
+    command_handler: Annotated[
+        CommandHandler[RenewBudgetCommand],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_repository.call(
-                    BudgetRepository
+                MainContainer.application_container.provided.get_command_handler.call(
+                    RenewBudgetCommand
                 )
             ]
         ),
-    ],
-    unit_of_work: Annotated[
-        UnitOfWork, Depends(Provide[AppContainer.persistence_container.uow])
-    ],
-    strategies: Annotated[
-        list[BudgetStrategy], Depends(Provide[AppContainer.domain_container.strategies])
     ],
 ):
     """
@@ -246,16 +209,10 @@ async def renew_budget(
 
     Args:
         budget_id: The UUID of the budget to renew.
-        budget_repository: Repository for budget persistence.
-        unit_of_work: Unit of work for transaction management.
+        command_handler: Injected handler for the RenewBudgetCommand.
     """
     user_id = DEFAULT_USER_ID
     command = RenewBudgetCommand(user_id=user_id, budget_id=budget_id)
-    command_handler = RenewBudgetCommandHandler(
-        budget_repository=budget_repository,
-        unit_of_work=unit_of_work,
-        strategies=strategies,
-    )
     await command_handler.handle(command)
 
 
@@ -267,7 +224,7 @@ async def get_categories(
         QueryHandler[GetCategoriesQuery, CategoryListDTO],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_query_handler.call(
+                MainContainer.application_container.provided.get_query_handler.call(
                     GetCategoriesQuery
                 )
             ]
@@ -281,5 +238,6 @@ async def get_categories(
         budget_id: The UUID of the budget.
         query_handler: Injected query handler for retrieving categories.
     """
-    query = GetCategoriesQuery(budget_id=budget_id)
+    user_id = DEFAULT_USER_ID
+    query = GetCategoriesQuery(budget_id=budget_id, user_id=user_id)
     return await query_handler.handle(query)

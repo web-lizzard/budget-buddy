@@ -6,7 +6,9 @@ from application.queries.get_budget_statistics_query import GetBudgetStatisticsQ
 from application.queries.handlers.query_handler import QueryHandler
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends
-from infrastructure.container.app_container import AppContainer
+from infrastructure.container.main_container import MainContainer
+
+from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID
 
 router = APIRouter(tags=["statistics"])
 
@@ -19,7 +21,7 @@ async def get_budget_statistics(
         QueryHandler[GetBudgetStatisticsQuery, StatisticsRecordDTO],
         Depends(
             Provide[
-                AppContainer.persistence_container.provided.get_query_handler.call(
+                MainContainer.persistence_container.provided.get_query_handler.call(
                     GetBudgetStatisticsQuery
                 )
             ]
@@ -33,5 +35,8 @@ async def get_budget_statistics(
         budget_id: The UUID of the budget.
         query_handler: Injected query handler for retrieving statistics.
     """
-    query = GetBudgetStatisticsQuery(budget_id=budget_id)
+    # TODO: Replace with actual authenticated user ID later
+    # User ID from payload might be redundant if we use authenticated user context
+    user_id = DEFAULT_USER_ID  # Or use authenticated user ID
+    query = GetBudgetStatisticsQuery(budget_id=budget_id, user_id=user_id)
     return await query_handler.handle(query)

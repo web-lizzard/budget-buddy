@@ -82,7 +82,6 @@ class CreateTransactionRequestPayload(BaseModel):
     category_id: uuid.UUID
     amount: MoneyPayload
     transaction_type: TransactionTypeEnumPayload
-    occurred_date: datetime
     description: str | None = None
     user_id: uuid.UUID
 

@@ -18,11 +18,10 @@ class SQLGetBudgetStatisticsQueryHandler(
         self._session = session
 
     async def handle(self, query: GetBudgetStatisticsQuery) -> StatisticsRecordDTO:
-        # Find the latest statistics record for the given budget and user
         stmt = (
             select(StatisticsRecordModel)
             .where(StatisticsRecordModel.budget_id == query.budget_id)
-            .where(StatisticsRecordModel.user_id == query.user_id)  # Add user_id check
+            .where(StatisticsRecordModel.user_id == query.user_id)
             .options(selectinload(StatisticsRecordModel.category_statistics))
             .order_by(StatisticsRecordModel.creation_date.desc())
             .limit(1)
@@ -30,15 +29,11 @@ class SQLGetBudgetStatisticsQueryHandler(
 
         result = await self._session.scalar(stmt)
 
-        # Check if statistics exist and belong to the user
         if not result or result.user_id != query.user_id:
             raise StatisticsRecordNotFoundError(
                 f"Statistics not found for budget id {query.budget_id}. "
                 f"Statistics might not have been generated yet or do not belong to the user."
             )
-
-        # Removed date conversion as model now uses datetime
-        # creation_datetime = datetime.combine(result.creation_date, time.min)
 
         return StatisticsRecordDTO(
             id=result.id,
@@ -60,8 +55,8 @@ class SQLGetBudgetStatisticsQueryHandler(
                 amount=result.used_limit.amount,
                 currency=result.used_limit.currency,
             ),
-            creation_date=result.creation_date,  # Use datetime directly from model
-            categories_statistics=[  # Map category statistics
+            creation_date=result.creation_date,
+            categories_statistics=[
                 CategoryStatisticsRecordDTO(
                     id=cat_stat.id,
                     category_id=cat_stat.category_id,

@@ -1,48 +1,31 @@
-from adapters.outbound.persistence.in_memory.budget_repository import (
-    InMemoryBudgetRepository,
+from typing import AsyncGenerator
+
+from adapters.outbound.persistence.sql_alchemy.repositories.budget_repository import (
+    SQLAlchemyBudgetRepository,
 )
-from adapters.outbound.persistence.in_memory.query_handlers.get_budget_by_id_query_handler import (
-    GetBudgetByIdQueryHandler,
+from adapters.outbound.persistence.sql_alchemy.repositories.statistics_repository import (
+    SQLAlchemyStatisticsRepository,
 )
-from adapters.outbound.persistence.in_memory.query_handlers.get_budget_statistics_query_handler import (
-    GetBudgetStatisticsQueryHandler,
+from adapters.outbound.persistence.sql_alchemy.repositories.transaction_repository import (
+    SQLAlchemyTransactionRepository,
 )
-from adapters.outbound.persistence.in_memory.query_handlers.get_budgets_query_handler import (
-    GetBudgetsQueryHandler,
-)
-from adapters.outbound.persistence.in_memory.query_handlers.get_categories_query_handler import (
-    GetCategoriesQueryHandler,
-)
-from adapters.outbound.persistence.in_memory.query_handlers.get_category_by_id_query_handler import (
-    GetCategoryByIdQueryHandler,
-)
-from adapters.outbound.persistence.in_memory.query_handlers.get_transaction_by_id_query_handler import (
-    GetTransactionByIdQueryHandler,
-)
-from adapters.outbound.persistence.in_memory.query_handlers.get_transactions_query_handler import (
-    GetTransactionsQueryHandler,
-)
-from adapters.outbound.persistence.in_memory.statistics_repository import (
-    InMemoryStatisticsRepository,
-)
-from adapters.outbound.persistence.in_memory.transaction_repository import (
-    InMemoryTransactionRepository,
-)
-from adapters.outbound.persistence.in_memory.uow import InMemoryUnitOfWork
+from adapters.outbound.persistence.sql_alchemy.uow.uow import SQLAlchemyUnitOfWork
 from application.ports.uow.uow import UnitOfWork
-from application.queries.get_budget_by_id_query import GetBudgetByIdQuery
-from application.queries.get_budget_statistics_query import GetBudgetStatisticsQuery
-from application.queries.get_budgets_query import GetBudgetsQuery
-from application.queries.get_categories_query import GetCategoriesQuery
-from application.queries.get_category_by_id_query import GetCategoryByIdQuery
-from application.queries.get_transaction_by_id_query import GetTransactionByIdQuery
-from application.queries.get_transactions_query import GetTransactionsQuery
 from dependency_injector import containers, providers
 from domain.ports.budget_repository import BudgetRepository
 from domain.ports.outbound.statistics_repository import StatisticsRepository
 from domain.ports.transaction_repository import TransactionRepository
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from .database_container import DatabaseContainer
 from .publisher_container import PublisherContainer
+
+
+async def _get_session(
+    session_maker: async_sessionmaker,
+) -> AsyncGenerator[AsyncSession, None]:
+    async with session_maker() as session:
+        yield session
 
 
 class PersistenceContainer(containers.DeclarativeContainer):
@@ -51,37 +34,32 @@ class PersistenceContainer(containers.DeclarativeContainer):
     publisher_container: providers.Container[PublisherContainer] = providers.Container(
         PublisherContainer
     )
+    database_container: providers.Container[DatabaseContainer] = providers.Container(
+        DatabaseContainer
+    )
 
-    query_handlers = providers.Dict(
-        {
-            GetBudgetByIdQuery: providers.Factory(GetBudgetByIdQueryHandler),
-            GetBudgetsQuery: providers.Factory(GetBudgetsQueryHandler),
-            GetCategoriesQuery: providers.Factory(GetCategoriesQueryHandler),
-            GetCategoryByIdQuery: providers.Factory(GetCategoryByIdQueryHandler),
-            GetTransactionsQuery: providers.Factory(GetTransactionsQueryHandler),
-            GetTransactionByIdQuery: providers.Factory(GetTransactionByIdQueryHandler),
-            GetBudgetStatisticsQuery: providers.Factory(
-                GetBudgetStatisticsQueryHandler
-            ),
-        }
+    session: providers.Resource[AsyncSession] = providers.Resource(
+        _get_session, session_maker=database_container.sessionmaker
     )
 
     repositories = providers.Dict(
         {
             BudgetRepository: providers.Factory(
-                InMemoryBudgetRepository, users=None, budgets=None
+                SQLAlchemyBudgetRepository, session=session
             ),
-            TransactionRepository: providers.Factory(InMemoryTransactionRepository),
-            StatisticsRepository: providers.Factory(InMemoryStatisticsRepository),
+            TransactionRepository: providers.Factory(
+                SQLAlchemyTransactionRepository, session=session
+            ),
+            StatisticsRepository: providers.Factory(
+                SQLAlchemyStatisticsRepository, session=session
+            ),
         }
     )
 
     uow: providers.Factory[UnitOfWork] = providers.Factory(
-        InMemoryUnitOfWork, event_publisher=publisher_container.domain_publisher
-    )
-
-    get_query_handler = providers.Callable(
-        lambda query_type, handlers: handlers[query_type], handlers=query_handlers
+        SQLAlchemyUnitOfWork,
+        session=session,
+        event_publisher=publisher_container.domain_publisher,
     )
 
     get_repository = providers.Callable(
