@@ -36,12 +36,15 @@ CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "
 FROM base AS development
 WORKDIR /app
 COPY backend/pyproject.toml .
+ENV UV_NO_CACHE=1
+ENV PYTHONDONTWRITEBYTECODE=1
 # Install in dev mode with uv
 RUN uv sync
 # Copy src folder and alembic config
 COPY backend/src ./src
 COPY backend/alembic.ini .
 EXPOSE 8000
+
 CMD ["uv", "run", "src/main.py"]
 
 # Subscriber build for RabbitMQ event processing
@@ -60,13 +63,4 @@ WORKDIR /app
 COPY backend/src ./src
 COPY backend/alembic.ini .
 # Run celery worker for budget_buddy_tasks
-CMD ["celery", "-A", "src.celery_app.app", "worker", "--loglevel=INFO"]
-
-# Flower build for monitoring Celery tasks
-FROM deps AS flower
-WORKDIR /app
-# Copy src folder and alembic config
-COPY backend/src ./src
-COPY backend/alembic.ini .
-# Run flower with connection to RabbitMQ
-CMD ["celery", "-A", "src.celery_app.app", "flower", "--port=5555", "--broker=amqp://guest:guest@rabbitmq:5672//"]
+CMD ["celery", "-A", "src.celery_app.app", "flower", "--port=5555"]

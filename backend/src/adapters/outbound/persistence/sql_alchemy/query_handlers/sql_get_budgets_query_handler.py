@@ -71,7 +71,7 @@ class SQLGetBudgetsQueryHandler(
                 user_id=budget.user_id,
                 name=budget.name,
                 total_limit=MoneyDTO(
-                    amount=budget.total_limit.value.amount,
+                    amount=budget.total_limit.value.to_float(),
                     currency=budget.total_limit.value.currency,
                 ),
                 currency=budget.total_limit.value.currency,
@@ -86,7 +86,7 @@ class SQLGetBudgetsQueryHandler(
                         id=cat.id,
                         name=cat.name,
                         limit=MoneyDTO(
-                            amount=cat.limit.value.amount,
+                            amount=cat.limit.value.to_float(),
                             currency=cat.limit.value.currency,
                         ),
                         budget_id=cat.budget_id,

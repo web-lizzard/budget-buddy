@@ -1,11 +1,11 @@
 import logging
+from datetime import timedelta
 
 import aio_pika
+from celery_app import app as celery_app
 from dependency_injector.wiring import inject
 from domain.events.budget import BudgetCreated
 from pydantic import ValidationError
-
-from adapters.inbound.tasks.budget_tasks import renew_budget_task
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +26,23 @@ async def on_budget_created_message(message: aio_pika.IncomingMessage) -> None:
             event = BudgetCreated.model_validate_json(message.body)
             logger.debug(f"Deserialized BudgetCreated event: {event}")
 
-            # Schedule Celery task for budget renewal
-            renew_budget_task.apply_async(
-                args=[event.budget_id, event.user_id],
-                countdown=30,  # 30s delay before task execution
+            # Schedule task for budget renewal using celery_app
+            logger.debug(
+                f"Scheduling renewal task with args: budget_id={event.budget_id}, user_id={event.user_id}, "
+                f"eta={event.end_date - timedelta(days=1)}"
             )
 
-            logger.info(f"Scheduled renewal task for budget {event.budget_id}")
+            # Użyj instancji celery_app aby zaplanować zadanie przez Redis
+            task = celery_app.send_task(
+                "budget_renewal_task",
+                kwargs={"budget_id": event.budget_id, "user_id": event.user_id},
+                eta=event.end_date - timedelta(days=1),
+                queue="budget_renewal_queue",
+            )
+
+            logger.info(
+                f"Scheduled renewal task (ID: {task.id}) for budget {event.budget_id}"
+            )
 
         except ValidationError as e:
             logger.error(
@@ -63,8 +73,8 @@ def register_budget_created_subscriber(
     """
 
     async def setup_subscriber():
-        # Queue declaration for budget renewal
-        queue_name = "budget_renewal_queue"
+        # Queue declaration for budget renewal events
+        queue_name = "budget_created_events_queue"
         queue = await channel.declare_queue(queue_name, durable=True)
 
         # Binding for BudgetCreated event

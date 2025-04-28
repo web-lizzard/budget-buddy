@@ -20,3 +20,9 @@ def configure_logging(settings: Settings) -> None:
         format=settings.logger.format,
         handlers=handlers,
     )
+
+    logging.getLogger("celery").setLevel(logging.INFO)
+    logging.getLogger("celery.worker").setLevel(logging.INFO)
+    logging.getLogger("celery.task").setLevel(logging.INFO)
+    logging.getLogger("celery.app").setLevel(logging.INFO)
+    logging.getLogger("celery.utils").setLevel(logging.INFO)

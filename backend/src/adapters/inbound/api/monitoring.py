@@ -1,5 +1,9 @@
+from logging import getLogger
+
 from fastapi import APIRouter, Response
 from infrastructure.settings import Environment, get_settings
+
+logger = getLogger(__name__)
 
 
 def create_monitoring_router() -> APIRouter:
@@ -21,6 +25,7 @@ def create_monitoring_router() -> APIRouter:
         Returns:
             Response: 200 OK if the application is alive
         """
+        logger.error("Liveness check")
         return Response(status_code=200)
 
     @router.get("/readiness")
@@ -32,4 +37,5 @@ def create_monitoring_router() -> APIRouter:
         """
         return Response(status_code=200)
 
+    return router
     return router

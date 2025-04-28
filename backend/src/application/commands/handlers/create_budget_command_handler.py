@@ -1,13 +1,12 @@
+from application.commands import CategoryData, CreateBudgetCommand
+from application.commands.handlers.command_handler import CommandHandler
+from application.ports.uow import UnitOfWork
 from domain.events import BudgetCreated
 from domain.events.domain_event import DomainEvent
 from domain.factories import BudgetFactory
 from domain.factories.budget_factory import CategoryInput
 from domain.ports import BudgetRepository
 from domain.value_objects import BudgetName, CategoryName, Limit, Money
-
-from application.commands import CategoryData, CreateBudgetCommand
-from application.commands.handlers.command_handler import CommandHandler
-from application.ports.uow import UnitOfWork
 
 
 class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
@@ -41,6 +40,7 @@ class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
         Returns:
             BudgetCreated domain event
         """
+        print("Creating budget")
         # Create strategy input based on strategy type
         category_inputs = [
             self._get_category_input(category, command.currency)
@@ -68,6 +68,7 @@ class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
             start_date=budget.start_date,
             strategy=str(command.strategy_input.strategy_type),
             name=budget_name.value,
+            end_date=budget.end_date,
         )
 
     def _get_category_input(

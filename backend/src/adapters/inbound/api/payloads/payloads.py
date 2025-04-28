@@ -36,7 +36,6 @@ class CreateCategoryRequestPayload(BaseModel):
 
 # Payload for creating a new budget.
 class CreateBudgetRequestPayload(BaseModel):
-    user_id: uuid.UUID
     total_limit: MoneyPayload
     start_date: date
     end_date: date

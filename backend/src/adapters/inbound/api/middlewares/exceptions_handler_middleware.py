@@ -43,9 +43,9 @@ class ExceptionHandlerMiddleware(BaseHTTPMiddleware):
                 e, status_code=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            _logger.error(exc_info=e, msg=str(e))
+            _logger.debug(exc_info=e, msg=str(e))
             return self._create_error_response(
-                UnknownException("An unexpected error occurred"),
+                UnknownException(str(e)),
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

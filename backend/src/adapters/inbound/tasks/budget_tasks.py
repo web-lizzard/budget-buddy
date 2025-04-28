@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
     bind=True,
     max_retries=3,
     default_retry_delay=60,
-    queue="budget_renewal_task_queue",
+    name="budget_renewal_task",
+    queue="budget_renewal_queue",
 )
 @inject
 def renew_budget_task(
@@ -24,7 +25,9 @@ def renew_budget_task(
     budget_id: str,
     user_id: str,
     handler: RenewBudgetCommandHandler = Provide[
-        MainContainer.application_container.renew_budget_command_handler
+        MainContainer.application_container.provided.get_command_handler.call(
+            RenewBudgetCommand
+        )
     ],
 ):
     """

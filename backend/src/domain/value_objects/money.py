@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Union
 
-from domain.exceptions import InvalidCurrencyError, CurrencyMismatchError
+from domain.exceptions import CurrencyMismatchError, InvalidCurrencyError
 
 
 @dataclass(frozen=True)
@@ -101,6 +101,15 @@ class Money:
         new_amount = int(Decimal(self.amount) / decimal_divisor)
 
         return Money(new_amount, self.currency)
+
+    def to_float(self) -> float:
+        """
+        Convert the amount from int to float.
+
+        Returns:
+            Amount in major currency units (e.g. dollars)
+        """
+        return self.amount / 100.0
 
     def _ensure_same_currency(self, other: "Money") -> None:
         """

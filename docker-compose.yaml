@@ -12,12 +12,10 @@ services:
       - ./backend/src:/app/src
     env_file:
       - .env
-    restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_started
+      - rabbitmq
+      - postgres
+      - redis
 
   subscriber:
     build:
@@ -29,13 +27,8 @@ services:
     env_file:
       - .env
     depends_on:
-      api:
-        condition: service_started
       rabbitmq:
-        condition: service_started
-      postgres:
         condition: service_healthy
-    restart: unless-stopped
 
   celeryworker:
     build:
@@ -47,25 +40,11 @@ services:
     env_file:
       - .env
     depends_on:
-      rabbitmq:
-        condition: service_started
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-
-  flower:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-      target: flower
+      - rabbitmq
+      - postgres
+      - redis
     ports:
       - "5555:5555"
-    depends_on:
-      rabbitmq:
-        condition: service_started
-      celeryworker:
-        condition: service_started
-    restart: unless-stopped
 
   postgres:
     image: postgres:latest
@@ -77,32 +56,39 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U budget_buddy -d budget_buddy"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:4-management
     hostname: rabbitmq
     ports:
       - "5672:5672" # AMQP protocol port
       - "15672:15672" # Management UI port
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq/
+      - ./rabbitmq-definitions.json:/etc/rabbitmq/definitions.json:ro
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    restart: unless-stopped
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_ERLANG_COOKIE: "THISISASECURECOOKIESTRING1234567890"
+      RABBITMQ_LOAD_DEFINITIONS: "/etc/rabbitmq/definitions.json"
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      test: ["CMD", "rabbitmqctl", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   adminer:
     image: adminer
@@ -113,3 +99,5 @@ services:
 
 volumes:
   postgres_data:
+  rabbitmq_data:
+  redis_data:

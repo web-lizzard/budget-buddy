@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 from adapters.outbound.persistence.sql_alchemy.models import (
@@ -27,6 +28,7 @@ def map_category_statistics_record_domain_to_model(
     domain: CategoryStatisticsRecord,
     statistics_record_model_id: uuid.UUID,
     user_id: uuid.UUID,
+    creation_date: datetime.datetime,
 ) -> CategoryStatisticsRecordModel:
     """Maps CategoryStatisticsRecord domain entity to CategoryStatisticsRecordModel SQLAlchemy object."""
     # TODO: statistics_record_model_id and user_id might be needed for consistency
@@ -59,6 +61,7 @@ def map_category_statistics_record_domain_to_model(
             amount=domain.used_limit.amount,
             currency=domain.used_limit.currency,
         ),
+        created_at=creation_date,
     )
 
 
@@ -115,9 +118,11 @@ def map_statistics_record_domain_to_model(
         ),
         category_statistics=[
             map_category_statistics_record_domain_to_model(
-                cs, domain.id, domain.user_id
+                cs, domain.id, domain.user_id, domain.creation_date
             )
             for cs in domain.categories_statistics
         ],
+        created_at=domain.creation_date,
+        creation_date=domain.creation_date,
     )
     return model

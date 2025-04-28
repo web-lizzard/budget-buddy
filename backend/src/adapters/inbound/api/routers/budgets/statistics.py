@@ -1,14 +1,13 @@
 from typing import Annotated
 from uuid import UUID
 
+from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID
 from application.dtos.statistics_record_dto import StatisticsRecordDTO
 from application.queries.get_budget_statistics_query import GetBudgetStatisticsQuery
 from application.queries.handlers.query_handler import QueryHandler
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends
 from infrastructure.container.main_container import MainContainer
-
-from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID
 
 router = APIRouter(tags=["statistics"])
 
@@ -21,7 +20,7 @@ async def get_budget_statistics(
         QueryHandler[GetBudgetStatisticsQuery, StatisticsRecordDTO],
         Depends(
             Provide[
-                MainContainer.persistence_container.provided.get_query_handler.call(
+                MainContainer.application_container.provided.get_query_handler.call(
                     GetBudgetStatisticsQuery
                 )
             ]

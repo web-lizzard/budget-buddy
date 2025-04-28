@@ -23,7 +23,7 @@ class APISettings(BaseModel):
 class LoggerSettings(BaseModel):
     """Logger configuration settings."""
 
-    level: str = "INFO"
+    level: str = "DEBUG"
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 
@@ -51,9 +51,39 @@ class RabbitMQSettings(BaseModel):
     user: str = "guest"
     password: str = "guest"
     vhost: str = "/"
+    celery_vhost: str = "/celery"
+    events_vhost: str = "/events"
     exchange_name: str = "domain_events"
 
-    url: str = f"amqp://{user}:{password}@{host}:{port}{vhost}"
+    @property
+    def events_url(self) -> str:
+        """URL for event publishing/subscribing."""
+        return f"amqp://{self.user}:{self.password}@{self.host}:{self.port}{self.events_vhost}"
+
+    @property
+    def celery_url(self) -> str:
+        """URL for Celery tasks."""
+        return f"amqp://{self.user}:{self.password}@{self.host}:{self.port}{self.celery_vhost}"
+
+    url: str = f"amqp://{user}:{password}@{host}:{port}{vhost}"  # keeping for backward compatibility
+
+
+class RedisSettings(BaseModel):
+    """Redis configuration settings."""
+
+    host: str = "redis"  # Service name in Docker network
+    port: int = 6379
+    db: int = 0
+
+    @property
+    def url(self) -> str:
+        """URL for Redis connection."""
+        return f"redis://{self.host}:{self.port}/{self.db}"
+
+    @property
+    def celery_broker_url(self) -> str:
+        """URL for Celery broker."""
+        return self.url
 
 
 class Settings(BaseSettings):
@@ -67,6 +97,7 @@ class Settings(BaseSettings):
     logger: LoggerSettings = LoggerSettings()
     database: DatabaseSettings = DatabaseSettings()
     rabbitmq: RabbitMQSettings = RabbitMQSettings()
+    redis: RedisSettings = RedisSettings()
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -18,7 +18,9 @@ logger = logging.getLogger(__name__)
 async def on_transaction_added_message(
     message: aio_pika.IncomingMessage,
     handler: CalculateStatisticsCommandHandler = Provide[
-        MainContainer.application_container.calculate_statistics_command_handler
+        MainContainer.application_container.provided.get_command_handler.call(
+            CalculateStatisticsCommand
+        )
     ],
 ) -> None:
     """

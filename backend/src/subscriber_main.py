@@ -14,6 +14,7 @@ from adapters.inbound.subscribers.transaction_added_subscriber import (
 )
 from aio_pika.abc import AbstractRobustConnection
 from infrastructure.container.main_container import MainContainer
+from infrastructure.settings import get_settings
 
 # Configure logging
 logging.basicConfig(
@@ -31,25 +32,13 @@ async def main() -> None:
     """
     # Initialize DI container
     container = MainContainer()
+    settings = get_settings()
+    container.config.from_pydantic(settings)
     container.init_resources()
-    container.config.from_dict(
-        {
-            "rabbitmq": {
-                "url": "amqp://guest:guest@rabbitmq:5672/",
-                "exchange_name": "domain_events",
-            }
-        }
-    )
-    container.wire(
-        modules=[
-            "adapters.inbound.subscribers.transaction_added_subscriber",
-            "adapters.inbound.subscribers.budget_created_subscriber",
-        ]
-    )
 
     # Get RabbitMQ configuration
-    amqp_url = str(container.config["rabbitmq"]["url"])
-    exchange_name = str(container.config["rabbitmq"]["exchange_name"])
+    amqp_url = settings.rabbitmq.url
+    exchange_name = settings.rabbitmq.exchange_name
 
     connection: Optional[AbstractRobustConnection] = None
 

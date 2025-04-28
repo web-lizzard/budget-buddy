@@ -1,11 +1,6 @@
 # NOTE: Linter might complain about DTOs, assume they exist
 from uuid import UUID
 
-from application.dtos import StatisticsRecordDTO
-from application.queries import GetBudgetStatisticsQuery
-from application.queries.handlers import QueryHandler
-from domain.aggregates.statistics_record import StatisticsRecord
-
 # Import the concrete repository implementation and default user ID
 from adapters.outbound.persistence.in_memory.database import (
     DEFAULT_USER_ID,
@@ -14,6 +9,10 @@ from adapters.outbound.persistence.in_memory.database import (
 from adapters.outbound.persistence.in_memory.statistics_repository import (
     InMemoryStatisticsRepository,
 )
+from application.dtos import StatisticsRecordDTO
+from application.queries import GetBudgetStatisticsQuery
+from application.queries.handlers import QueryHandler
+from domain.aggregates.statistics_record import StatisticsRecord
 
 from .mappers import map_statistics_record_to_dto
 
