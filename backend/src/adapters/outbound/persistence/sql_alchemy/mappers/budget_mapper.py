@@ -44,9 +44,6 @@ def map_category_domain_to_model(domain: Category, user_id: UUID) -> CategoryMod
 # --- Budget Mappers ---
 def map_budget_model_to_domain(model: BudgetModel) -> Budget:
     """Maps BudgetModel SQLAlchemy object to Budget domain aggregate."""
-    print("--------------------------------")
-    print(type(model.start_date), type(model.end_date))
-    print("--------------------------------")
     return Budget(
         id=model.id,
         user_id=model.user_id,

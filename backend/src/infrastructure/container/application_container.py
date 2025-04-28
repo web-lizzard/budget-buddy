@@ -30,8 +30,12 @@ from application.commands import (
     RemoveCategoryCommand,
     RenewBudgetCommand,
 )
+from application.commands.calculate_statistics_command import CalculateStatisticsCommand
 from application.commands.handlers.add_category_command_handler import (
     AddCategoryCommandHandler,
+)
+from application.commands.handlers.calculate_statistics_command_handler import (
+    CalculateStatisticsCommandHandler,
 )
 from application.commands.handlers.create_budget_command_handler import (
     CreateBudgetCommandHandler,
@@ -68,6 +72,7 @@ from application.queries import (
 )
 from dependency_injector import containers, providers
 from domain.ports.budget_repository import BudgetRepository
+from domain.ports.outbound.statistics_repository import StatisticsRepository
 from domain.ports.transaction_repository import TransactionRepository
 
 # Forward references for type hinting - use classes directly if available
@@ -198,6 +203,19 @@ class ApplicationContainer(containers.DeclarativeContainer):
                 ),
                 transaction_repository=persistence_container.provided.get_repository.call(
                     TransactionRepository
+                ),
+            ),
+            CalculateStatisticsCommand: providers.Factory(
+                CalculateStatisticsCommandHandler,
+                unit_of_work=persistence_container.uow,
+                budget_repository=persistence_container.provided.get_repository.call(
+                    BudgetRepository
+                ),
+                transaction_repository=persistence_container.provided.get_repository.call(
+                    TransactionRepository
+                ),
+                statistics_repository=persistence_container.provided.get_repository.call(
+                    StatisticsRepository
                 ),
             ),
         }

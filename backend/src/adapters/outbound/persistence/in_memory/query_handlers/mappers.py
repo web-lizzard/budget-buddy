@@ -22,7 +22,7 @@ from domain.value_objects import Money
 
 def map_money_to_dto(money: Money) -> MoneyDTO:
     """Maps Money value object to MoneyDTO."""
-    return MoneyDTO(amount=money.amount, currency=money.currency)
+    return MoneyDTO(amount=money.to_float(), currency=money.currency)
 
 
 def map_category_to_dto(category: Category) -> CategoryDTO:

@@ -1,4 +1,4 @@
-from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
+from adapters.outbound.domain_publisher import RabbitMQDomainPublisher
 from dependency_injector import containers, providers
 from domain.ports.domain_publisher import DomainPublisher
 
@@ -6,6 +6,12 @@ from domain.ports.domain_publisher import DomainPublisher
 class PublisherContainer(containers.DeclarativeContainer):
     """Dependency injection container for publishers."""
 
+    config = providers.Configuration()
+
     domain_publisher: providers.Provider[DomainPublisher] = providers.Singleton(
-        InMemoryDomainPublisher
+        RabbitMQDomainPublisher,
+        amqp_url=providers.Callable(lambda c: c["rabbitmq"]["url"], config),
+        exchange_name=providers.Callable(
+            lambda c: c["rabbitmq"]["exchange_name"], config
+        ),
     )

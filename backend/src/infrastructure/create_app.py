@@ -19,7 +19,6 @@ def create_app() -> FastAPI:
     configure_logging(settings)
 
     container = MainContainer()
-    container.wire(packages=["adapters.inbound.api"])
     container.config.from_pydantic(settings)
 
     app = ContainerizedFastAPI(

@@ -1,9 +1,8 @@
 from dependency_injector import containers, providers
-
 from infrastructure.container.application_container import ApplicationContainer
 from infrastructure.container.domain_container import DomainContainer
 
-# Add import for DatabaseContainer
+# Add import for containers
 from .database_container import DatabaseContainer
 from .persistence_container import PersistenceContainer
 from .publisher_container import PublisherContainer
@@ -12,6 +11,13 @@ from .publisher_container import PublisherContainer
 class MainContainer(containers.DeclarativeContainer):
     """Dependency injection container."""
 
+    wiring_config = containers.WiringConfiguration(
+        packages=[
+            "adapters.inbound.api",
+            "adapters.inbound.subscribers",
+            "adapters.inbound.tasks",
+        ]
+    )
     # Configuration
     config = providers.Configuration()
 
@@ -22,7 +28,7 @@ class MainContainer(containers.DeclarativeContainer):
     domain_container = providers.Container(DomainContainer)
 
     # Publishers
-    publisher_container = providers.Container(PublisherContainer)
+    publisher_container = providers.Container(PublisherContainer, config=config)
 
     # Persistence
     persistence_container = providers.Container(

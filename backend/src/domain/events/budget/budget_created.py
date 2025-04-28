@@ -1,10 +1,8 @@
-from dataclasses import dataclass
 from datetime import datetime
 
 from domain.events.domain_event import DomainEvent
 
 
-@dataclass(frozen=True)
 class BudgetCreated(DomainEvent):
     budget_id: str
     user_id: str
@@ -12,7 +10,4 @@ class BudgetCreated(DomainEvent):
     start_date: datetime
     strategy: str
     name: str
-
-    def __post_init__(self):
-        # Call parent __init__ since dataclass doesn't do it automatically
-        super().__init__()
+    end_date: datetime

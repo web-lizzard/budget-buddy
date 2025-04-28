@@ -2,5 +2,5 @@ from .dto import DTO
 
 
 class MoneyDTO(DTO):
-    amount: int
+    amount: float
     currency: str

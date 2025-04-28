@@ -26,7 +26,6 @@ class InMemoryStatisticsRepository(StatisticsRepository):
         """Saves (creates or updates) a statistics record in memory."""
 
         self._records[statistics_record.id] = statistics_record
-        print(self._records)
 
     async def find_by_id(
         self, statistic_id: uuid.UUID, user_id: uuid.UUID

@@ -12,19 +12,39 @@ services:
       - ./backend/src:/app/src
     env_file:
       - .env
-    restart: unless-stopped
     depends_on:
+      - rabbitmq
       - postgres
+      - redis
 
   subscriber:
     build:
       context: .
       dockerfile: backend/Dockerfile
       target: subscriber
+    volumes:
+      - ./backend/src:/app/src
     env_file:
       - .env
     depends_on:
-      - api
+      rabbitmq:
+        condition: service_healthy
+
+  celeryworker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: celeryworker
+    volumes:
+      - ./backend/src:/app/src
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - redis
+    ports:
+      - "5555:5555"
 
   postgres:
     image: postgres:latest
@@ -36,7 +56,39 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+      - ./rabbitmq-definitions.json:/etc/rabbitmq/definitions.json:ro
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_ERLANG_COOKIE: "THISISASECURECOOKIESTRING1234567890"
+      RABBITMQ_LOAD_DEFINITIONS: "/etc/rabbitmq/definitions.json"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   adminer:
     image: adminer
@@ -47,3 +99,5 @@ services:
 
 volumes:
   postgres_data:
+  rabbitmq_data:
+  redis_data:

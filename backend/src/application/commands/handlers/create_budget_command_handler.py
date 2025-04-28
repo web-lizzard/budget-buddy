@@ -68,6 +68,7 @@ class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
             start_date=budget.start_date,
             strategy=str(command.strategy_input.strategy_type),
             name=budget_name.value,
+            end_date=budget.end_date,
         )
 
     def _get_category_input(

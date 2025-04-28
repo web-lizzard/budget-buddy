@@ -1,6 +1,4 @@
 from application.dtos import CategoryStatisticsRecordDTO, MoneyDTO, StatisticsRecordDTO
-
-# from application.exceptions import NotFoundError # Removed incorrect import
 from application.queries import GetBudgetStatisticsQuery
 from application.queries.handlers import QueryHandler
 from domain.exceptions import StatisticsRecordNotFoundError
@@ -40,19 +38,19 @@ class SQLGetBudgetStatisticsQueryHandler(
             user_id=result.user_id,
             budget_id=result.budget_id,
             current_balance=MoneyDTO(
-                amount=result.current_balance.amount,
+                amount=result.current_balance.to_float(),
                 currency=result.current_balance.currency,
             ),
             daily_available_amount=MoneyDTO(
-                amount=result.daily_available_amount.amount,
+                amount=result.daily_available_amount.to_float(),
                 currency=result.daily_available_amount.currency,
             ),
             daily_average=MoneyDTO(
-                amount=result.daily_average.amount,
+                amount=result.daily_average.to_float(),
                 currency=result.daily_average.currency,
             ),
             used_limit=MoneyDTO(
-                amount=result.used_limit.amount,
+                amount=result.used_limit.to_float(),
                 currency=result.used_limit.currency,
             ),
             creation_date=result.creation_date,
@@ -61,19 +59,19 @@ class SQLGetBudgetStatisticsQueryHandler(
                     id=cat_stat.id,
                     category_id=cat_stat.category_id,
                     current_balance=MoneyDTO(
-                        amount=cat_stat.current_balance.amount,
+                        amount=cat_stat.current_balance.to_float(),
                         currency=cat_stat.current_balance.currency,
                     ),
                     daily_available_amount=MoneyDTO(
-                        amount=cat_stat.daily_available_amount.amount,
+                        amount=cat_stat.daily_available_amount.to_float(),
                         currency=cat_stat.daily_available_amount.currency,
                     ),
                     daily_average=MoneyDTO(
-                        amount=cat_stat.daily_average.amount,
+                        amount=cat_stat.daily_average.to_float(),
                         currency=cat_stat.daily_average.currency,
                     ),
                     used_limit=MoneyDTO(
-                        amount=cat_stat.used_limit.amount,
+                        amount=cat_stat.used_limit.to_float(),
                         currency=cat_stat.used_limit.currency,
                     ),
                 )

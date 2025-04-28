@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import datetime
 
 from .budget_strategy_dto import BudgetStrategyDTO
 from .category_dto import CategoryDTO
@@ -12,8 +12,8 @@ class BudgetDTO(DTO):
     user_id: uuid.UUID
     total_limit: MoneyDTO
     currency: str
-    start_date: date
-    end_date: date
+    start_date: datetime
+    end_date: datetime
     strategy: BudgetStrategyDTO
     name: str
     deactivation_date: datetime | None = None
