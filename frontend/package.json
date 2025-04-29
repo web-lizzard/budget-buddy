@@ -9,16 +9,22 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix --ignore-pattern components/ui/"
   },
   "dependencies": {
     "@nuxt/eslint": "^1.3.0",
+    "@peterbud/nuxt-query": "^0.0.6",
+    "@pinia/nuxt": "^0.11.0",
     "@tailwindcss/vite": "^4.1.4",
+    "@tanstack/vue-table": "^8.21.3",
+    "@vueuse/core": "^13.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "eslint": "^9.25.1",
     "lucide-vue-next": "^0.503.0",
     "nuxt": "^3.17.0",
+    "pinia": "^3.0.2",
+    "reka-ui": "^2.2.0",
     "shadcn-nuxt": "^2.1.0",
     "tailwind-merge": "^3.2.0",
     "tailwindcss": "^4.1.4",
