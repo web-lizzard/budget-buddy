@@ -7,7 +7,6 @@ import { useRouter } from 'vue-router'; // Import useRouter for navigation
 
 // Import child components
 import BudgetFilterTabs from '@/components/BudgetFilterTabs.vue';
-import CreateBudgetButton from '@/components/CreateBudgetButton.vue';
 import BudgetListTable from '@/components/BudgetListTable.vue'; // Uncomment the table import
 
 // Import Shadcn UI components used directly here
@@ -66,7 +65,7 @@ function handleCreateClick() {
     <div class="flex justify-between items-center">
       <h1 class="text-3xl font-bold">My Budgets</h1>
       <!-- Use CreateBudgetButton component -->
-      <CreateBudgetButton @click="handleCreateClick" />
+      <Button @click="handleCreateClick">Create Budget</Button>
     </div>
 
     <!-- Use BudgetFilterTabs component -->
