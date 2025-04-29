@@ -1,0 +1,1664 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Budget Buddy API",
+        "description": "API for managing personal budgets",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/monitoring/liveness": {
+            "get": {
+                "tags": [
+                    "Monitoring"
+                ],
+                "summary": "Liveness",
+                "description": "Check if the application is alive.\n\nReturns:\n    Response: 200 OK if the application is alive",
+                "operationId": "liveness_monitoring_liveness_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/monitoring/readiness": {
+            "get": {
+                "tags": [
+                    "Monitoring"
+                ],
+                "summary": "Readiness",
+                "description": "Check if the application is ready to accept requests.\n\nReturns:\n    Response: 200 OK if the application is ready",
+                "operationId": "readiness_monitoring_readiness_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/budgets/": {
+            "get": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "budgets"
+                ],
+                "summary": "Get Budgets",
+                "description": "Retrieve a list of budgets with pagination and filtering options.\n\nArgs:\n    status: Optional filter for budget status ('active' or 'expired')\n    page: Page number for pagination\n    limit: Number of items per page\n    sort: Field to sort results by\n    query_handler: Injected query handler for retrieving budgets",
+                "operationId": "get_budgets_v0_budgets__get",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter by 'active' or 'expired'",
+                            "title": "Status"
+                        },
+                        "description": "Filter by 'active' or 'expired'"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "Page number",
+                            "default": 1,
+                            "title": "Page"
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Items per page",
+                            "default": 10,
+                            "title": "Limit"
+                        },
+                        "description": "Items per page"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Field to sort by",
+                            "title": "Sort"
+                        },
+                        "description": "Field to sort by"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedItemDTO_BudgetDTO_"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "budgets"
+                ],
+                "summary": "Create Budget",
+                "description": "Create a new budget.\n\nArgs:\n    payload: Budget creation data.\n    command_handler: Injected handler for the CreateBudgetCommand.",
+                "operationId": "create_budget_v0_budgets__post",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateBudgetRequestPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/budgets/{budget_id}": {
+            "get": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "budgets"
+                ],
+                "summary": "Get Budget By Id",
+                "description": "Retrieve detailed information for a specific budget.\n\nArgs:\n    budget_id: The UUID of the budget to retrieve.\n    query_handler: Injected query handler for retrieving budget details.",
+                "operationId": "get_budget_by_id_v0_budgets__budget_id__get",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BudgetDTO"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/budgets/{budget_id}/deactivate": {
+            "patch": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "budgets"
+                ],
+                "summary": "Deactivate Budget",
+                "description": "Deactivate a budget to prevent automatic renewal.\n\nArgs:\n    budget_id: The UUID of the budget to deactivate.\n    command_handler: Injected handler for the DeactivateBudgetCommand.",
+                "operationId": "deactivate_budget_v0_budgets__budget_id__deactivate_patch",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/budgets/{budget_id}/renew": {
+            "post": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "budgets"
+                ],
+                "summary": "Renew Budget",
+                "description": "Manually trigger budget renewal based on the defined strategy.\n\nArgs:\n    budget_id: The UUID of the budget to renew.\n    command_handler: Injected handler for the RenewBudgetCommand.",
+                "operationId": "renew_budget_v0_budgets__budget_id__renew_post",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/budgets/{budget_id}/categories": {
+            "get": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "budgets"
+                ],
+                "summary": "Get Categories",
+                "description": "Retrieve all categories associated with a specific budget.\n\nArgs:\n    budget_id: The UUID of the budget.\n    query_handler: Injected query handler for retrieving categories.",
+                "operationId": "get_categories_v0_budgets__budget_id__categories_get",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryListDTO"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "categories"
+                ],
+                "summary": "Create Category",
+                "description": "Create a new category within a given budget.\n\nArgs:\n    budget_id: The UUID of the budget to add the category to.\n    payload: Category creation data.\n    command_handler: Injected handler for AddCategoryCommand.",
+                "operationId": "create_category_v0_budgets__budget_id__categories_post",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateCategoryRequestPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/budgets/{budget_id}/categories/{category_id}": {
+            "get": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "categories"
+                ],
+                "summary": "Get Category By Id",
+                "description": "Retrieve details for a specific category in a budget.\n\nArgs:\n    budget_id: The UUID of the budget.\n    category_id: The UUID of the category to retrieve.\n    query_handler: Injected query handler for retrieving category details.",
+                "operationId": "get_category_by_id_v0_budgets__budget_id__categories__category_id__get",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Category Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryDTO"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "categories"
+                ],
+                "summary": "Update Category",
+                "description": "Update an existing category's details.\n\nArgs:\n    budget_id: The UUID of the budget containing the category.\n    category_id: The UUID of the category to update.\n    payload: Updated category data.\n    command_handler: Injected handler for EditCategoryCommand.",
+                "operationId": "update_category_v0_budgets__budget_id__categories__category_id__put",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Category Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCategoryRequestPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "categories"
+                ],
+                "summary": "Delete Category",
+                "description": "Delete a category from a budget.\n\nHandles associated transactions based on the provided transfer policy in the payload.\n\nArgs:\n    budget_id: The UUID of the budget containing the category.\n    category_id: The UUID of the category to delete.\n    payload: Payload specifying the transfer policy for transactions.\n    command_handler: Injected handler for RemoveCategoryCommand.",
+                "operationId": "delete_category_v0_budgets__budget_id__categories__category_id__delete",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Category Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DeleteCategoryRequestPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/budgets/{budget_id}/statistics": {
+            "get": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "statistics"
+                ],
+                "summary": "Get Budget Statistics",
+                "description": "Retrieve overall financial statistics for a budget.\n\nArgs:\n    budget_id: The UUID of the budget.\n    query_handler: Injected query handler for retrieving statistics.",
+                "operationId": "get_budget_statistics_v0_budgets__budget_id__statistics_get",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StatisticsRecordDTO"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/budgets/{budget_id}/transactions": {
+            "get": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "transactions"
+                ],
+                "summary": "Get Transactions",
+                "description": "Retrieve a list of transactions for a specified budget.\n\nArgs:\n    budget_id: The UUID of the budget.\n    query_handler: Injected query handler for retrieving transactions.\n    date_from: Optional start date filter.\n    date_to: Optional end date filter.\n    page: Page number for pagination.\n    limit: Number of items per page.\n    sort: Field to sort results by.",
+                "operationId": "get_transactions_v0_budgets__budget_id__transactions_get",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter transactions from this date (YYYY-MM-DD)",
+                            "title": "Date From"
+                        },
+                        "description": "Filter transactions from this date (YYYY-MM-DD)"
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filter transactions up to this date (YYYY-MM-DD)",
+                            "title": "Date To"
+                        },
+                        "description": "Filter transactions up to this date (YYYY-MM-DD)"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "Page number",
+                            "default": 1,
+                            "title": "Page"
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Items per page",
+                            "default": 10,
+                            "title": "Limit"
+                        },
+                        "description": "Items per page"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Field to sort by (e.g., 'occurred_date')",
+                            "title": "Sort"
+                        },
+                        "description": "Field to sort by (e.g., 'occurred_date')"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedItemDTO_TransactionDTO_"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "transactions"
+                ],
+                "summary": "Create Transaction",
+                "description": "Create a new transaction in a budget category.\n\nArgs:\n    budget_id: The UUID of the budget.\n    payload: Transaction creation data.\n    command_handler: Injected handler for CreateTransactionCommand.",
+                "operationId": "create_transaction_v0_budgets__budget_id__transactions_post",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateTransactionRequestPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v0/budgets/{budget_id}/transactions/{transaction_id}": {
+            "get": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "transactions"
+                ],
+                "summary": "Get Transaction By Id",
+                "description": "Retrieve details for a specific transaction.\n\nArgs:\n    budget_id: The UUID of the budget.\n    transaction_id: The UUID of the transaction to retrieve.\n    query_handler: Injected query handler for retrieving transaction details.",
+                "operationId": "get_transaction_by_id_v0_budgets__budget_id__transactions__transaction_id__get",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    },
+                    {
+                        "name": "transaction_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Transaction Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionDTO"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "transactions"
+                ],
+                "summary": "Update Transaction",
+                "description": "Update an existing transaction.\n\nArgs:\n    budget_id: The UUID of the budget containing the transaction.\n    transaction_id: The UUID of the transaction to update.\n    payload: Updated transaction data.\n    command_handler: Injected handler for EditTransactionCommand.",
+                "operationId": "update_transaction_v0_budgets__budget_id__transactions__transaction_id__put",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    },
+                    {
+                        "name": "transaction_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Transaction Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateTransactionRequestPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "v0",
+                    "budgets",
+                    "transactions"
+                ],
+                "summary": "Delete Transaction",
+                "description": "Delete a transaction.\n\nArgs:\n    budget_id: The UUID of the budget containing the transaction.\n    transaction_id: The UUID of the transaction to delete.\n    command_handler: Injected handler for DeleteTransactionCommand.",
+                "operationId": "delete_transaction_v0_budgets__budget_id__transactions__transaction_id__delete",
+                "parameters": [
+                    {
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Budget Id"
+                        }
+                    },
+                    {
+                        "name": "transaction_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Transaction Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "BudgetDTO": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "User Id"
+                    },
+                    "total_limit": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "title": "Currency"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Start Date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "End Date"
+                    },
+                    "strategy": {
+                        "$ref": "#/components/schemas/BudgetStrategyDTO"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "deactivation_date": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Deactivation Date"
+                    },
+                    "categories": {
+                        "items": {
+                            "$ref": "#/components/schemas/CategoryDTO"
+                        },
+                        "type": "array",
+                        "title": "Categories",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "user_id",
+                    "total_limit",
+                    "currency",
+                    "start_date",
+                    "end_date",
+                    "strategy",
+                    "name"
+                ],
+                "title": "BudgetDTO"
+            },
+            "BudgetStrategyDTO": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "title": "Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "type"
+                ],
+                "title": "BudgetStrategyDTO"
+            },
+            "BudgetStrategyType": {
+                "type": "string",
+                "enum": [
+                    "monthly",
+                    "yearly"
+                ],
+                "title": "BudgetStrategyType",
+                "description": "Enum representing budget strategy types."
+            },
+            "CategoryDTO": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "budget_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Budget Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "limit": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "budget_id",
+                    "name",
+                    "limit"
+                ],
+                "title": "CategoryDTO"
+            },
+            "CategoryListDTO": {
+                "properties": {
+                    "categories": {
+                        "items": {
+                            "$ref": "#/components/schemas/CategoryDTO"
+                        },
+                        "type": "array",
+                        "title": "Categories"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "categories"
+                ],
+                "title": "CategoryListDTO"
+            },
+            "CategoryStatisticsRecordDTO": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "category_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Category Id"
+                    },
+                    "current_balance": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    },
+                    "daily_available_amount": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    },
+                    "daily_average": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    },
+                    "used_limit": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "category_id",
+                    "current_balance",
+                    "daily_available_amount",
+                    "daily_average",
+                    "used_limit"
+                ],
+                "title": "CategoryStatisticsRecordDTO"
+            },
+            "CreateBudgetRequestPayload": {
+                "properties": {
+                    "total_limit": {
+                        "$ref": "#/components/schemas/MoneyPayload"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "title": "Start Date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "title": "End Date"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "minLength": 3,
+                        "title": "Name"
+                    },
+                    "categories": {
+                        "items": {
+                            "$ref": "#/components/schemas/CreateCategoryRequestPayload"
+                        },
+                        "type": "array",
+                        "title": "Categories"
+                    },
+                    "strategy": {
+                        "$ref": "#/components/schemas/StrategyPayload"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "total_limit",
+                    "start_date",
+                    "end_date",
+                    "name",
+                    "strategy"
+                ],
+                "title": "CreateBudgetRequestPayload"
+            },
+            "CreateCategoryRequestPayload": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "limit": {
+                        "$ref": "#/components/schemas/MoneyPayload"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "limit"
+                ],
+                "title": "CreateCategoryRequestPayload"
+            },
+            "CreateTransactionRequestPayload": {
+                "properties": {
+                    "category_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Category Id"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/MoneyPayload"
+                    },
+                    "transaction_type": {
+                        "$ref": "#/components/schemas/TransactionTypeEnumPayload"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "User Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "category_id",
+                    "amount",
+                    "transaction_type",
+                    "user_id"
+                ],
+                "title": "CreateTransactionRequestPayload"
+            },
+            "DeleteCategoryRequestPayload": {
+                "properties": {
+                    "handle_transaction": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/HandleTransactionDeletePayload"
+                            },
+                            {
+                                "$ref": "#/components/schemas/HandleTransactionMovePayload"
+                            }
+                        ],
+                        "title": "Handle Transaction"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "handle_transaction"
+                ],
+                "title": "DeleteCategoryRequestPayload"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "HandleTransactionDeletePayload": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "const": "delete",
+                        "title": "Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "type"
+                ],
+                "title": "HandleTransactionDeletePayload"
+            },
+            "HandleTransactionMovePayload": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "const": "move",
+                        "title": "Type"
+                    },
+                    "target_category_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Target Category Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "type",
+                    "target_category_id"
+                ],
+                "title": "HandleTransactionMovePayload"
+            },
+            "MoneyDTO": {
+                "properties": {
+                    "amount": {
+                        "type": "number",
+                        "title": "Amount"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "title": "Currency"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "amount",
+                    "currency"
+                ],
+                "title": "MoneyDTO"
+            },
+            "MoneyPayload": {
+                "properties": {
+                    "amount": {
+                        "type": "number",
+                        "title": "Amount"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "title": "Currency"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "amount",
+                    "currency"
+                ],
+                "title": "MoneyPayload"
+            },
+            "PaginatedItemDTO_BudgetDTO_": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/BudgetDTO"
+                        },
+                        "type": "array",
+                        "title": "Items"
+                    },
+                    "total": {
+                        "type": "integer",
+                        "title": "Total"
+                    },
+                    "skip": {
+                        "type": "integer",
+                        "title": "Skip"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "title": "Limit"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "items",
+                    "total",
+                    "skip",
+                    "limit"
+                ],
+                "title": "PaginatedItemDTO[BudgetDTO]"
+            },
+            "PaginatedItemDTO_TransactionDTO_": {
+                "properties": {
+                    "items": {
+                        "items": {
+                            "$ref": "#/components/schemas/TransactionDTO"
+                        },
+                        "type": "array",
+                        "title": "Items"
+                    },
+                    "total": {
+                        "type": "integer",
+                        "title": "Total"
+                    },
+                    "skip": {
+                        "type": "integer",
+                        "title": "Skip"
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "title": "Limit"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "items",
+                    "total",
+                    "skip",
+                    "limit"
+                ],
+                "title": "PaginatedItemDTO[TransactionDTO]"
+            },
+            "StatisticsRecordDTO": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "User Id"
+                    },
+                    "budget_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Budget Id"
+                    },
+                    "current_balance": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    },
+                    "daily_available_amount": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    },
+                    "daily_average": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    },
+                    "used_limit": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    },
+                    "creation_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Creation Date"
+                    },
+                    "categories_statistics": {
+                        "items": {
+                            "$ref": "#/components/schemas/CategoryStatisticsRecordDTO"
+                        },
+                        "type": "array",
+                        "title": "Categories Statistics"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "user_id",
+                    "budget_id",
+                    "current_balance",
+                    "daily_available_amount",
+                    "daily_average",
+                    "used_limit",
+                    "creation_date"
+                ],
+                "title": "StatisticsRecordDTO"
+            },
+            "StrategyPayload": {
+                "properties": {
+                    "budget_strategy_type": {
+                        "$ref": "#/components/schemas/BudgetStrategyType"
+                    },
+                    "parameters": {
+                        "additionalProperties": true,
+                        "type": "object",
+                        "title": "Parameters"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "budget_strategy_type"
+                ],
+                "title": "StrategyPayload"
+            },
+            "TransactionDTO": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "category_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Category Id"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/MoneyDTO"
+                    },
+                    "transaction_type": {
+                        "$ref": "#/components/schemas/TransactionTypeEnum"
+                    },
+                    "occurred_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Occurred Date"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "User Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "category_id",
+                    "amount",
+                    "transaction_type",
+                    "occurred_date",
+                    "user_id"
+                ],
+                "title": "TransactionDTO"
+            },
+            "TransactionTypeEnum": {
+                "type": "string",
+                "enum": [
+                    "INCOME",
+                    "EXPENSE"
+                ],
+                "title": "TransactionTypeEnum"
+            },
+            "TransactionTypeEnumPayload": {
+                "type": "string",
+                "enum": [
+                    "EXPENSE",
+                    "INCOME"
+                ],
+                "title": "TransactionTypeEnumPayload"
+            },
+            "UpdateCategoryRequestPayload": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "limit": {
+                        "$ref": "#/components/schemas/MoneyPayload"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "limit"
+                ],
+                "title": "UpdateCategoryRequestPayload"
+            },
+            "UpdateTransactionRequestPayload": {
+                "properties": {
+                    "category_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Category Id"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/MoneyPayload"
+                    },
+                    "transaction_type": {
+                        "$ref": "#/components/schemas/TransactionTypeEnumPayload"
+                    },
+                    "occurred_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Occurred Date"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "category_id",
+                    "amount",
+                    "transaction_type",
+                    "occurred_date"
+                ],
+                "title": "UpdateTransactionRequestPayload"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}
