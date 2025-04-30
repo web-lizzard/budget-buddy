@@ -2,7 +2,9 @@ import uuid
 from datetime import date
 
 from domain.aggregates.statistics_record import StatisticsRecord
-from domain.exceptions.statistics_not_found_exceptions import StatisticsNotFoundError
+from domain.exceptions.statistics_record_not_found_error import (
+    StatisticsRecordNotFoundError,
+)
 from domain.ports.outbound.statistics_repository import StatisticsRepository
 
 from .database import IN_MEMORY_DATABASE
@@ -33,7 +35,7 @@ class InMemoryStatisticsRepository(StatisticsRepository):
         """Finds a statistics record by its ID for a specific user."""
         record = self._records.get(statistic_id)
         if record is None or record.user_id != user_id:
-            raise StatisticsNotFoundError(
+            raise StatisticsRecordNotFoundError(
                 f"Statistics record with ID {statistic_id} not found for user {user_id}"
             )
         return record

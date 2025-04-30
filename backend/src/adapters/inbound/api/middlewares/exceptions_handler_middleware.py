@@ -4,7 +4,9 @@ from domain.exceptions.budget_not_found_error import BudgetNotFoundError
 from domain.exceptions.category_not_found_error import CategoryNotFoundError
 from domain.exceptions.domain_exception import DomainError
 from domain.exceptions.not_compatible_version_error import NotCompatibleVersionError
-from domain.exceptions.statistics_not_found_exceptions import StatisticsNotFoundError
+from domain.exceptions.statistics_record_not_found_error import (
+    StatisticsRecordNotFoundError,
+)
 from domain.exceptions.transaction_not_found_error import TransactionNotFoundError
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
@@ -35,7 +37,7 @@ class ExceptionHandlerMiddleware(BaseHTTPMiddleware):
             BudgetNotFoundError,
             CategoryNotFoundError,
             TransactionNotFoundError,
-            StatisticsNotFoundError,
+            StatisticsRecordNotFoundError,
         ) as e:
             return self._create_error_response(e, status_code=status.HTTP_404_NOT_FOUND)
         except DomainError as e:
