@@ -71,7 +71,7 @@ export const useBudgetDetailData = (budgetId: MaybeRef<string>) => {
       }
 
       const parsedBudget = safeParse(BudgetSchema, budgetResponse, 'Budget')
-      const parsedTransactions = safeParse(z.array(TransactionSchema), transactionsResponse, 'Transactions')
+      const parsedTransactions = safeParse(z.array(TransactionSchema), transactionsResponse.items, 'Transactions')
 
       if (!parsedBudget || !parsedTransactions) {
         console.error('Core data validation failed (Budget or Transactions).')

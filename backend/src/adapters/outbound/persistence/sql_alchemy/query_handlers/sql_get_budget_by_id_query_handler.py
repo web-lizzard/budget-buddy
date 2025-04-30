@@ -30,7 +30,7 @@ class SQLGetBudgetByIdQueryHandler(QueryHandler[GetBudgetByIdQuery, BudgetDTO]):
             user_id=result.user_id,
             name=result.name,
             total_limit=MoneyDTO(
-                amount=result.total_limit.value.amount,
+                amount=result.total_limit.value.to_float(),
                 currency=result.total_limit.value.currency,
             ),
             currency=result.total_limit.value.currency,
@@ -45,7 +45,7 @@ class SQLGetBudgetByIdQueryHandler(QueryHandler[GetBudgetByIdQuery, BudgetDTO]):
                     id=cat.id,
                     name=cat.name,
                     limit=MoneyDTO(
-                        amount=cat.limit.value.amount,
+                        amount=cat.limit.value.to_float(),
                         currency=cat.limit.value.currency,
                     ),
                     budget_id=cat.budget_id,
