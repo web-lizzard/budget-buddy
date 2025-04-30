@@ -38,7 +38,6 @@ class CreateCategoryRequestPayload(BaseModel):
 class CreateBudgetRequestPayload(BaseModel):
     total_limit: MoneyPayload
     start_date: date
-    end_date: date
     name: str = Field(..., min_length=3, max_length=100)
     categories: list[CreateCategoryRequestPayload] = Field(default_factory=list)
     strategy: StrategyPayload

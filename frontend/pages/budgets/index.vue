@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useBudgetStore } from '@/stores/budgetStore';
 import type { BudgetFilterValue, BudgetSortOption } from '@/types/budget';
@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router'; // Import useRouter for navigation
 // Import child components
 import BudgetFilterTabs from '@/components/BudgetFilterTabs.vue';
 import BudgetListTable from '@/components/BudgetListTable.vue'; // Uncomment the table import
+import CreateBudgetModal from '@/components/CreateBudgetModal.vue'; // Import the modal component
 
 // Import Shadcn UI components used directly here
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -27,6 +28,9 @@ const {
   isLoading,
   error
 } = storeToRefs(budgetStore);
+
+// State for controlling the modal visibility
+const isModalOpen = ref(false);
 
 // Fetch budgets on mount
 onMounted(() => {
@@ -54,8 +58,7 @@ function handleRowClick(payload: { id: string }) {
 }
 
 function handleCreateClick() {
-  console.log('Navigate to create budget page - Nav Skipped as requested');
-  // router.push('/budgets/create'); // Navigation logic intentionally omitted
+  isModalOpen.value = true; // Open the modal
 }
 
 </script>
@@ -119,6 +122,9 @@ function handleCreateClick() {
             </div>
         </div>
     </div>
+
+    <!-- Modal for Creating Budgets -->
+    <CreateBudgetModal v-model="isModalOpen" />
 
   </div>
 </template>

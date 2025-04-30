@@ -6,8 +6,9 @@ import type {
   BudgetSortOption,
   PaginatedBudgetsDTO, // Updated type name
   BudgetDTO,           // Updated type name
-  BudgetListItemViewModel
+  BudgetListItemViewModel,
 } from '@/types/budget';
+import type { CreateBudgetRequestPayload } from '~/types/api'; // Import API payload type
 
 // Keep the mapping function separate or move to utils
 // Updated to use BudgetDTO
@@ -63,21 +64,20 @@ function mapBudgetDTOToViewModel(dto: BudgetDTO): BudgetListItemViewModel {
   };
 }
 
-// Define store using setup function syntax
 export const useBudgetStore = defineStore('budgetStore', () => {
   const budgets = ref<BudgetListItemViewModel[]>([]);
   const totalBudgets = ref<number>(0);
   const currentPage = ref<number>(1);
   const itemsPerPage = ref<number>(10); // Default items per page
   const currentFilter = ref<BudgetFilterValue>('all');
-  const currentSort = ref<BudgetSortOption>({ sortBy: 'start_date', sortOrder: 'desc' }); // Default sort
+  const currentSort = ref<BudgetSortOption>({ sortBy: 'name', sortOrder: 'asc' }); // Default sort
   const isLoading = ref<boolean>(false);
   const error = ref<string | null>(null);
-
 
   async function fetchBudgets() {
     isLoading.value = true;
     error.value = null;
+    console.log('Fetching budgets...', { page: currentPage.value, limit: itemsPerPage.value, filter: currentFilter.value, sort: currentSort.value });
     try {
       const params: Record<string, string | number> = {
         page: currentPage.value,
@@ -95,15 +95,10 @@ export const useBudgetStore = defineStore('budgetStore', () => {
       budgets.value = response.items.map(mapBudgetDTOToViewModel);
       totalBudgets.value = response.total;
 
-    } catch (err: unknown) { // Use unknown instead of any
-      let message = 'Failed to load budgets. Please try again.';
-      // Type guard or check if error is an object with expected properties
-      if (typeof err === 'object' && err !== null) {
-          const potentialError = err as { data?: { message?: string }; statusMessage?: string; message?: string };
-          message = potentialError.data?.message || potentialError.statusMessage || potentialError.message || message;
-      }
-      error.value = message;
-      budgets.value = []; // Clear budgets on error
+    } catch (err: unknown) {
+      console.error('Error fetching budgets:', err);
+      error.value = 'Failed to fetch budgets. Please try again.';
+      budgets.value = [];
       totalBudgets.value = 0;
     } finally {
       isLoading.value = false;
@@ -125,18 +120,49 @@ export const useBudgetStore = defineStore('budgetStore', () => {
     }
   }
 
-  function setItemsPerPage(limit: number) {
-      if (limit > 0 && itemsPerPage.value !== limit) {
-          itemsPerPage.value = limit;
-          currentPage.value = 1; // Reset page when limit changes
-          fetchBudgets(); // Refetch data
-      }
+  function setItemsPerPage(size: number) {
+    if (size > 0 && itemsPerPage.value !== size) {
+      itemsPerPage.value = size;
+      currentPage.value = 1; // Reset page when limit changes
+      fetchBudgets(); // Refetch data
+    }
   }
 
   function setSort(sortOption: BudgetSortOption) {
     if (currentSort.value.sortBy !== sortOption.sortBy || currentSort.value.sortOrder !== sortOption.sortOrder) {
       currentSort.value = sortOption;
-      fetchBudgets(); // Refetch data
+      fetchBudgets();
+    }
+  }
+
+  async function createBudget(payload: CreateBudgetRequestPayload): Promise<void> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      console.log('Sending create budget request:', payload);
+      const response = await $fetch('/api/v0/budgets/', {
+        method: 'POST',
+        body: payload,
+      });
+      console.log('Create budget response:', response);
+      currentPage.value = 1;
+      await fetchBudgets();
+    } catch (err: unknown) {
+      console.error('Error creating budget:', err);
+      let apiError = 'An unexpected error occurred.';
+      // Refined Type guard for $fetch errors (ofetch)
+      if (typeof err === 'object' && err !== null) {
+        if ('data' in err && typeof err.data === 'object' && err.data !== null) {
+          const errorData = err.data as { message?: string; detail?: string };
+          apiError = errorData.message || errorData.detail || apiError;
+        } else if ('message' in err && typeof err.message === 'string') {
+          // Handle generic Error objects
+          apiError = err.message;
+        }
+      }
+      error.value = `Failed to create budget: ${apiError} Please check your input and try again.`;
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -154,5 +180,6 @@ export const useBudgetStore = defineStore('budgetStore', () => {
     setPage,
     setItemsPerPage,
     setSort,
+    createBudget,
   };
 });
