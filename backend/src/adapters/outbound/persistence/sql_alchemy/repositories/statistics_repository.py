@@ -2,7 +2,9 @@ import uuid
 from datetime import date, datetime
 
 from domain.aggregates.statistics_record import StatisticsRecord
-from domain.exceptions.statistics_not_found_exceptions import StatisticsNotFoundError
+from domain.exceptions.statistics_record_not_found_error import (
+    StatisticsRecordNotFoundError,
+)
 from domain.ports.outbound.statistics_repository import StatisticsRepository
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,7 +44,7 @@ class SQLAlchemyStatisticsRepository(StatisticsRepository):
         record_model = result.scalars().one_or_none()
 
         if record_model is None:
-            raise StatisticsNotFoundError(
+            raise StatisticsRecordNotFoundError(
                 f"Statistics record with ID {statistic_id} not found for user {user_id}"
             )
         return map_statistics_record_model_to_domain(record_model)

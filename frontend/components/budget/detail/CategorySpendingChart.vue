@@ -14,9 +14,6 @@ import type { ChartDataViewModel } from '@/types/viewmodels'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DEFAULT_CHART_COLORS } from '@/constants/charts'
 
-
-// Register Chart.js components
-// (Might be done globally in a Nuxt plugin instead)
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale)
 
 const props = defineProps<{
@@ -28,30 +25,26 @@ const hasData = computed(() => {
     props.chartData &&
     props.chartData.labels.length > 0 &&
     props.chartData.datasets.length > 0 &&
-    props.chartData.datasets[0].data.some(value => value > 0) // Check if there's any non-zero spending
+    props.chartData.datasets[0].data.some(value => value > 0)
   )
 })
 
-// Default Chart.js options
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      position: 'right' as const, // Position legend on the right
+      position: 'right' as const,
     },
     tooltip: {
       callbacks: {
-        // Customize tooltip to show currency (requires access to raw amounts or formatting)
-        // This basic example just shows the value
         label: function(context: TooltipItem<'doughnut'>) {
             let label = context.dataset.label || '';
             if (label) {
                 label += ': ';
             }
             if (context.parsed !== null) {
-                 // TODO: Find a way to get currency/format properly
-                label += context.parsed.toFixed(2); // Example: format as needed
+                label += context.parsed.toFixed(2);
             }
             return label;
         }
@@ -60,10 +53,8 @@ const chartOptions = computed(() => ({
   },
 }))
 
-// Prepare data in the structure vue-chartjs expects
 const doughnutChartData = computed(() => {
     if (!hasData.value || !props.chartData) {
-        // Return a structure Chart.js understands even when empty
         return {
             labels: [],
             datasets: [{
@@ -76,10 +67,9 @@ const doughnutChartData = computed(() => {
         labels: props.chartData.labels,
         datasets: props.chartData.datasets.map(dataset => ({
             ...dataset,
-            // Use imported default colors
             backgroundColor: dataset.backgroundColor && dataset.backgroundColor.length > 0
                 ? dataset.backgroundColor
-                : DEFAULT_CHART_COLORS // Use constant
+                : DEFAULT_CHART_COLORS
         }))
     }
 })
@@ -106,9 +96,7 @@ const doughnutChartData = computed(() => {
 </template>
 
 <style scoped>
-/* Ensure chart container allows the chart to be responsive */
 .chart-container {
   position: relative;
-  /* height: 300px; You might need to set a fixed height or aspect ratio */
 }
 </style>

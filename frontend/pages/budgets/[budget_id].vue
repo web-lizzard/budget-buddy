@@ -143,8 +143,6 @@ const handleDeactivateBudget = () => {
     alert(`Placeholder: Deactivate budget ${budgetIdParam.value}`);
 };
 
-// TODO: Implement SkeletonLoader component
-// TODO: Implement ErrorDisplay component
 
 </script>
 
@@ -165,32 +163,32 @@ const handleDeactivateBudget = () => {
     </div>
 
     <div v-else-if="budgetData" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- Left Column (or Main Column on smaller screens) -->
         <div class="lg:col-span-2 space-y-4">
              <BudgetSummaryCard :budget="budgetData" />
-             <OverallStatsCard
-                :statistics="statisticsData"
-                :budget-limit="budgetData.total_limit"
-             />
-            <!-- Render CategoryList -->
-             <CategoryList
-                :categories="categoryListViewModels"
-                @edit-category="handleEditCategory"
-                @remove-category="handleRemoveCategory"
-              />
-        </div>
 
-        <!-- Right Column (or Second Column on smaller screens) -->
-        <div class="lg:col-span-1 space-y-4">
-            <CategorySpendingChart :chart-data="categorySpendingChartData" />
-            <RecentTransactionsTable :transactions="transactionViewModels" :budget-id="budgetIdParam as string" />
-            <!-- Use ActionButtons -->
-            <ActionButtons
+             <ActionButtons
                 :budget-id="budgetIdParam as string"
                 :is-active="budgetData.is_active"
                 @add-transaction="handleAddTransaction"
                 @deactivate-budget="handleDeactivateBudget"
               />
+            <RecentTransactionsTable :transactions="transactionViewModels" :budget-id="budgetIdParam as string" />
+            <OverallStatsCard
+                :statistics="statisticsData"
+                :budget-limit="budgetData.total_limit"
+             />
+
+        </div>
+
+        <!-- Right Column (or Second Column on smaller screens) -->
+        <div class="lg:col-span-1 space-y-4">
+            <CategorySpendingChart :chart-data="categorySpendingChartData" />
+            <CategoryList
+                :categories="categoryListViewModels"
+                @edit-category="handleEditCategory"
+                @remove-category="handleRemoveCategory"
+              />
+
         </div>
     </div>
 

@@ -3,25 +3,23 @@ import type { Budget } from '~/types/budget'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { format } from 'date-fns'
 
-const props = defineProps<{ budget: Budget | null }>()
+const props = defineProps<{ budget: Budget }>()
 
 const formattedStartDate = computed(() => {
-  return props.budget?.start_date ? format(new Date(props.budget.start_date), 'PP') : 'N/A'
+  return format(props.budget.start_date, 'MMM d, yyyy')
 })
 
 const formattedEndDate = computed(() => {
-  return props.budget?.end_date ? format(new Date(props.budget.end_date), 'PP') : 'N/A'
+  return format(props.budget.end_date, 'MMM d, yyyy')
 })
 
 const formattedLimit = computed(() => {
-    if (!props.budget?.total_limit) return 'N/A'
-    // Basic currency formatting (consider a dedicated utility)
     return `${props.budget.total_limit.amount.toLocaleString()} ${props.budget.total_limit.currency}`
 })
 </script>
 
 <template>
-  <Card v-if="budget" class="mb-4">
+  <Card class="mb-4">
     <CardHeader>
       <CardTitle>{{ budget.name }}</CardTitle>
     </CardHeader>
@@ -44,10 +42,7 @@ const formattedLimit = computed(() => {
       </div>
     </CardContent>
   </Card>
-  <div v-else>
-    <!-- Optional: Placeholder or message when budget is null -->
-    <p>Budget data not available.</p>
-  </div>
+
 </template>
 
 <style scoped>

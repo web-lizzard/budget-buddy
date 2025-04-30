@@ -22,7 +22,6 @@ const handleRemove = () => {
     emit('remove-category', props.category.id)
 }
 
-// Formatted values for display (optional stats)
 const currentBalance = computed(() => formatCurrency(props.category.currentBalance))
 const usedLimit = computed(() => formatCurrency(props.category.usedLimit))
 
@@ -33,7 +32,7 @@ const usedLimit = computed(() => formatCurrency(props.category.usedLimit))
     <AccordionTrigger>
         <div class="flex justify-between items-center w-full pr-4">
              <span class="font-medium text-left">{{ category.name }}</span>
-             <!-- Optional: Show a summary stat like balance or percentage here -->
+             <span class="text-muted-foreground text-sm">{{ category.limit.amount}}</span>
         </div>
     </AccordionTrigger>
     <AccordionContent>
@@ -45,7 +44,6 @@ const usedLimit = computed(() => formatCurrency(props.category.usedLimit))
                 label="Limit Usage"
             />
 
-            <!-- Optional: Display more stats if available -->
             <div class="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                 <div v-if="category.currentBalance">
                     <span>Current Balance:</span>

@@ -8,14 +8,13 @@ import { TransactionSchema } from '@/schemas/transactionSchema'
 import { useAsyncData, createError } from '#app'
 
 // Helper function for safe Zod parsing
-function safeParse<T extends z.ZodTypeAny>(schema: T, data: unknown, context: string): z.infer<T> | null {
+function safeParse<T extends z.ZodTypeAny>(schema: T, data: unknown): z.infer<T> {
   const result = schema.safeParse(data)
   if (result.success) {
     return result.data
   }
   else {
-    console.error(`Zod validation failed for ${context}:`, result.error.format())
-    return null
+    throw Exception
   }
 }
 
@@ -40,13 +39,24 @@ export const useBudgetDetailData = (budgetId: MaybeRef<string>) => {
       let transactionsResponse: unknown = null;
 
       try {
-        // Fetch budget and transactions (essential)
         [budgetResponse, transactionsResponse] = await Promise.all([
           $fetch(budgetUrl),
           $fetch(transactionsUrl),
         ])
 
-        // Try fetching statistics, handle 404 gracefully, re-throw other errors
+
+        if (!transactionsResponse.items.length) {
+          const budget = safeParse(BudgetSchema, budgetResponse, 'budget')
+          return {
+            budget: {
+              ...budget,
+              is_active: !budget.deactivation_date,
+            },
+            stats: null,
+            transactions: [],
+          }
+        }
+
         try {
             statsResponse = await $fetch(statsUrl);
         } catch (statsError: unknown) {
