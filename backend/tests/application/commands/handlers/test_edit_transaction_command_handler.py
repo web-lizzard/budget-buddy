@@ -172,7 +172,7 @@ class TestEditTransactionCommandHandler:
             budget_id=budget_id,
             user_id=user_id,
             category_id=category_id,
-            amount=Money.mint(200.0, "USD"),
+            amount=200.0,
             transaction_type=TransactionType.INCOME,
             description="Updated transaction",
         )
@@ -264,7 +264,7 @@ class TestEditTransactionCommandHandler:
             budget_id=budget_id,
             user_id=user_id,
             category_id=category_id,
-            amount=Money.mint(200.0, "USD"),
+            amount=200.0,
             transaction_type=TransactionType.INCOME,
             description="Updated transaction",
         )
@@ -298,7 +298,7 @@ class TestEditTransactionCommandHandler:
             budget_id=budget_id,
             user_id=user_id,
             category_id=nonexistent_category_id,  # This category doesn't exist
-            amount=Money.mint(200.0, "USD"),
+            amount=200.0,
             transaction_type=TransactionType.INCOME,
             description="Updated transaction",
         )
@@ -306,3 +306,46 @@ class TestEditTransactionCommandHandler:
         # Act & Assert
         with pytest.raises(CategoryNotFoundError):
             await handler.handle(command)
+
+    @pytest.mark.asyncio
+    async def test_handle_edits_transaction_with_occurred_date(
+        self, user_id, budget_id, transaction_id, category_id
+    ):
+        """Test that handling the command updates the occurred date when provided."""
+        (
+            handler,
+            _,
+            transaction_repository,
+            unit_of_work,
+            domain_publisher,
+            _,
+            transaction,
+        ) = _get_dependencies(user_id, budget_id, transaction_id, category_id)
+        new_occurred_date = datetime(2023, 2, 1)
+        command = EditTransactionCommand(
+            transaction_id=transaction_id,
+            budget_id=budget_id,
+            user_id=user_id,
+            category_id=category_id,
+            amount=150.0,
+            transaction_type=transaction.transaction_type,
+            description="Updated transaction with new occurred date",
+            occurred_date=new_occurred_date,
+        )
+        captured_events = []
+
+        def event_subscriber(event):
+            captured_events.append(event)
+
+        domain_publisher.subscribe(TransactionEditedEvent, event_subscriber)
+        await handler.handle(command)
+        assert transaction.occurred_date == new_occurred_date
+        assert transaction.amount.amount == Money.mint(150.0, "USD").amount
+        assert transaction.description == "Updated transaction with new occurred date"
+        assert len(captured_events) == 1
+        event = captured_events[0]
+        assert event.transaction_id == transaction_id
+        assert event.budget_id == budget_id
+        assert event.user_id == user_id
+        assert event.description == "Updated transaction with new occurred date"
+        assert event.amount.amount == Money.mint(150.0, "USD").amount

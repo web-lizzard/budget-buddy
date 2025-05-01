@@ -41,7 +41,7 @@
       "categories": [
          {
             "name": "Category Name",
-            "limit": { "amount": 200, "currency": "USD" }
+            "limit": { "amount": 200 }
          }
       ],
       "strategy": { "type": "monthly/yearly", "parameters": {} }
@@ -80,7 +80,7 @@
     ```json
     {
       "name": "Category Name",
-      "limit": { "amount": 200, "currency": "USD" }
+      "limit": { "amount": 200 }
     }
     ```
   - **Constraints**: Maximum of 5 categories per budget; category name must be unique within a budget.
@@ -93,7 +93,7 @@
     ```json
     {
       "name": "updated_category_name",
-      "limit": { "amount": 250, "currency": "USD" }
+      "limit": { "amount": 250 }
     }
     ```
   - **Response**: No content; only HTTP status code 200 OK is returned.
@@ -129,7 +129,7 @@
     ```json
     {
       "category_id": "uuid",
-      "amount": { "amount": 100, "currency": "USD" },
+      "amount": { "amount": 100 },
       "transaction_type": "INCOME" or "EXPENSE",
       "occurred_date": "YYYY-MM-DDTHH:MM:SSZ",
       "description": "optional description",
@@ -148,7 +148,7 @@
     ```json
     {
       "category_id": "uuid",
-      "amount": { "amount": 120, "currency": "USD" },
+      "amount": { "amount": 120 },
       "transaction_type": "INCOME" or "EXPENSE",
       "occurred_date": "YYYY-MM-DDTHH:MM:SSZ",
       "description": "updated description"

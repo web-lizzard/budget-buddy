@@ -15,7 +15,6 @@ class CreateTransactionCommand(Command):
     budget_id: UUID
     user_id: UUID
     amount: float
-    currency: str
     transaction_type: TransactionType
-    occurred_date: datetime
+    occurred_date: datetime | None = None
     description: str | None = None

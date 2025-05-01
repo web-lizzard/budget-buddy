@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from domain.events.domain_event import DomainEvent
 from domain.events.transaction import TransactionAdded
 from domain.factories.transaction_factory import TransactionFactory
@@ -41,19 +43,24 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
         Returns:
             TransactionAdded domain event
         """
+        # Fetch the budget first to get the currency
+        _, budget = await self._budget_repository.find_by(
+            command.budget_id, command.user_id
+        )
+
         transaction_factory = TransactionFactory(self._budget_repository)
 
-        # Convert amount to Money value object
-        amount = Money.mint(command.amount, command.currency)
+        # Convert amount to Money value object using budget's currency
+        amount = Money.mint(command.amount, budget.currency)
 
-        # Create transaction
+        # Create transaction (TransactionFactory or Budget should handle date/activation validation)
         transaction = await transaction_factory.create_transaction(
             category_id=command.category_id,
             amount=amount,
             transaction_type=command.transaction_type,
             budget_id=command.budget_id,
             user_id=command.user_id,
-            occurred_date=command.occurred_date,
+            occurred_date=command.occurred_date or datetime.now(),
             description=command.description,
         )
 
@@ -64,7 +71,7 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
         return TransactionAdded(
             transaction_id=str(transaction.id),
             category_id=str(transaction.category_id),
-            amount=amount.amount,
+            amount=amount.amount,  # Use amount directly from Money object
             type=str(transaction.transaction_type),
             date=transaction.occurred_date,
             budget_id=str(command.budget_id),

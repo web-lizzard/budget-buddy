@@ -9,7 +9,6 @@ from domain.exceptions import (
     CannotAddTransactionToDeactivatedBudgetError,
     CategoryLimitExceedsBudgetError,
     CategoryNotFoundError,
-    CurrencyMismatchError,
     DuplicateCategoryNameError,
     MaxCategoriesReachedError,
     TransactionOutsideBudgetPeriodError,
@@ -318,16 +317,6 @@ class TestBudget:
         # Transaction date before deactivation
         transaction_date = valid_budget.deactivation_date - timedelta(hours=1)
         valid_budget.validate_transaction_date(transaction_date)
-
-    def test_validate_transaction_currency_success(self, valid_budget):
-        """Test validating a transaction currency that matches budget currency."""
-        # Should not raise an exception
-        valid_budget.validate_transaction_currency("USD")
-
-    def test_validate_transaction_currency_mismatch(self, valid_budget):
-        """Test validating a transaction currency that doesn't match budget currency."""
-        with pytest.raises(CurrencyMismatchError):
-            valid_budget.validate_transaction_currency("EUR")
 
     def test_string_representation(self, valid_budget):
         """Test string representation of Budget."""
