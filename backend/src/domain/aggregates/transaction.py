@@ -90,6 +90,7 @@ class Transaction:
         category_id: UUID,
         amount: Money,
         transaction_type: TransactionType,
+        occurred_date: datetime,
         description: str | None = None,
     ) -> None:
         """Update transaction details.
@@ -104,6 +105,7 @@ class Transaction:
         self._amount = amount
         self._transaction_type = transaction_type
         self._description = description
+        self._occurred_date = occurred_date
 
     def __str__(self) -> str:
         """String representation of the transaction."""

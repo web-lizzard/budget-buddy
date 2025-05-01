@@ -9,10 +9,7 @@ from domain.ports.domain_publisher import DomainPublisher
 class MockEvent(DomainEvent):
     """A simple event for testing."""
 
-    event_type = "test"
-
-    def __init__(self, data: str):
-        self.data = data
+    event_type: str = "test"
 
 
 class MockDomainPublisher(DomainPublisher):
@@ -60,7 +57,7 @@ class TestInMemoryUnitOfWork:
         # Arrange
         publisher = MockDomainPublisher()
         uow = InMemoryUnitOfWork(publisher)
-        event = MockEvent(data="test data")
+        event = MockEvent()
 
         # Act
         await uow.commit(event)

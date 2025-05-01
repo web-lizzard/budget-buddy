@@ -8,7 +8,6 @@ from domain.exceptions import (
     CannotAddTransactionToDeactivatedBudgetError,
     CategoryLimitExceedsBudgetError,
     CategoryNotFoundError,
-    CurrencyMismatchError,
     DuplicateCategoryNameError,
     MaxCategoriesReachedError,
     TransactionOutsideBudgetPeriodError,
@@ -141,6 +140,10 @@ class Budget:
             DuplicateCategoryNameError: If category with the same name already exists
             CategoryLimitExceedsBudgetError: If category limit exceeds available budget limit
         """
+        assert (
+            limit.value.currency == self._currency
+        ), "Category currency must match budget currency"
+
         if len(self._categories) >= self._MAX_CATEGORIES:
             raise MaxCategoriesReachedError(self._MAX_CATEGORIES)
 
@@ -205,6 +208,9 @@ class Budget:
             existing_category.change_name(name)
 
         if limit is not None:
+            assert (
+                limit.value.currency == self._currency
+            ), "Category currency must match budget currency"
             used_limit = self._calculate_used_limit(
                 limit, exclude_category_id=category_id
             )
@@ -242,19 +248,6 @@ class Budget:
             raise CannotAddTransactionToDeactivatedBudgetError(
                 str(transaction_date), str(self._deactivation_date)
             )
-
-    def validate_transaction_currency(self, currency: str) -> None:
-        """
-        Validate transaction currency against budget currency.
-
-        Args:
-            currency: Transaction currency
-
-        Raises:
-            CurrencyMismatchError: If transaction currency doesn't match budget currency
-        """
-        if currency != self._currency:
-            raise CurrencyMismatchError(currency, self._currency)
 
     def get_category_by(self, category_id: UUID) -> Category:
         """Get category by id.

@@ -1,7 +1,12 @@
+from uuid import UUID
+
+from domain.aggregates.budget import Budget
+from domain.aggregates.transaction import Transaction
 from domain.events.transaction_edited_event import TransactionEditedEvent
 from domain.exceptions import CannotAddTransactionToDeactivatedBudgetError
 from domain.ports.budget_repository import BudgetRepository
 from domain.ports.transaction_repository import TransactionRepository
+from domain.value_objects import Money
 
 from application.commands.edit_transaction_command import EditTransactionCommand
 from application.commands.handlers.command_handler import CommandHandler
@@ -59,26 +64,41 @@ class EditTransactionCommandHandler(CommandHandler[EditTransactionCommand]):
             command.transaction_id, command.user_id
         )
 
-        category = budget.get_category_by(command.category_id)
+        if command.occurred_date:
+            budget.validate_transaction_date(command.occurred_date)
 
         # Update the transaction
         transaction.update(
-            category_id=category.id,
-            amount=command.amount,
-            transaction_type=command.transaction_type,
-            description=command.description,
+            category_id=self._get_category_id(command, transaction, budget),
+            amount=(
+                Money.mint(command.amount, budget.currency)
+                if command.amount
+                else transaction.amount
+            ),
+            transaction_type=(command.transaction_type or transaction.transaction_type),
+            description=(command.description or transaction.description),
+            occurred_date=command.occurred_date or transaction.occurred_date,
         )
 
         # Save the updated transaction
         await self._transaction_repository.save(transaction)
 
-        # Return the event
+        # Return the event - use updated values from the transaction aggregate
         return TransactionEditedEvent(
-            transaction_id=command.transaction_id,
+            transaction_id=transaction.id,
             budget_id=command.budget_id,
             user_id=command.user_id,
-            category_id=category.id,
-            amount=command.amount,
-            transaction_type=command.transaction_type,
-            description=command.description,
+            category_id=transaction.category_id,
+            amount=transaction.amount,
+            transaction_type=transaction.transaction_type,
+            description=transaction.description,
         )
+
+    def _get_category_id(
+        self, command: EditTransactionCommand, transaction: Transaction, budget: Budget
+    ) -> UUID:
+        if not command.category_id:
+            return transaction.category_id
+
+        budget.get_category_by(command.category_id)
+        return command.category_id

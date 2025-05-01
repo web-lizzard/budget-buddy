@@ -7,10 +7,15 @@ from domain.value_objects import BudgetStrategyType
 from pydantic import BaseModel, Field
 
 
-# Local payload definition for Money
+# Local payload definition for Money (used for Budget total_limit)
 class MoneyPayload(BaseModel):
     amount: float
     currency: str
+
+
+# New local payload definition for Amount (used for categories and transactions)
+class AmountPayload(BaseModel):
+    amount: float
 
 
 # Local payload definition for Strategy
@@ -31,7 +36,7 @@ class TransactionTypeEnumPayload(str, Enum):
 # Payload for creating a new category inside a budget.
 class CreateCategoryRequestPayload(BaseModel):
     name: str
-    limit: MoneyPayload
+    limit: AmountPayload
 
 
 # Payload for creating a new budget.
@@ -49,7 +54,7 @@ class CreateBudgetRequestPayload(BaseModel):
 # Payload for updating an existing category.
 class UpdateCategoryRequestPayload(BaseModel):
     name: str
-    limit: MoneyPayload
+    limit: AmountPayload
 
 
 # Payload for handling transactions during category deletion (delete option).
@@ -78,16 +83,17 @@ class DeleteCategoryRequestPayload(BaseModel):
 # Payload for creating a new transaction.
 class CreateTransactionRequestPayload(BaseModel):
     category_id: uuid.UUID
-    amount: MoneyPayload
+    amount: AmountPayload
     transaction_type: TransactionTypeEnumPayload
     description: str | None = None
+    occurred_date: datetime
     user_id: uuid.UUID
 
 
 # Payload for updating a transaction.
 class UpdateTransactionRequestPayload(BaseModel):
     category_id: uuid.UUID
-    amount: MoneyPayload
+    amount: AmountPayload
     transaction_type: TransactionTypeEnumPayload
     occurred_date: datetime
     description: str | None = None
