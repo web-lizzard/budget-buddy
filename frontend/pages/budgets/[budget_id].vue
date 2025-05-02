@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBudgetDetailData } from '~/composables/useBudgetDetailData'
 import { createError } from '#app'
@@ -9,8 +9,9 @@ import CategorySpendingChart from '@/components/budget/detail/CategorySpendingCh
 import RecentTransactionsTable from '@/components/budget/detail/RecentTransactionsTable.vue'
 import CategoryList from '@/components/budget/detail/CategoryList.vue'
 import ActionButtons from '@/components/budget/detail/ActionButtons.vue'
+import AddEditTransactionModal from '@/components/transaction/AddEditTransactionModal.vue'
 import type { ChartDataViewModel, TransactionViewModel, CategoryListItemViewModel } from '~/types/viewmodels'
-import type { Transaction } from '~/types/transaction'
+import type { TransactionType } from '~/types/transaction'
 import type { Category } from '~/types/category'
 import type { CategoryStatistics } from '~/types/statistics'
 
@@ -18,6 +19,9 @@ const route = useRoute()
 const router = useRouter()
 
 const budgetIdParam = computed(() => route.params.budget_id)
+
+// Added reactive state for controlling the Add/Edit Transaction modal
+const isTransactionModalOpen = ref(false)
 
 // Validate the budgetId when the param changes. Throw 400 error if invalid.
 // Use watchEffect to reactively check and throw error.
@@ -35,6 +39,17 @@ watchEffect(() => {
 const { budgetData, statisticsData, recentTransactions, pending, error, refresh } =
   useBudgetDetailData(budgetIdParam as ComputedRef<string>) // Assert type as string now
 
+
+const budgetViewModel = computed(() => {
+  if (!budgetData.value) return null;
+  return {
+    currency: budgetData.value.currency,
+    startDate: new Date(budgetData.value.start_date),
+    endDate: new Date(budgetData.value.end_date),
+    budgetId: budgetData.value.id
+  }
+})
+
 // --- Computed ViewModels ---
 
 const categoryMap = computed(() => {
@@ -44,13 +59,14 @@ const categoryMap = computed(() => {
 });
 
 const transactionViewModels = computed((): TransactionViewModel[] => {
+
     if (!recentTransactions.value) return [];
-    return recentTransactions.value.map((tx: Transaction) => ({
+    return recentTransactions.value.map((tx) => ({
         id: tx.id,
         date: new Date(tx.date), // Convert string date to Date object
         categoryName: categoryMap.value.get(tx.category_id) ?? 'Uncategorized', // Get name from map
-        type: tx.type,
-        amount: tx.amount
+        type: tx.type.toUpperCase() as TransactionType,
+        amount: tx.amount,
     }));
 });
 
@@ -132,8 +148,14 @@ const handleRemoveCategory = (categoryId: string) => {
 
 const handleAddTransaction = () => {
     console.log('Action: Add transaction');
-     // Example Navigation:
-    router.push(`/budgets/${budgetIdParam.value}/transactions/new`);
+    // Open the Add/Edit Transaction modal instead of navigating
+    isTransactionModalOpen.value = true;
+};
+
+const handleTransactionSaved = () => {
+    // Called when the modal successfully saves a transaction
+    isTransactionModalOpen.value = false;
+    refresh();
 };
 
 const handleDeactivateBudget = () => {
@@ -151,8 +173,7 @@ const handleDeactivateBudget = () => {
     <h1 class="text-2xl font-bold mb-4">Budget Detail</h1>
 
     <div v-if="pending">
-      <p>Loading budget details...</p>
-      <!-- TODO: SkeletonLoader -->
+      <SkeletonLoader />
     </div>
 
     <div v-else-if="error">
@@ -180,7 +201,6 @@ const handleDeactivateBudget = () => {
 
         </div>
 
-        <!-- Right Column (or Second Column on smaller screens) -->
         <div class="lg:col-span-1 space-y-4">
             <CategorySpendingChart :chart-data="categorySpendingChartData" />
             <CategoryList
@@ -196,9 +216,13 @@ const handleDeactivateBudget = () => {
       <p class="text-yellow-600">Budget data could not be loaded or is unavailable.</p>
     </div>
 
+    <AddEditTransactionModal
+      :is-open="isTransactionModalOpen"
+      mode="create"
+      :budget="budgetViewModel"
+      :available-categories="budgetData?.categories || []"
+      @close="isTransactionModalOpen = false"
+      @transaction-saved="handleTransactionSaved"
+    />
   </div>
 </template>
-
-<style scoped>
-/* Scoped styles for the budget detail page */
-</style>

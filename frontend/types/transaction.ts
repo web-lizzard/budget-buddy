@@ -1,20 +1,22 @@
 import { z } from 'zod'
-import { MoneySchema, type Money } from './money'
+import type { Money } from './money'
 
-// Transaction type enum based on plan
-export type TransactionType = 'Expense' | 'Income'
+/**
+ * Represents the type of a transaction, used across different layers.
+ */
+export type TransactionType = 'INCOME' | 'EXPENSE'
 
-export const TransactionTypeSchema = z.enum(['Expense', 'Income'])
+export const TransactionTypeSchema = z.enum(['INCOME', 'EXPENSE'])
 
 // Transaction type corresponding to TransactionDTO and plan needs
 export interface Transaction {
   id: string // UUID
+  category_id: string // UUID of the associated category
+  user_id: string // UUID of the user
   amount: Money
   type: TransactionType
-  date: string // Keep as string, parse to Date in ViewModel
-  category_id: string // UUID
-  budget_id: string // UUID
-  // Add other fields from DTO if needed (e.g., description, payee)
+  date: string // ISO datetime string (e.g., "2023-10-27T10:00:00Z")
+  description?: string | null
 }
 
 // Zod schema for validating Transaction objects from API
@@ -24,5 +26,33 @@ export const TransactionSchema = z.object({
   type: TransactionTypeSchema,
   date: z.string().datetime(), // Validate as ISO 8601 date string
   category_id: z.string().uuid(),
-  budget_id: z.string().uuid(),
+  user_id: z.string().uuid(),
 })
+
+// --- API Payloads for Transactions ---
+
+// Payload definition for Amount used in transaction payloads
+export interface AmountPayload {
+  amount: number;
+}
+
+// Type for transaction type used in payloads (same as TransactionType)
+export type TransactionTypePayload = TransactionType;
+
+// Payload for creating a new transaction (POST /budgets/{id}/transactions)
+export interface CreateTransactionPayload {
+  category_id: string; // UUID
+  amount: AmountPayload;
+  transaction_type: TransactionTypePayload;
+  occurred_date: string; // ISO Date string (e.g., YYYY-MM-DDTHH:mm:ssZ)
+  description?: string;
+}
+
+// Payload for updating an existing transaction (PUT /budgets/{id}/transactions/{tid})
+export interface UpdateTransactionPayload {
+  category_id: string; // UUID
+  amount: AmountPayload;
+  transaction_type: TransactionTypePayload;
+  occurred_date: string; // ISO Date string
+  description?: string;
+}

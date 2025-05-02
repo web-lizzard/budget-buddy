@@ -1,5 +1,4 @@
-import { z } from 'zod'
-import { MoneySchema, type Money } from './money'
+import type { Money } from './money'
 
 // Category Statistics type corresponding to CategoryStatisticsRecordDTO
 export interface CategoryStatistics {
@@ -11,15 +10,6 @@ export interface CategoryStatistics {
   used_limit: Money
 }
 
-// Zod schema for validating CategoryStatistics objects
-export const CategoryStatisticsSchema = z.object({
-  id: z.string().uuid(), // Keep for validation
-  category_id: z.string().uuid(),
-  current_balance: MoneySchema,
-  daily_available_amount: MoneySchema,
-  daily_average: MoneySchema,
-  used_limit: MoneySchema,
-})
 
 // Budget Statistics type corresponding to StatisticsRecordDTO
 export interface BudgetStatistics {
@@ -33,16 +23,3 @@ export interface BudgetStatistics {
   // creation_date: string // Not needed per plan, but present in DTO
   categories_statistics: CategoryStatistics[]
 }
-
-// Zod schema for validating BudgetStatistics objects from API
-export const BudgetStatisticsSchema = z.object({
-  id: z.string().uuid(), // Keep for validation
-  user_id: z.string().uuid(), // Keep for validation
-  budget_id: z.string().uuid(), // Keep for validation
-  current_balance: MoneySchema,
-  daily_available_amount: MoneySchema,
-  daily_average: MoneySchema,
-  used_limit: MoneySchema,
-  creation_date: z.string().datetime(), // Keep for validation
-  categories_statistics: z.array(CategoryStatisticsSchema).default([]),
-})

@@ -1,9 +1,8 @@
 // types/budget.ts
 
 // Equivalent of MoneyDTO
-import { z } from 'zod'
-import { CategorySchema, type Category } from './category'
-import { MoneySchema, type Money } from './money'
+import type  { Category } from './category'
+import type {  Money } from './money'
 
 export interface BudgetStrategy {
   type: 'monthly' | 'yearly' | string; // Allow string for flexibility
@@ -81,22 +80,3 @@ export interface Budget {
   // strategy: BudgetStrategyDTO // Not detailed in plan, omit for now
   // deactivation_date: string | null // Included in DTO, add if needed for UI
 }
-
-// Zod schema for validating Budget objects from API
-export const BudgetSchema = z.object({
-  id: z.string().uuid(),
-  user_id: z.string().uuid(), // Keep for validation even if not used directly in TS type
-  name: z.string().min(1),
-  total_limit: MoneySchema,
-  start_date: z.string().datetime(), // Validate as ISO 8601 date string
-  end_date: z.string().datetime(),
-  currency: z.string().length(3),
-  // strategy: BudgetStrategySchema, // Define if needed
-  deactivation_date: z.string().datetime().nullable().optional(),
-  categories: z.array(CategorySchema).default([]),
-  // `is_active` might not come directly from API, may need transformation/calculation
-  // If it comes from API, add it here. Assuming it's derived for now.
-})
-
-// We might need a type for the API response that includes is_active if derived
-// Or calculate it based on deactivation_date
