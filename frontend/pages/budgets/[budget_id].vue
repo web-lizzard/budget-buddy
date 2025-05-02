@@ -10,6 +10,7 @@ import RecentTransactionsTable from '@/components/budget/detail/RecentTransactio
 import CategoryList from '@/components/budget/detail/CategoryList.vue'
 import ActionButtons from '@/components/budget/detail/ActionButtons.vue'
 import AddEditTransactionModal from '@/components/transaction/AddEditTransactionModal.vue'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { ChartDataViewModel, TransactionViewModel, CategoryListItemViewModel } from '~/types/viewmodels'
 import type { TransactionType } from '~/types/transaction'
 import type { Category } from '~/types/category'
@@ -44,8 +45,8 @@ const budgetViewModel = computed(() => {
   if (!budgetData.value) return null;
   return {
     currency: budgetData.value.currency,
-    startDate: new Date(budgetData.value.start_date),
-    endDate: new Date(budgetData.value.end_date),
+    startDate: new Date(budgetData.value.startDate),
+    endDate: new Date(budgetData.value.endDate),
     budgetId: budgetData.value.id
   }
 })
@@ -173,7 +174,7 @@ const handleDeactivateBudget = () => {
     <h1 class="text-2xl font-bold mb-4">Budget Detail</h1>
 
     <div v-if="pending">
-      <SkeletonLoader />
+      <Skeleton class="h-10 w-full" />
     </div>
 
     <div v-else-if="error">

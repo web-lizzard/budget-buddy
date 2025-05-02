@@ -1,25 +1,23 @@
 import type { Money } from './money'
 
-// Category Statistics type corresponding to CategoryStatisticsRecordDTO
+/**
+ * Frontend representation of category statistics with consistent camelCase naming
+ */
 export interface CategoryStatistics {
-  // id: string // Not needed per plan, but present in DTO
-  category_id: string // UUID
-  current_balance: Money
-  daily_available_amount: Money
-  daily_average: Money
-  used_limit: Money
+  categoryId: string
+  currentBalance: Money
+  dailyAvailableAmount: Money
+  dailyAverage: Money
+  usedLimit: Money
 }
 
-
-// Budget Statistics type corresponding to StatisticsRecordDTO
+/**
+ * Frontend representation of budget statistics with consistent camelCase naming
+ */
 export interface BudgetStatistics {
-  // id: string // Not needed per plan, but present in DTO
-  // user_id: string // Not needed per plan, but present in DTO
-  // budget_id: string // Not needed per plan, but present in DTO
-  current_balance: Money
-  daily_available_amount: Money
-  daily_average: Money
-  used_limit: Money
-  // creation_date: string // Not needed per plan, but present in DTO
-  categories_statistics: CategoryStatistics[]
+  currentBalance: Money
+  dailyAvailableAmount: Money
+  dailyAverage: Money
+  usedLimit: Money
+  categoriesStatistics: CategoryStatistics[]
 }

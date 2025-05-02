@@ -20,7 +20,7 @@ import type {
 import type {
     CreateTransactionPayload,
     UpdateTransactionPayload
-} from '@/types/transaction';
+} from '@/types/dtos';
 
 
 import { useTransactionApi } from '@/composables/useTransactionApi';

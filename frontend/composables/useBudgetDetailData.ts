@@ -14,7 +14,7 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, data: unknown): z.infer<T>
     return result.data
   }
   else {
-    throw Exception
+    throw new Error('Failed to parse data')
   }
 }
 
@@ -46,7 +46,7 @@ export const useBudgetDetailData = (budgetId: MaybeRef<string>) => {
 
 
         if (!transactionsResponse.items.length) {
-          const budget = safeParse(BudgetSchema, budgetResponse, 'budget')
+          const budget = safeParse(BudgetSchema, budgetResponse)
           return {
             budget: {
               ...budget,
@@ -80,8 +80,8 @@ export const useBudgetDetailData = (budgetId: MaybeRef<string>) => {
         throw createError({ statusCode, statusMessage: message, fatal: true, data: err.data })
       }
 
-      const parsedBudget = safeParse(BudgetSchema, budgetResponse, 'Budget')
-      const parsedTransactions = safeParse(z.array(TransactionSchema), transactionsResponse.items, 'Transactions')
+      const parsedBudget = safeParse(BudgetSchema, budgetResponse)
+      const parsedTransactions = safeParse(z.array(TransactionSchema), transactionsResponse.items)
 
       if (!parsedBudget || !parsedTransactions) {
         console.error('Core data validation failed (Budget or Transactions).')

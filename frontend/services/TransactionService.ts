@@ -1,0 +1,173 @@
+import { $fetch, type FetchOptions } from 'ofetch';
+import { z } from 'zod';
+import type { CreateTransactionPayload, UpdateTransactionPayload, TransactionDTO, DomainError, PaginatedItems } from '@/types/dtos';
+import { TransactionSchema } from '@/schemas/transactionSchema';
+import type { Transaction } from '@/types/transaction';
+import { mapToDomainError, apiConfig } from '@/utils/apiUtils';
+
+// Define the shape of the paginated response from the API for transactions
+const PaginatedTransactionDTOSchema = z.object({
+  items: z.array(TransactionSchema),
+  total: z.number(),
+  skip: z.number(),
+  limit: z.number(),
+});
+
+/**
+ * Service class responsible for interacting with Transaction-related API endpoints
+ * for a specific budget. Requires budgetId upon instantiation.
+ */
+export class TransactionService {
+    private budgetId: string;
+    private baseUrl: string;
+
+    constructor(budgetId: string) {
+        if (!budgetId) {
+            throw new Error('Budget ID must be provided to instantiate TransactionService.');
+        }
+        this.budgetId = budgetId;
+        this.baseUrl = `${apiConfig.baseURL}/budgets/${this.budgetId}/transactions`;
+    }
+
+    /**
+     * Creates a new transaction for the specified budget.
+     * @param payload - Data for the new transaction (expected in API DTO format).
+     * @returns The created transaction details (domain model) if returned by API, otherwise null.
+     * @throws {DomainError} If the API call fails or validation fails.
+     */
+    async createTransaction(payload: CreateTransactionPayload): Promise<Transaction | null> {
+        try {
+            const response = await $fetch<TransactionDTO | null>(this.baseUrl, {
+                method: 'POST',
+                body: payload,
+                responseType: 'json',
+                ...apiConfig.commonOptions,
+            });
+
+            if (response) {
+                 const parsed = TransactionSchema.safeParse(response);
+                 if (parsed.success) {
+                     const dto = parsed.data;
+                     // TODO: Move mapping to TransactionSchema.transform()
+                     return {
+                         id: dto.id,
+                         categoryId: dto.category_id,
+                         userId: dto.user_id,
+                         amount: dto.amount,
+                         type: dto.type,
+                         date: dto.date,
+                         // description: dto.description, // Assuming schema handles optional description potentially
+                     };
+                 }
+                 console.warn('Create transaction response validation failed, but operation might have succeeded.', parsed.error);
+                 return null;
+            }
+            return null;
+        } catch (error: unknown) {
+            if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+                throw error as DomainError;
+            }
+            throw mapToDomainError(error, `Failed to create transaction for budget ${this.budgetId}`);
+        }
+    }
+
+    /**
+     * Updates an existing transaction.
+     * @param transactionId - The ID of the transaction to update.
+     * @param payload - Updated data for the transaction (expected in API DTO format).
+     * @throws {DomainError} If the API call fails.
+     */
+    async updateTransaction(transactionId: string, payload: UpdateTransactionPayload): Promise<void> {
+        const url = `${this.baseUrl}/${transactionId}`;
+        try {
+            await $fetch(url, {
+                method: 'PUT',
+                body: payload,
+                responseType: 'json',
+                ...apiConfig.commonOptions,
+            });
+        } catch (error: unknown) {
+             if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+                throw error as DomainError;
+            }
+            throw mapToDomainError(error, `Failed to update transaction ${transactionId}`);
+        }
+    }
+
+    /**
+    * Deletes a transaction.
+    * @param transactionId - The ID of the transaction to delete.
+    * @throws {DomainError} If the API call fails.
+    */
+   async deleteTransaction(transactionId: string): Promise<void> {
+        const url = `${this.baseUrl}/${transactionId}`;
+        try {
+            await $fetch(url, {
+                method: 'DELETE',
+                responseType: 'json',
+                ...apiConfig.commonOptions,
+            });
+        } catch (error: unknown) {
+             if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+                throw error as DomainError;
+            }
+             throw mapToDomainError(error, `Failed to delete transaction ${transactionId}`);
+        }
+    }
+
+   /**
+    * Fetches recent transactions for the specified budget.
+    * Maps the paginated DTO response to a paginated Domain model response.
+    * @param limit - Maximum number of transactions to fetch.
+    * @param sort - Sorting criteria (e.g., 'date:desc').
+    * @returns A paginated response containing recent transactions (domain models).
+    * @throws {DomainError} If the API call fails or data validation fails.
+    */
+   async getRecentTransactions(
+        limit: number = 3,
+        sort: string = 'date:desc'
+    ): Promise<PaginatedItems<Transaction>> {
+     try {
+        // Use this.baseUrl which already includes the budgetId
+        const options: FetchOptions = {
+            ...apiConfig.commonOptions,
+            params: { limit, sort },
+        };
+        const rawData = await $fetch<z.infer<typeof PaginatedTransactionDTOSchema>>(this.baseUrl, {
+            ...options,
+            responseType: 'json',
+        });
+        const parsed = PaginatedTransactionDTOSchema.safeParse(rawData);
+
+        if (!parsed.success) {
+             console.error('Failed to parse recent transactions structure:', parsed.error);
+             throw { status: 'validation_error', message: 'Invalid API response format for recent transactions.' } as DomainError;
+        }
+
+        // TODO: Move mapping to TransactionSchema.transform()
+        const domainItems = parsed.data.items.map(itemDto => ({
+            id: itemDto.id,
+            categoryId: itemDto.category_id,
+            userId: itemDto.user_id,
+            amount: itemDto.amount,
+            type: itemDto.type,
+            date: itemDto.date,
+            // description: itemDto.description, // Assume handled by schema or not present
+        }));
+
+        return {
+            items: domainItems,
+            total: parsed.data.total,
+            skip: parsed.data.skip,
+            limit: parsed.data.limit,
+        };
+     } catch (error: unknown) {
+         if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+            throw error as DomainError;
+         }
+         throw mapToDomainError(error, `Failed to fetch recent transactions for budget ${this.budgetId}`);
+     }
+  }
+
+    // TODO: Add methods for getTransactionById, listTransactions etc. as needed
+}
