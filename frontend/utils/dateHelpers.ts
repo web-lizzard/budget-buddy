@@ -1,4 +1,4 @@
-import { type DateValue, getLocalTimeZone } from '@internationalized/date';
+import { CalendarDate, type DateValue, getLocalTimeZone } from '@internationalized/date';
 
 // Można tu dodać inne funkcje pomocnicze związane z datami, np. formatowanie do YYYY-MM-DD
 import { format } from 'date-fns';
@@ -53,4 +53,9 @@ export const formatDateToYYYYMMDD = (dateInput: Date | DateValue | undefined | n
         console.error("Invalid date provided for formatting YYYY-MM-DD");
         return '';
     }
+};
+
+
+export const dateToCalendarDate = (date: Date): CalendarDate => {
+  return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
 };

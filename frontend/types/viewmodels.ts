@@ -8,10 +8,10 @@ import type { TransactionType } from './transaction'
 export interface CategoryListItemViewModel {
   id: string
   name: string
-  limit: Money
-  currentBalance?: Money // Optional, based on availability of stats
-  usedLimit?: Money // Optional, based on availability of stats
-  progressPercentage: number // Calculated value (0-100+)
+  limit: Money | null
+  currentBalance?: Money | null // Current balance from stats
+  usedLimit?: Money | null // Used limit from stats
+  progressPercentage: number // Calculated progress towards limit
 }
 
 /**
@@ -20,24 +20,53 @@ export interface CategoryListItemViewModel {
  */
 export interface TransactionViewModel {
   id: string
-  date: Date // Converted to Date object for easier formatting
-  categoryName: string // Fetched or mapped based on category_id
+  date: Date
+  categoryName: string // Derived from categoryMap
   type: TransactionType
   amount: Money
 }
-
 
 /**
  * ViewModel structure required by the chart library (e.g., Chart.js Doughnut).
  */
 
-export interface CharDataset {
+export interface ChartDatasetViewModel {
   data: number[]
-  backgroundColor: string[] // Colors for each category slice
+  backgroundColor?: string | string[] // Optional background colors
+  label?: string // Optional dataset label
 }
-
 
 export interface ChartDataViewModel {
   labels: string[]
-  datasets: CharDataset[]
+  datasets: ChartDatasetViewModel[]
+}
+
+// --- Budget Detail ViewModels ---
+
+// Represents basic budget info for summary display
+export interface BudgetSummaryViewModel {
+  id: string
+  name: string
+  startDate: Date
+  endDate: Date
+  totalLimit: Money | null
+  currency: string
+  isActive: boolean
+}
+
+// --- Add/Edit Transaction Modal ViewModels ---
+
+export interface CategoryViewModel {
+  id: string;
+  name: string;
+}
+
+export interface TransactionDataViewModel {
+  id: string;
+  categoryId: string;
+  amount: number; // Note: In the form, we handle this as number | null initially
+  currency: string; // For verification, form uses budgetCurrency
+  type: 'INCOME' | 'EXPENSE';
+  occurredDate: string; // ISO string from API
+  description?: string;
 }

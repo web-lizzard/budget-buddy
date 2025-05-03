@@ -1,185 +1,169 @@
 // stores/budgetStore.ts
-import { ref } from 'vue'; // Removed unused computed import
-import { defineStore } from 'pinia';
+import { ref, computed, watch } from 'vue'
+import { defineStore } from 'pinia'
+import { useQuery } from '@/composables/useQuery'
+import { useCommand } from '@/composables/useCommand'
+import { BudgetService } from '@/services/BudgetService'
 import type {
-  BudgetFilterValue,
-  BudgetSortOption,
-  PaginatedBudgetsDTO, // Updated type name
-  BudgetDTO,           // Updated type name
-  BudgetListItemViewModel,
-} from '@/types/budget';
-import type { CreateBudgetRequestPayload } from '~/types/api'; // Import API payload type
+    BudgetFilterValue,
+    BudgetSortOption,
+    BudgetListItemViewModel,
+    Budget // Import Budget type itself
+} from '@/types/budget'
+import type {
+    CreateBudgetRequestPayload,
+    PaginatedItems, // Import PaginatedItems from dtos
+    DomainError
+} from '@/types/dtos'
 
-// Keep the mapping function separate or move to utils
-// Updated to use BudgetDTO
-function mapBudgetDTOToViewModel(dto: BudgetDTO): BudgetListItemViewModel {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Normalize today to the start of the day for accurate comparison
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const startDate = new Date(dto.start_date); // Keep for potential future use or clarity, suppress unused var warning
-  const endDate = new Date(dto.end_date);
-  const deactivationDate = dto.deactivation_date ? new Date(dto.deactivation_date) : null;
+// Mapping function remains largely the same, using Budget type
+function mapBudgetToViewModel(budget: Budget): BudgetListItemViewModel {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endDate = new Date(budget.endDate);
+    const deactivationDate = budget.deactivationDate ? new Date(budget.deactivationDate) : null;
 
-  let status: 'active' | 'expired' | 'inactive';
-  let statusLabel: string; // Label will be determined based on status
+    let status: 'active' | 'expired' | 'inactive';
+    let statusLabel: string;
 
-  // 1. Check for inactive status first (explicitly deactivated)
-  if (deactivationDate && deactivationDate <= today) {
-    status = 'inactive';
-    statusLabel = 'Inactive';
-  }
-  // 2. Check for expired status (end date is in the past)
-  else if (endDate < today) {
-    status = 'expired';
-    statusLabel = 'Expired';
-  }
-  // 3. Otherwise, consider it active (covers cases where start date is today or in the past, and end date is today or in the future)
-  // Note: Budgets starting in the future are also marked active based on previous logic. Adjust if needed.
-  else {
-    status = 'active';
-    statusLabel = 'Active';
-  }
+    if (deactivationDate && deactivationDate <= today) {
+        status = 'inactive';
+        statusLabel = 'Inactive';
+    }
+    else if (endDate < today) {
+        status = 'expired';
+        statusLabel = 'Expired';
+    }
+    else {
+        status = 'active';
+        statusLabel = 'Active';
+    }
 
-  // Prepare data for the view model
-  // Formatting (dateRange, limitFormatted) is best done in the component using Intl
-  // Pass raw data or minimally processed data where possible
-
-  // Example: Pass raw dates for potential use in the component
-  // const dateRange = `${dto.start_date.substring(0, 10)} - ${dto.end_date.substring(0, 10)}`;
-
-  // Example: Pass raw amount and currency for formatting in component
-  // const limitFormatted = `${dto.total_limit.amount} ${dto.total_limit.currency}`; // Let component handle formatting
-
-  return {
-    id: dto.id,
-    name: dto.name,
-    status: status,
-    statusLabel: statusLabel, // Keep label for potential direct use or i18n key
-    // Provide raw data that might be needed for display logic or formatting in the component
-    dateRange: `${dto.start_date.split('T')[0]} - ${dto.end_date.split('T')[0]}`, // Basic range string, component can format better
-    limitFormatted: `${dto.total_limit.amount} ${dto.total_limit.currency}`, // Basic amount string, component should format
-    currency: dto.currency,
-    startDate: dto.start_date, // Keep original ISO string for sorting
-    endDate: dto.end_date,     // Add original ISO string for formatting
-  };
+    return {
+        id: budget.id,
+        name: budget.name,
+        status: status,
+        statusLabel: statusLabel,
+        dateRange: `${budget.startDate.split('T')[0]} - ${budget.endDate.split('T')[0]}`, // Basic range string
+        limitFormatted: `${budget.totalLimit.amount} ${budget.totalLimit.currency}`, // Basic amount string
+        currency: budget.currency,
+        startDate: budget.startDate,
+        endDate: budget.endDate,
+    };
 }
 
 export const useBudgetStore = defineStore('budgetStore', () => {
-  const budgets = ref<BudgetListItemViewModel[]>([]);
-  const totalBudgets = ref<number>(0);
-  const currentPage = ref<number>(1);
-  const itemsPerPage = ref<number>(10); // Default items per page
-  const currentFilter = ref<BudgetFilterValue>('all');
-  const currentSort = ref<BudgetSortOption>({ sortBy: 'name', sortOrder: 'asc' }); // Default sort
-  const isLoading = ref<boolean>(false);
-  const error = ref<string | null>(null);
+    // State Refs for filters, pagination, sorting
+    const currentPage = ref<number>(1);
+    const itemsPerPage = ref<number>(10);
+    const currentFilter = ref<BudgetFilterValue>('all');
+    const currentSort = ref<BudgetSortOption>({ sortBy: 'name', sortOrder: 'asc' });
 
-  async function fetchBudgets() {
-    isLoading.value = true;
-    error.value = null;
-    console.log('Fetching budgets...', { page: currentPage.value, limit: itemsPerPage.value, filter: currentFilter.value, sort: currentSort.value });
-    try {
-      const params: Record<string, string | number> = {
+    // Instantiate BudgetService
+    const budgetService = new BudgetService();
+
+    // --- useQuery for fetching budgets ---
+    const queryKey = computed(() => {
+        return `budgets-list-${currentPage.value}-${itemsPerPage.value}-${currentFilter.value}-${currentSort.value.sortBy}-${currentSort.value.sortOrder}`;
+    });
+
+    const fetcherParams = computed(() => ({
         page: currentPage.value,
         limit: itemsPerPage.value,
-        ...(currentFilter.value !== 'all' && { status: currentFilter.value }),
+        status: currentFilter.value,
         sort: `${currentSort.value.sortOrder === 'desc' ? '-' : ''}${currentSort.value.sortBy}`,
-      };
+    }));
 
-      // TODO: Replace '/api/budgets' with actual API endpoint from config/env
-      const response = await $fetch<PaginatedBudgetsDTO>('/api/v0/budgets/', {
-        method: 'GET', // Ensure method is GET
-        params: params,
-      });
+    // Provide unknown as the second type argument
+    const { data: paginatedBudgetsData, pending: isLoading, error: queryError, refresh: refreshBudgets } = useQuery<PaginatedItems<Budget>, unknown>(
+        queryKey,
+        () => budgetService.listBudgets(fetcherParams.value),
+        {
+            lazy: false,
+        },
+         [currentPage, itemsPerPage, currentFilter, currentSort] // Pass refs directly
+    );
 
-      budgets.value = response.items.map(mapBudgetDTOToViewModel);
-      totalBudgets.value = response.total;
+    // Computed values derived from useQuery data
+    const budgets = computed(() => paginatedBudgetsData.value?.items.map(mapBudgetToViewModel) ?? []);
+    const totalBudgets = computed(() => paginatedBudgetsData.value?.total ?? 0);
+    const error = ref<string | null>(null);
 
-    } catch (err: unknown) {
-      console.error('Error fetching budgets:', err);
-      error.value = 'Failed to fetch budgets. Please try again.';
-      budgets.value = [];
-      totalBudgets.value = 0;
-    } finally {
-      isLoading.value = false;
-    }
-  }
+    // Watch for query errors and update the local error ref
+    watch(queryError, (newError) => {
+        error.value = newError ? newError.message : null;
+    });
 
-  function setFilter(filter: BudgetFilterValue) {
-    if (currentFilter.value !== filter) {
-      currentFilter.value = filter;
-      currentPage.value = 1; // Reset page when filter changes
-      fetchBudgets(); // Refetch data
-    }
-  }
-
-  function setPage(page: number) {
-    if (page > 0 && currentPage.value !== page) {
-      currentPage.value = page;
-      fetchBudgets(); // Refetch data
-    }
-  }
-
-  function setItemsPerPage(size: number) {
-    if (size > 0 && itemsPerPage.value !== size) {
-      itemsPerPage.value = size;
-      currentPage.value = 1; // Reset page when limit changes
-      fetchBudgets(); // Refetch data
-    }
-  }
-
-  function setSort(sortOption: BudgetSortOption) {
-    if (currentSort.value.sortBy !== sortOption.sortBy || currentSort.value.sortOrder !== sortOption.sortOrder) {
-      currentSort.value = sortOption;
-      fetchBudgets();
-    }
-  }
-
-  async function createBudget(payload: CreateBudgetRequestPayload): Promise<void> {
-    isLoading.value = true;
-    error.value = null;
-    try {
-      console.log('Sending create budget request:', payload);
-      const response = await $fetch('/api/v0/budgets/', {
-        method: 'POST',
-        body: payload,
-      });
-      console.log('Create budget response:', response);
-      currentPage.value = 1;
-      await fetchBudgets();
-    } catch (err: unknown) {
-      console.error('Error creating budget:', err);
-      let apiError = 'An unexpected error occurred.';
-      // Refined Type guard for $fetch errors (ofetch)
-      if (typeof err === 'object' && err !== null) {
-        if ('data' in err && typeof err.data === 'object' && err.data !== null) {
-          const errorData = err.data as { message?: string; detail?: string };
-          apiError = errorData.message || errorData.detail || apiError;
-        } else if ('message' in err && typeof err.message === 'string') {
-          // Handle generic Error objects
-          apiError = err.message;
+    // --- Methods to change state (trigger useQuery refresh via watched refs) ---
+    function setFilter(filter: BudgetFilterValue) {
+        if (currentFilter.value !== filter) {
+            currentFilter.value = filter;
+            currentPage.value = 1;
         }
-      }
-      error.value = `Failed to create budget: ${apiError} Please check your input and try again.`;
-    } finally {
-      isLoading.value = false;
     }
-  }
 
-  return {
-    budgets,
-    totalBudgets,
-    currentPage,
-    itemsPerPage,
-    currentFilter,
-    currentSort,
-    isLoading,
-    error,
-    fetchBudgets,
-    setFilter,
-    setPage,
-    setItemsPerPage,
-    setSort,
-    createBudget,
-  };
+    function setPage(page: number) {
+        if (page > 0 && currentPage.value !== page) {
+            currentPage.value = page;
+        }
+    }
+
+    function setItemsPerPage(size: number) {
+        if (size > 0 && itemsPerPage.value !== size) {
+            itemsPerPage.value = size;
+            currentPage.value = 1;
+        }
+    }
+
+    function setSort(sortOption: BudgetSortOption) {
+        if (currentSort.value.sortBy !== sortOption.sortBy || currentSort.value.sortOrder !== sortOption.sortOrder) {
+            currentSort.value = sortOption;
+            currentPage.value = 1;
+        }
+    }
+
+    // --- useCommand for creating a budget ---
+    const { execute: executeCreateBudget, loading: isCreating, error: createError } = useCommand<CreateBudgetRequestPayload>(
+        (payload) => budgetService.createBudget(payload),
+        {
+            onSuccess: async () => {
+                console.log('Budget created successfully, refreshing list...');
+                currentPage.value = 1;
+                await refreshBudgets();
+            },
+            onError: (err: DomainError) => {
+                error.value = `Failed to create budget: ${err.message}. Please check input.`;
+                console.error('Error creating budget:', err);
+            }
+        }
+    );
+
+    async function createBudget(payload: CreateBudgetRequestPayload): Promise<void> {
+       error.value = null;
+       await executeCreateBudget(payload);
+    }
+
+     watch(createError, (newError) => {
+         if (newError && !error.value) {
+             error.value = `Failed to create budget: ${newError.message}`;
+         }
+     });
+
+    return {
+        budgets,
+        totalBudgets,
+        currentPage,
+        itemsPerPage,
+        currentFilter,
+        currentSort,
+        isLoading,
+        isCreating,
+        error,
+        fetchBudgets: refreshBudgets,
+        setFilter,
+        setPage,
+        setItemsPerPage,
+        setSort,
+        createBudget,
+    };
 });

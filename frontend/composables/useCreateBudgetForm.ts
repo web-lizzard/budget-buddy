@@ -1,53 +1,94 @@
 import { computed } from 'vue';
-import { useForm, useFieldArray } from 'vee-validate';
+import { useFieldArray, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import type {  DateValue } from '@internationalized/date';
-import {
-    budgetFormSchema,
-    type BudgetFormInput,
-    type CategoryFormData
-} from '@/schemas/createBudgetSchemas';
+import type { DateValue } from '@internationalized/date';
 
+import { useBudgetStore } from '@/stores/budgetStore';
+import { budgetFormSchema, type BudgetFormInput } from '@/schemas/createBudgetSchemas';
+import type { CreateBudgetRequestPayload, CreateCategoryRequestPayload, StrategyPayload } from '@/types/dtos';
+
+// Supported currencies (consider moving to a config file)
+const CURRENCIES = ['PLN', 'EUR', 'USD', 'GBP']
 
 export function useCreateBudgetForm() {
+    const budgetStore = useBudgetStore();
 
-  const formSchema = toTypedSchema(budgetFormSchema);
+    const form = useForm<BudgetFormInput>({
+        validationSchema: toTypedSchema(budgetFormSchema),
+        initialValues: {
+            name: '',
+            totalLimit: undefined,
+            currency: 'PLN',
+            startDate: undefined,
+            strategyType: 'monthly',
+            categories: [],
+        },
+    });
 
-  const { handleSubmit, resetForm, errors, isSubmitting, meta } = useForm<BudgetFormInput>({
-      validationSchema: formSchema,
-      initialValues: {
-        name: '',
-        totalLimit: null,
-        currency: undefined,
-        startDate: undefined,
-        strategyType: undefined,
-        categories: [],
-      },
-  });
+    const { fields: categoryFields, push: addCategory, remove: removeCategory } = useFieldArray<{
+        name: string;
+        limit: number | undefined;
+    }>('categories');
 
-  const { fields, remove, push } = useFieldArray<CategoryFormData>('categories');
+    const handleDateUpdate = (onChange: (value: unknown) => void, dateValue: DateValue | undefined) => {
+        if (dateValue) {
+            onChange(dateValue);
+        }
+    };
 
-  // --- Helper function for Calendar --- (Still needed here for the template handler)
-  function handleDateUpdate(fieldSetter: (value: DateValue | undefined) => void, dateValue: DateValue | undefined) {
-      fieldSetter(dateValue);
-  }
+    const mapFormToPayload = (values: BudgetFormInput): CreateBudgetRequestPayload => {
+        const startDate = values.startDate!.toDate('UTC');
+        const totalLimitAmount = values.totalLimit!;
 
-  return {
-      errors,
-      isSubmitting,
-      isValid: computed(() => meta.value.valid),
+        const mappedCategories: CreateCategoryRequestPayload[] = (values.categories ?? []).map(cat => {
+            const categoryPayload: Partial<CreateCategoryRequestPayload> & { name: string } = { name: cat.name };
+            if (cat.limit !== undefined && cat.limit !== null && cat.limit > 0) {
+                categoryPayload.limit = { amount: cat.limit, currency: values.currency };
+            }
+            return categoryPayload as CreateCategoryRequestPayload;
+        });
 
-      // Category Fields Management
-      categoryFields: fields,
-      addCategory: () => push({ name: '', limit: 0 }),
-      removeCategory: remove,
+        const payload: CreateBudgetRequestPayload = {
+            name: values.name,
+            total_limit: { amount: totalLimitAmount, currency: values.currency },
+            start_date: startDate.toISOString(),
+            categories: mappedCategories,
+            strategy: values.strategyType as unknown as StrategyPayload,
+        };
 
-      // Actions
-      handleSubmit,
-      resetForm,
+        return payload;
+    };
 
-      handleDateUpdate,
-      CURRENCIES: ['PLN', 'USD', 'EUR'] as const, // Keep constants here as they relate to form options
-      STRATEGIES: ['monthly', 'yearly'] as const,
-  };
+    const handleSubmit = form.handleSubmit(async (values) => {
+        console.log('Form validated successfully:', values);
+        const payload = mapFormToPayload(values);
+        console.log('Mapped payload for API:', payload);
+
+        await budgetStore.createBudget(payload);
+
+        if (!budgetStore.error) {
+            console.log('Budget creation initiated successfully via store.');
+            form.resetForm();
+        }
+         else {
+             console.error('Budget creation failed via store:', budgetStore.error);
+         }
+    });
+
+    return {
+        errors: form.errors,
+        meta: form.meta,
+        values: form.values,
+        categoryFields,
+        addCategory,
+        removeCategory,
+        handleSubmit,
+        resetForm: form.resetForm,
+        handleDateUpdate,
+        CURRENCIES,
+        isCreating: computed(() => budgetStore.isCreating),
+        error: computed(() => budgetStore.error),
+        setFieldValue: form.setFieldValue,
+        handleReset: form.handleReset,
+    };
 }

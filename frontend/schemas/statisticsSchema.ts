@@ -21,6 +21,8 @@ export const BudgetStatisticsSchema = z.object({
   daily_available_amount: MoneySchema,
   daily_average: MoneySchema,
   used_limit: MoneySchema,
-  creation_date: z.string().datetime(),
+  creation_date: z.string().datetime({
+    local: true
+  }),
   categories_statistics: z.array(CategoryStatisticsSchema).default([]),
 })

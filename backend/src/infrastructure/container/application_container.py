@@ -95,34 +95,40 @@ class ApplicationContainer(containers.DeclarativeContainer):
         DomainContainer
     )
 
-    # Query Handlers
+    # Query Handlers - korzystają z sesji query_session
     query_handlers = providers.Dict(
         {
             GetBudgetByIdQuery: providers.Factory(
-                SQLGetBudgetByIdQueryHandler, session=persistence_container.session
+                SQLGetBudgetByIdQueryHandler,
+                session=persistence_container.query_session,
             ),
             GetBudgetsQuery: providers.Factory(
-                SQLGetBudgetsQueryHandler, session=persistence_container.session
+                SQLGetBudgetsQueryHandler, session=persistence_container.query_session
             ),
             GetCategoriesQuery: providers.Factory(
-                SQLGetCategoriesQueryHandler, session=persistence_container.session
+                SQLGetCategoriesQueryHandler,
+                session=persistence_container.query_session,
             ),
             GetCategoryByIdQuery: providers.Factory(
-                SQLGetCategoryByIdQueryHandler, session=persistence_container.session
+                SQLGetCategoryByIdQueryHandler,
+                session=persistence_container.query_session,
             ),
             GetTransactionsQuery: providers.Factory(
-                SQLGetTransactionsQueryHandler, session=persistence_container.session
+                SQLGetTransactionsQueryHandler,
+                session=persistence_container.query_session,
             ),
             GetTransactionByIdQuery: providers.Factory(
-                SQLGetTransactionByIdQueryHandler, session=persistence_container.session
+                SQLGetTransactionByIdQueryHandler,
+                session=persistence_container.query_session,
             ),
             GetBudgetStatisticsQuery: providers.Factory(
                 SQLGetBudgetStatisticsQueryHandler,
-                session=persistence_container.session,
+                session=persistence_container.query_session,
             ),
         }
     )
 
+    # Command Handlers - korzystają z sesji command_session poprzez repositories
     command_handlers = providers.Dict(
         {
             # Budget Commands

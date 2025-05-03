@@ -87,7 +87,6 @@ class CreateTransactionRequestPayload(BaseModel):
     transaction_type: TransactionTypeEnumPayload
     description: str | None = None
     occurred_date: datetime
-    user_id: uuid.UUID
 
 
 # Payload for updating a transaction.

@@ -4,20 +4,20 @@ import type { BudgetStatistics } from '~/types/statistics'
 import type { Money } from '~/types/money'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { formatCurrency } from '~/utils/currency' // Import the helper
-import LimitProgressBar from '~/components/ui/LimitProgressBar.vue' // Import LimitProgressBar
+import LimitProgressBar from '~/components/LimitProgressBar.vue' // Import LimitProgressBar
 
 const props = defineProps<{
-    statistics: BudgetStatistics | null
-    budgetLimit: Money | null // Add prop for the total budget limit
+    statistics: BudgetStatistics
+    budgetLimit: Money
 }>()
 
 // Computed properties for formatted values
-const currentBalance = computed(() => formatCurrency(props.statistics?.current_balance))
-const dailyAvailable = computed(() => formatCurrency(props.statistics?.daily_available_amount))
-const dailyAverage = computed(() => formatCurrency(props.statistics?.daily_average))
-const usedLimitValue = computed(() => props.statistics?.used_limit?.amount)
-const budgetLimitValue = computed(() => props.budgetLimit?.amount)
-const currency = computed(() => props.budgetLimit?.currency ?? props.statistics?.used_limit?.currency ?? '')
+const currentBalance = computed(() => formatCurrency(props.statistics.currentBalance))
+const dailyAvailable = computed(() => formatCurrency(props.statistics.dailyAvailableAmount))
+const dailyAverage = computed(() => formatCurrency(props.statistics.dailyAverage))
+const usedLimitValue = computed(() => props.statistics.usedLimit.amount)
+const budgetLimitValue = computed(() => props.budgetLimit.amount)
+const currency = computed(() => props.budgetLimit.currency)
 
 // Add computed for progress bar later
 // const limitProgress = computed(() => ...)
@@ -45,7 +45,6 @@ const currency = computed(() => props.budgetLimit?.currency ?? props.statistics?
         </div>
         <div>
           <p class="text-muted-foreground text-sm">Limit Usage</p>
-          <!-- Use LimitProgressBar -->
           <LimitProgressBar
             :current-value="usedLimitValue"
             :limit-value="budgetLimitValue"
@@ -57,7 +56,6 @@ const currency = computed(() => props.budgetLimit?.currency ?? props.statistics?
     </CardContent>
   </Card>
   <div v-else>
-     <!-- Optional: Placeholder when statistics are null (e.g., during initial load or 404) -->
     <Card class="mb-4 border-dashed">
       <CardHeader>
           <CardTitle>Overall Statistics</CardTitle>

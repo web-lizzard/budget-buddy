@@ -26,7 +26,7 @@ const formatDate = (date: Date) => {
 }
 
 const amountClass = (type: TransactionViewModel['type']) => {
-  return type === 'Income' ? 'text-green-600' : 'text-red-600'
+  return type === 'INCOME' ? 'text-green-600' : 'text-red-600'
 }
 
 

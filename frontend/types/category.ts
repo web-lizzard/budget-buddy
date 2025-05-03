@@ -1,11 +1,12 @@
-import type { Money } from '@/types/money'
+import type { Money } from './money'
 
-// Category type corresponding to CategoryDTO
+/**
+ * Frontend representation of a category with consistent camelCase naming
+ */
 export interface Category {
-  id: string // UUID
+  id: string
   name: string
   limit: Money
-  // Add other fields if necessary based on full CategoryDTO
 }
 
 // Zod schema for validating Category objects
