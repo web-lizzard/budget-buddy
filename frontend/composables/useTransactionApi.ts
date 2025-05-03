@@ -1,64 +1,80 @@
-import type { CreateTransactionPayload, UpdateTransactionPayload } from '@/types/transaction';
-import { $fetch, FetchError } from 'ofetch';
+import { computed, type MaybeRef, unref } from 'vue';
+import { useCommand } from '@/composables/useCommand';
+import { TransactionService } from '@/services/TransactionService';
+// Import correct payload types from dtos
+import type { CreateTransactionPayload, UpdateTransactionPayload } from '@/types/dtos';
 
-// Helper function to handle potential FetchError and extract message
-function handleApiError(error: unknown): string {
-    if (error instanceof FetchError) {
-        // Try to get error message from response data, fallback to status text or generic message
-        return error.data?.message || error.statusText || error.message || 'An unexpected API error occurred.';
-    }
-    if (error instanceof Error) {
-        return error.message;
-    }
-    return 'An unknown error occurred.';
+// Type for the update command payload, combining ID and data
+interface UpdateCommandPayload {
+    transactionId: string;
+    payload: UpdateTransactionPayload;
 }
 
 export function useTransactionApi(budgetId: MaybeRef<string>) {
-    const id = toValue(budgetId); // Get the actual budget ID value
+    const unreffedBudgetId = computed(() => unref(budgetId));
 
-    // Base URL for the transaction endpoints for this specific budget
-    const baseUrl = `/api/budgets/${id}/transactions`;
+    // Instantiate service reactively based on budgetId
+    const transactionService = computed(() => new TransactionService(unreffedBudgetId.value));
 
-    /**
-     * Creates a new transaction for the budget.
-     * @param payload - The data for the new transaction.
-     * @throws {Error} If the API call fails.
-     */
-    async function createTransaction(payload: CreateTransactionPayload): Promise<void> {
-        try {
-            await $fetch(baseUrl, {
-                method: 'POST',
-                body: payload,
-            });
-        } catch (error) {
-            const errorMessage = handleApiError(error);
-            throw new Error(`Failed to create transaction: ${errorMessage}`);
+    // --- Command for Creating Transaction ---
+    const {
+        execute: executeCreate,
+        loading: loadingCreate,
+        error: errorCreate
+    } = useCommand<CreateTransactionPayload>(
+        async (payload) => {
+            await transactionService.value.createTransaction(payload);
+        },
+        {
+            // Optional: Add onSuccess/onError specific to the composable consumer
         }
-    }
+    );
 
-    /**
-     * Updates an existing transaction.
-     * @param transactionId - The ID of the transaction to update.
-     * @param payload - The updated data for the transaction.
-     * @throws {Error} If the API call fails.
-     */
-    async function updateTransaction(transactionId: string, payload: UpdateTransactionPayload): Promise<void> {
-        const url = `${baseUrl}/${transactionId}`;
-        try {
-            await $fetch(url, {
-                method: 'PUT',
-                body: payload,
-            });
-            // PUT usually returns 200 OK with no body
-        } catch (error) {
-            const errorMessage = handleApiError(error);
-            console.error(`Failed to update transaction ${transactionId}:`, errorMessage, error);
-            throw new Error(`Failed to update transaction: ${errorMessage}`);
+    // --- Command for Updating Transaction ---
+    const {
+        execute: executeUpdate,
+        loading: loadingUpdate,
+        error: errorUpdate
+    } = useCommand<UpdateCommandPayload>(
+        async ({ transactionId, payload }) => {
+            await transactionService.value.updateTransaction(transactionId, payload);
+        },
+        {
+            // Optional: Add onSuccess/onError
         }
-    }
+    );
+
+    // --- Command for Deleting Transaction (Example) ---
+    const {
+        execute: executeDelete,
+        loading: loadingDelete,
+        error: errorDelete
+    } = useCommand<string>( // Payload is the transactionId
+        async (transactionId) => {
+            await transactionService.value.deleteTransaction(transactionId);
+        },
+        {
+             // Optional: Add onSuccess/onError
+        }
+    );
+
+    // Combine errors if needed, or let consumer handle individual errors
+    const combinedError = computed(() => errorCreate.value || errorUpdate.value || errorDelete.value );
 
     return {
-        createTransaction,
-        updateTransaction,
+        createTransaction: executeCreate,
+        loadingCreate,
+        errorCreate,
+
+        updateTransaction: executeUpdate,
+        loadingUpdate,
+        errorUpdate,
+
+        deleteTransaction: executeDelete,
+        loadingDelete,
+        errorDelete,
+
+        // Optional combined error state
+        error: combinedError,
     };
 }

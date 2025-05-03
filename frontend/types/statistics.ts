@@ -20,4 +20,5 @@ export interface BudgetStatistics {
   dailyAverage: Money
   usedLimit: Money
   categoriesStatistics: CategoryStatistics[]
+  creationDate: Date
 }

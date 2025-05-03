@@ -8,8 +8,10 @@ export const TransactionTypeSchema = z.enum(['INCOME', 'EXPENSE'])
 export const TransactionSchema = z.object({
   id: z.string().uuid(),
   amount: MoneySchema,
-  type: TransactionTypeSchema,
-  date: z.string().datetime(),
+  transaction_type: TransactionTypeSchema,
+  occurred_date: z.string().datetime({
+    local: true
+  }),
   category_id: z.string().uuid(),
   user_id: z.string().uuid(),
 })

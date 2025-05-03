@@ -39,7 +39,9 @@ class SQLGetTransactionsQueryHandler(
         base_where = (TransactionModel.user_id == query.user_id,)
 
         stmt = select(TransactionModel).where(*base_where)
-        count_stmt = select(func.count(TransactionModel.id)).where(*base_where)
+        count_stmt = (
+            select(func.count(1)).select_from(TransactionModel).where(*base_where)
+        )
 
         if query.date_from:
             date_from = datetime.fromisoformat(query.date_from)
@@ -70,7 +72,9 @@ class SQLGetTransactionsQueryHandler(
             TransactionDTO(
                 id=tx.id,
                 category_id=tx.category_id,
-                amount=MoneyDTO(amount=tx.amount.amount, currency=tx.amount.currency),
+                amount=MoneyDTO(
+                    amount=tx.amount.to_float(), currency=tx.amount.currency
+                ),
                 transaction_type=TransactionTypeEnum(tx.transaction_type.value),
                 occurred_date=tx.occurred_date,
                 description=tx.description,

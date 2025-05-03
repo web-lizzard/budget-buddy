@@ -26,6 +26,7 @@ def create_app() -> FastAPI:
         title="Budget Buddy API",
         description="API for managing personal budgets",
         version="1.0.0",
+        redirect_slashes=False,
     )
 
     # Include routers

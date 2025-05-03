@@ -1,5 +1,5 @@
-import { ref, computed, watch, type MaybeRef, type WatchSource, unref } from 'vue';
-import { useAsyncData, type AsyncDataOptions, type NuxtError } from '#app';
+import { ref, computed, type MaybeRef, type WatchSource, unref } from 'vue';
+import { useAsyncData, type AsyncDataOptions } from '#app';
 import type { DomainError } from '@/types/dtos'; // Adjusted based on where DomainError is defined
 import { mapToDomainError } from '@/utils/apiUtils'; // Ensure path is correct
 
@@ -32,7 +32,7 @@ export function useQuery<TResponse, TWatchers>(
 
   const { onError: onErrorCallback, ...asyncDataOptions } = options;
 
-  const { data, pending, error: nuxtError, refresh, execute } = useAsyncData<TResponse>(
+  const { data, pending, refresh, execute } = useAsyncData<TResponse>(
     unrefKey.value,
     async () => {
       domainError.value = null;
@@ -50,7 +50,6 @@ export function useQuery<TResponse, TWatchers>(
          if (onErrorCallback) {
              onErrorCallback(mappedError);
          }
-         // Rethrow to populate nuxtError state
          throw mappedError;
       }
     },
@@ -61,20 +60,7 @@ export function useQuery<TResponse, TWatchers>(
     }
   );
 
-  // Watch nuxtError for errors potentially not caught above
-  watch(nuxtError, (newNuxtError) => {
-      if (newNuxtError && !domainError.value) {
-         // Use the cause if available (Nuxt wraps errors), otherwise the error itself
-         const errorSource = (newNuxtError as NuxtError).cause || newNuxtError;
-         const mapped = mapToDomainError(errorSource, 'Data fetching failed via NuxtError');
-         domainError.value = mapped;
-         if (onErrorCallback) {
-             onErrorCallback(mapped);
-         }
-     } else if (!newNuxtError) {
-         domainError.value = null;
-     }
-  });
+
 
   return {
     data,

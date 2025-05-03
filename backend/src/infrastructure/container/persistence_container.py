@@ -28,6 +28,13 @@ async def _get_session(
         yield session
 
 
+async def _get_query_session(
+    session_maker: async_sessionmaker,
+) -> AsyncGenerator[AsyncSession, None]:
+    async with session_maker() as session:
+        yield session
+
+
 class PersistenceContainer(containers.DeclarativeContainer):
     """Dependency injection container for persistence."""
 
@@ -38,27 +45,33 @@ class PersistenceContainer(containers.DeclarativeContainer):
         DatabaseContainer
     )
 
-    session: providers.Resource[AsyncSession] = providers.Resource(
+    # Session for commands and repositories (used with UoW)
+    command_session: providers.Resource[AsyncSession] = providers.Resource(
         _get_session, session_maker=database_container.sessionmaker
+    )
+
+    # Separate session factory for queries
+    query_session: providers.Resource[AsyncSession] = providers.Resource(
+        _get_query_session, session_maker=database_container.sessionmaker
     )
 
     repositories = providers.Dict(
         {
             BudgetRepository: providers.Factory(
-                SQLAlchemyBudgetRepository, session=session
+                SQLAlchemyBudgetRepository, session=command_session
             ),
             TransactionRepository: providers.Factory(
-                SQLAlchemyTransactionRepository, session=session
+                SQLAlchemyTransactionRepository, session=command_session
             ),
             StatisticsRepository: providers.Factory(
-                SQLAlchemyStatisticsRepository, session=session
+                SQLAlchemyStatisticsRepository, session=command_session
             ),
         }
     )
 
     uow: providers.Factory[UnitOfWork] = providers.Factory(
         SQLAlchemyUnitOfWork,
-        session=session,
+        session=command_session,
         event_publisher=publisher_container.domain_publisher,
     )
 

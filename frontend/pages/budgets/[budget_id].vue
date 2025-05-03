@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useBudgetDetailData } from '~/composables/useBudgetDetailData'
 import { createError } from '#app'
 import BudgetSummaryCard from '@/components/budget/detail/BudgetSummaryCard.vue'
 import OverallStatsCard from '@/components/budget/detail/OverallStatsCard.vue'
@@ -15,11 +14,16 @@ import type { ChartDataViewModel, TransactionViewModel, CategoryListItemViewMode
 import type { TransactionType } from '~/types/transaction'
 import type { Category } from '~/types/category'
 import type { CategoryStatistics } from '~/types/statistics'
+import { useQuery } from '~/composables/useQuery'
+import { BudgetService } from '~/services/BudgetService'
+import { TransactionService } from '~/services/TransactionService'
+import { useIntervalAction } from '~/composables/useIntervalAction'
 
 const route = useRoute()
 const router = useRouter()
 
 const budgetIdParam = computed(() => route.params.budget_id)
+
 
 // Added reactive state for controlling the Add/Edit Transaction modal
 const isTransactionModalOpen = ref(false)
@@ -35,21 +39,53 @@ watchEffect(() => {
     }
 })
 
-// Now, we can safely assume budgetIdParam holds a valid string UUID if the effect didn't throw
-// We pass the potentially changing param directly to the composable
-const { budgetData, statisticsData, recentTransactions, pending, error, refresh } =
-  useBudgetDetailData(budgetIdParam as ComputedRef<string>) // Assert type as string now
+const budgetService = new BudgetService()
+const transactionService = new TransactionService(budgetIdParam.value as string)
 
 
-const budgetViewModel = computed(() => {
-  if (!budgetData.value) return null;
-  return {
-    currency: budgetData.value.currency,
-    startDate: new Date(budgetData.value.startDate),
-    endDate: new Date(budgetData.value.endDate),
-    budgetId: budgetData.value.id
-  }
+
+const { data: budgetData, pending, error, refresh } = useQuery(
+  `budget-${budgetIdParam.value}`,
+  () => budgetService.getBudgetById(budgetIdParam.value as string),
+)
+
+const { data: recentTransactions, pending: pendingTransactions, refresh: refreshTransactions } = useQuery(
+  `recent-transactions-${budgetIdParam.value}`,
+  async () => {
+    return (await transactionService.getRecentTransactions(3)).items
+  },
+)
+
+
+const { data: statisticsData, pending: pendingStats, refresh: refreshStats } = useQuery(
+  `budget-stats-${budgetIdParam.value}`,
+  async () => {
+    return budgetService.getBudgetStatistics(budgetIdParam.value as string);
+  },
+)
+
+const statsTimestamp = computed(() => {
+  if (!statisticsData.value) return null;
+  return statisticsData.value.creationDate;
 })
+
+const timestamp = ref(new Date().toISOString()) // Store timestamp in UTC format
+
+const { executeAction: executeRefreshStats } = useIntervalAction(
+  () => refreshStats(),
+  () => {
+    if (!statsTimestamp.value) return false;
+
+    // TODO: This is a hack to compare the timestamps. We should use a more reliable method. Backend should returns timezone offset
+    const timeStamp = new Date(timestamp.value)
+    const statsTimeStamp = new Date(statsTimestamp.value)
+    const minutes = timeStamp.getMinutes()
+    const minutesStats = statsTimeStamp.getMinutes()
+    return minutes <= minutesStats;
+  }
+)
+
+
 
 // --- Computed ViewModels ---
 
@@ -65,14 +101,14 @@ const transactionViewModels = computed((): TransactionViewModel[] => {
     return recentTransactions.value.map((tx) => ({
         id: tx.id,
         date: new Date(tx.date), // Convert string date to Date object
-        categoryName: categoryMap.value.get(tx.category_id) ?? 'Uncategorized', // Get name from map
+        categoryName: categoryMap.value.get(tx.categoryId) ?? 'Uncategorized', // Get name from map
         type: tx.type.toUpperCase() as TransactionType,
         amount: tx.amount,
     }));
 });
 
 const categorySpendingChartData = computed((): ChartDataViewModel | null => {
-    if (!statisticsData.value || !statisticsData.value.categories_statistics || statisticsData.value.categories_statistics.length === 0) {
+    if (!statisticsData.value || !statisticsData.value.categoriesStatistics || statisticsData.value.categoriesStatistics.length === 0) {
         return null; // No data for chart
     }
 
@@ -82,10 +118,10 @@ const categorySpendingChartData = computed((): ChartDataViewModel | null => {
         '#41B883', '#E46651', '#00D8FF', '#DD1B16', '#FFB44C', '#34495E', '#9B59B6', '#3498DB', '#1ABC9C', '#F1C40F'
     ];
 
-    statisticsData.value.categories_statistics.forEach((catStat) => {
-        if (catStat.used_limit && catStat.used_limit.amount > 0) {
-            labels.push(categoryMap.value.get(catStat.category_id) ?? `Unknown Cat ${catStat.category_id.substring(0,4)}`);
-            data.push(catStat.used_limit.amount);
+    statisticsData.value.categoriesStatistics.forEach((catStat) => {
+        if (catStat.usedLimit && catStat.usedLimit.amount > 0) {
+            labels.push(categoryMap.value.get(catStat.categoryId) ?? `Unknown Cat ${catStat.categoryId.substring(0,4)}`);
+            data.push(catStat.usedLimit.amount);
         }
     });
 
@@ -106,13 +142,13 @@ const categoryListViewModels = computed((): CategoryListItemViewModel[] => {
 
     // Create a map of category stats for quick lookup
     const statsMap = new Map<string, CategoryStatistics>();
-    statisticsData.value?.categories_statistics?.forEach(stat => {
-        statsMap.set(stat.category_id, stat);
+    statisticsData.value?.categoriesStatistics?.forEach(stat => {
+        statsMap.set(stat.categoryId, stat);
     });
 
     return budgetData.value.categories.map((cat: Category) => {
         const stats = statsMap.get(cat.id);
-        const currentValue = stats?.used_limit?.amount ?? 0; // Use used_limit as current spending
+        const currentValue = stats?.usedLimit?.amount ?? 0; // Use used_limit as current spending
         const limitValue = cat.limit?.amount ?? 0;
         let progressPercentage = 0;
         if (limitValue > 0) {
@@ -126,8 +162,8 @@ const categoryListViewModels = computed((): CategoryListItemViewModel[] => {
             id: cat.id,
             name: cat.name,
             limit: cat.limit,
-            currentBalance: stats?.current_balance,
-            usedLimit: stats?.used_limit,
+            currentBalance: stats?.currentBalance,
+            usedLimit: stats?.usedLimit,
             progressPercentage: progressPercentage
         };
     });
@@ -156,7 +192,10 @@ const handleAddTransaction = () => {
 const handleTransactionSaved = () => {
     // Called when the modal successfully saves a transaction
     isTransactionModalOpen.value = false;
+    timestamp.value = new Date().toISOString();
     refresh();
+    executeRefreshStats();
+    refreshTransactions();
 };
 
 const handleDeactivateBudget = () => {
@@ -172,55 +211,62 @@ const handleDeactivateBudget = () => {
 <template>
   <div class="container mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4">Budget Detail</h1>
-
-    <div v-if="pending">
-      <Skeleton class="h-10 w-full" />
-    </div>
-
-    <div v-else-if="error">
+    <div v-if="error">
       <p class="text-red-500">Error: {{ error.message }}</p>
-      <p v-if="error.statusCode !== 400" class="text-sm text-muted-foreground">Status Code: {{ error.statusCode }}</p>
-      <button v-if="error.statusCode !== 400" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" @click="() => refresh()">Try Again</button>
-      <button v-else class="mt-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" @click="() => router.push('/budgets')">Go to Budgets</button>
+      <button class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" @click="() => refresh()">Try Again</button>
     </div>
 
-    <div v-else-if="budgetData" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div class="lg:col-span-2 space-y-4">
-             <BudgetSummaryCard :budget="budgetData" />
+            <Skeleton v-if="pending" class="h-32 w-full" />
+            <BudgetSummaryCard v-if="budgetData" :budget="budgetData" />
 
-             <ActionButtons
-                :budget-id="budgetIdParam as string"
-                :is-active="budgetData.is_active"
-                @add-transaction="handleAddTransaction"
-                @deactivate-budget="handleDeactivateBudget"
-              />
-            <RecentTransactionsTable :transactions="transactionViewModels" :budget-id="budgetIdParam as string" />
+            <Skeleton v-if="pending" class="h-12 w-full" />
+            <ActionButtons
+              v-else-if="budgetData"
+              :budget-id="budgetIdParam as string"
+              :is-active="budgetData.isActive"
+              @add-transaction="handleAddTransaction"
+              @deactivate-budget="handleDeactivateBudget"
+            />
+
+            <Skeleton v-if="pendingTransactions" class="h-64 w-full" />
+            <RecentTransactionsTable
+              v-else-if="recentTransactions"
+              :transactions="transactionViewModels"
+              :budget-id="budgetIdParam as string"
+            />
+
+            <Skeleton v-if="pendingStats" class="h-40 w-full" />
             <OverallStatsCard
-                :statistics="statisticsData"
-                :budget-limit="budgetData.total_limit"
-             />
-
+              v-else-if="statisticsData"
+              :statistics="statisticsData"
+              :budget-limit="budgetData?.totalLimit ?? { amount: 0, currency: 'USD' }"
+            />
         </div>
 
         <div class="lg:col-span-1 space-y-4">
-            <CategorySpendingChart :chart-data="categorySpendingChartData" />
-            <CategoryList
-                :categories="categoryListViewModels"
-                @edit-category="handleEditCategory"
-                @remove-category="handleRemoveCategory"
-              />
+            <Skeleton v-if="pendingStats" class="h-64 w-full" />
+            <CategorySpendingChart
+              v-else-if="categorySpendingChartData"
+              :chart-data="categorySpendingChartData"
+            />
 
+            <Skeleton v-if="pending || pendingStats" class="h-96 w-full" />
+            <CategoryList
+              v-else-if="budgetData && categoryListViewModels.length"
+              :categories="categoryListViewModels"
+              @edit-category="handleEditCategory"
+              @remove-category="handleRemoveCategory"
+            />
         </div>
     </div>
 
-    <div v-else>
-      <p class="text-yellow-600">Budget data could not be loaded or is unavailable.</p>
-    </div>
-
     <AddEditTransactionModal
+      v-if="budgetData"
       :is-open="isTransactionModalOpen"
       mode="create"
-      :budget="budgetViewModel"
+      :budget="budgetData"
       :available-categories="budgetData?.categories || []"
       @close="isTransactionModalOpen = false"
       @transaction-saved="handleTransactionSaved"

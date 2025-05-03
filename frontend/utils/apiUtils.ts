@@ -64,7 +64,7 @@ export function mapToDomainError(error: unknown, contextMessage: string = 'An AP
 
 
 export const apiConfig  = {
-    baseURL: "/v0/",
+    baseURL: "/api/v0",
     commonOptions: {
         headers: {
             'Content-Type': 'application/json',

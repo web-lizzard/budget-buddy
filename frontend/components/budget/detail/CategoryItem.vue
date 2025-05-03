@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CategoryListItemViewModel } from '@/types/viewmodels'
 import { Button } from '@/components/ui/button'
-import LimitProgressBar from '@/components/ui/LimitProgressBar.vue'
+import LimitProgressBar from '~/components/LimitProgressBar.vue'
 import { formatCurrency } from '@/utils/currency'
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { PenSquare, Trash2 } from 'lucide-vue-next' // Icons
@@ -32,7 +32,6 @@ const usedLimit = computed(() => formatCurrency(props.category.usedLimit))
     <AccordionTrigger>
         <div class="flex justify-between items-center w-full pr-4">
              <span class="font-medium text-left">{{ category.name }}</span>
-             <span class="text-muted-foreground text-sm">{{ category.limit.amount}}</span>
         </div>
     </AccordionTrigger>
     <AccordionContent>

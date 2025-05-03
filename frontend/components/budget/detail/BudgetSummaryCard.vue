@@ -6,15 +6,15 @@ import { format } from 'date-fns'
 const props = defineProps<{ budget: Budget }>()
 
 const formattedStartDate = computed(() => {
-  return format(props.budget.start_date, 'MMM d, yyyy')
+  return format(props.budget.startDate, 'MMM d, yyyy')
 })
 
 const formattedEndDate = computed(() => {
-  return format(props.budget.end_date, 'MMM d, yyyy')
+  return format(props.budget.endDate, 'MMM d, yyyy')
 })
 
 const formattedLimit = computed(() => {
-    return `${props.budget.total_limit.amount.toLocaleString()} ${props.budget.total_limit.currency}`
+    return `${props.budget.totalLimit.amount.toLocaleString()} ${props.budget.totalLimit.currency}`
 })
 </script>
 
@@ -35,8 +35,8 @@ const formattedLimit = computed(() => {
         </div>
          <div>
           <p class="text-muted-foreground">Status</p>
-          <p :class="[budget.is_active ? 'text-green-600' : 'text-red-600', 'font-medium']">
-            {{ budget.is_active ? 'Active' : 'Inactive' }}
+          <p :class="[budget.isActive ? 'text-green-600' : 'text-red-600', 'font-medium']">
+            {{ budget.isActive ? 'Active' : 'Inactive' }}
           </p>
         </div>
       </div>

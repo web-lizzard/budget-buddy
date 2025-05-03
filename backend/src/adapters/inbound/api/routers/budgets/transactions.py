@@ -2,11 +2,6 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
-from adapters.inbound.api.payloads.payloads import (
-    CreateTransactionRequestPayload,
-    UpdateTransactionRequestPayload,
-)
-from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID
 from application.commands.create_transaction_command import CreateTransactionCommand
 from application.commands.delete_transaction_command import DeleteTransactionCommand
 from application.commands.edit_transaction_command import EditTransactionCommand
@@ -22,6 +17,12 @@ from domain.value_objects.transaction_type import TransactionType
 from fastapi import APIRouter, Depends, Query
 from fastapi import status as http_status
 from infrastructure.container.main_container import MainContainer
+
+from adapters.inbound.api.payloads.payloads import (
+    CreateTransactionRequestPayload,
+    UpdateTransactionRequestPayload,
+)
+from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID
 
 router = APIRouter(tags=["transactions"])
 
@@ -145,7 +146,6 @@ async def create_transaction(
     command = CreateTransactionCommand(
         category_id=payload.category_id,
         amount=payload.amount.amount,
-        currency=payload.amount.currency,
         transaction_type=domain_transaction_type,  # Use domain enum
         budget_id=budget_id,
         user_id=user_id,

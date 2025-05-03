@@ -12,12 +12,21 @@ const CreateBudgetResponseSchema = z.object({
   id: z.string(),
 });
 
-const PaginatedBudgetSchema = z.object({
-  items: z.array(BudgetSchema),
+// Define schema for the expected paginated API response
+const PaginatedBudgetDTOSchema = z.object({ // Renamed for clarity
+  items: z.array(BudgetSchema), // Use the existing BudgetSchema for items
   total: z.number(),
   skip: z.number(),
   limit: z.number(),
 });
+
+// Interface for listBudgets parameters
+interface ListBudgetsParams {
+    page?: number;
+    limit?: number;
+    status?: 'active' | 'inactive' | 'expired' | 'all'; // Match filter values
+    sort?: string; // e.g., 'name', '-startDate'
+}
 
 /**
  * Service class responsible for interacting with Budget-related API endpoints.
@@ -87,6 +96,7 @@ export class BudgetService {
            dailyAvailableAmount: dto.daily_available_amount,
            dailyAverage: dto.daily_average,
            usedLimit: dto.used_limit,
+           creationDate: new Date(dto.creation_date),
            categoriesStatistics: dto.categories_statistics.map((csDto: CategoryStatisticsDTO) => ({
                categoryId: csDto.category_id,
                currentBalance: csDto.current_balance,
@@ -120,7 +130,7 @@ export class BudgetService {
    */
   async createBudget(payload: CreateBudgetRequestPayload): Promise<void> {
      try {
-         const url = `${apiConfig.baseURL}/budgets`;
+         const url = `${apiConfig.baseURL}/budgets/`;
          const response = await $fetch<unknown>(url, {
              method: 'POST',
              body: payload,
@@ -141,54 +151,68 @@ export class BudgetService {
          throw mapToDomainError(error, 'Failed to create budget');
      }
    }
-  /**
-   * Fetches a list of budgets.
-   * @returns A paginated response containing budgets (domain models).
-   * @throws {DomainError} If the API call fails or data validation fails.
-   */
-  async listBudgets(): Promise<PaginatedItems<Budget>> {
-      try {
-          const url = `${apiConfig.baseURL}/budgets`;
-          const response = await $fetch<unknown>(url, {
-              method: 'GET',
-              responseType: 'json',
-              ...apiConfig.commonOptions,
-          });
 
-          const parsedResponse = PaginatedBudgetSchema.safeParse(response);
-          if (!parsedResponse.success) {
-              console.error('Failed to parse list budgets response:', parsedResponse.error, response);
-              throw { status: 'validation_error', message: 'Invalid API response while fetching budgets.' } as DomainError;
-          }
+   /**
+    * Fetches a list of budgets with pagination, filtering, and sorting.
+    * @param params - Parameters for pagination, filtering, and sorting.
+    * @returns A paginated response containing budgets (domain models).
+    * @throws {DomainError} If the API call fails or data validation fails.
+    */
+   async listBudgets(params: ListBudgetsParams = {}): Promise<PaginatedItems<Budget>> {
+       try {
+           const url = `${apiConfig.baseURL}/budgets/`; // Added trailing slash
+           // Prepare query parameters, omitting undefined values and handling 'all' status
+           const queryParams: Record<string, string | number> = {};
+           if (params.page) queryParams.page = params.page;
+           if (params.limit) queryParams.limit = params.limit;
+           if (params.status && params.status !== 'all') queryParams.status = params.status;
+           if (params.sort) queryParams.sort = params.sort;
 
-          const domainItems = parsedResponse.data.items.map(budgetDto => ({
-              id: budgetDto.id,
-              name: budgetDto.name,
-              totalLimit: {
-                  amount: budgetDto.total_limit.amount,
-                  currency: budgetDto.total_limit.currency,
-              },
-              userId: budgetDto.user_id,
-              startDate: budgetDto.start_date,
-              endDate: budgetDto.end_date,
-              currency: budgetDto.currency,
-              categories: budgetDto.categories, // Assuming categories is part of the budget DTO
-              isActive: !budgetDto.deactivation_date, // Assuming isActive is part of the budget DTO
-          }));
+           const response = await $fetch<unknown>(url, {
+               method: 'GET',
+               responseType: 'json',
+               params: queryParams, // Pass prepared query parameters
+               ...apiConfig.commonOptions,
+           });
 
-          return {
-              items: domainItems,
-              total: parsedResponse.data.total,
-              skip: parsedResponse.data.skip,
-              limit: parsedResponse.data.limit,
-          };
-      } catch (error: unknown) {
-          if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
-              throw error as DomainError;
-          }
-          throw mapToDomainError(error, 'Failed to fetch budgets');
-      }
-  }
+           // Validate the structure of the paginated response
+           const parsedResponse = PaginatedBudgetDTOSchema.safeParse(response);
+           if (!parsedResponse.success) {
+               console.error('Failed to parse list budgets response:', parsedResponse.error, response);
+               throw { status: 'validation_error', message: 'Invalid API response while fetching budgets.' } as DomainError;
+           }
 
-  // TODO: Add instance methods for updateBudget, deleteBudget, listBudgets etc. as needed
+           // Map DTO items to Domain Model items
+           const domainItems = parsedResponse.data.items.map(budgetDto => ({
+               id: budgetDto.id,
+               userId: budgetDto.user_id,
+               name: budgetDto.name,
+               totalLimit: budgetDto.total_limit,
+               currency: budgetDto.currency,
+               startDate: budgetDto.start_date,
+               endDate: budgetDto.end_date,
+               deactivationDate: budgetDto.deactivation_date,
+               categories: budgetDto.categories.map((catDto: CategoryDTO) => ({
+                 id: catDto.id,
+                 name: catDto.name,
+                 limit: catDto.limit,
+               })),
+               isActive: !budgetDto.deactivation_date,
+           }));
+
+           return {
+               items: domainItems,
+               total: parsedResponse.data.total,
+               skip: parsedResponse.data.skip,
+               limit: parsedResponse.data.limit,
+           };
+       } catch (error: unknown) {
+           if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+               throw error as DomainError;
+           }
+           throw mapToDomainError(error, 'Failed to fetch budgets');
+       }
+   }
+
+  // TODO: Add instance methods for updateBudget, deleteBudget etc. as needed
 }

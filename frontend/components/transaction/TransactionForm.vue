@@ -5,6 +5,10 @@ import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon } from 'lucide-vue-next';
 
 import { useTransactionForm } from '@/composables/useTransactionForm';
+import type { Category } from '@/types/category';
+import type { Budget } from '@/types/budget';
+import type { Transaction, TransactionType } from '@/types/transaction';
+import type { TransactionFormInput, InitialTransactionFormData } from '@/schemas/transactionFormSchema';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,29 +31,26 @@ import {
 } from '@/components/ui/form';
 import { dateToCalendarDate } from '~/utils/dateHelpers';
 
-
-interface CategoryViewModel {
-  id: string;
-  name: string;
-}
-
-interface BudgetViewModel {
-  currency: string;
+interface BudgetDates {
   startDate: Date;
   endDate: Date;
 }
 
 const props = withDefaults(defineProps<{
   initialData: InitialTransactionFormData;
-  budget: BudgetViewModel;
-  availableCategories: CategoryViewModel[];
+  budget: Pick<Budget, 'currency'> & BudgetDates;
+  availableCategories: Pick<Category, 'id' | 'name'>[];
   isLoading?: boolean;
 }>(), {
-  initialData: { type: 'EXPENSE', description: undefined },
+  initialData: () => ({ type: 'EXPENSE' as TransactionType }),
   isLoading: false,
 });
 
-export type TransactionSubmitPayload = Omit<TransactionFormInput, 'occurredDate' | 'amount'> & { occurredDate: Date | null, amount: number | null };
+export type TransactionSubmitPayload = Omit<Transaction, 'id' | 'userId' | 'amount' | 'date'> & {
+  amount: number | null,
+  occurredDate: Date | null
+};
+
 const emit = defineEmits<{
   (e: 'submit', values: TransactionSubmitPayload): void;
 }>();
@@ -62,13 +63,14 @@ const {
 const budgetStartDateValue = computed(() => dateToCalendarDate(props.budget.startDate));
 const budgetEndDateValue = computed(() => dateToCalendarDate(props.budget.endDate));
 
-
 const handleFormSubmitEvent = async () => {
   const onValidationSuccess = (validatedValues: TransactionFormInput) => {
     const valuesToEmit: TransactionSubmitPayload = {
-        ...validatedValues,
-        occurredDate: dateValueToDate(validatedValues.occurredDate),
-        amount: validatedValues.amount // Pass amount as number | null
+        categoryId: validatedValues.categoryId ?? '',
+        type: validatedValues.type,
+        amount: validatedValues.amount,
+        occurredDate: validatedValues.occurredDate ? new Date(validatedValues.occurredDate.toString()) : null,
+        description: validatedValues.description,
     };
     emit('submit', valuesToEmit);
   };
@@ -80,7 +82,6 @@ const handleFormSubmitEvent = async () => {
   try {
     await handleSubmit(onValidationSuccess, onValidationError)();
   } catch (error) {
-    // This catch block might be redundant if onValidationError handles the rejection
     console.error('Caught validation error during handleSubmit:', error);
   }
 };

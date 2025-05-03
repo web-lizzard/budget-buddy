@@ -2,7 +2,7 @@ import { $fetch, type FetchOptions } from 'ofetch';
 import { z } from 'zod';
 import type { CreateTransactionPayload, UpdateTransactionPayload, TransactionDTO, DomainError, PaginatedItems } from '@/types/dtos';
 import { TransactionSchema } from '@/schemas/transactionSchema';
-import type { Transaction } from '@/types/transaction';
+import type { Transaction, TransactionType } from '@/types/transaction';
 import { mapToDomainError, apiConfig } from '@/utils/apiUtils';
 
 // Define the shape of the paginated response from the API for transactions
@@ -54,8 +54,8 @@ export class TransactionService {
                          categoryId: dto.category_id,
                          userId: dto.user_id,
                          amount: dto.amount,
-                         type: dto.type,
-                         date: dto.date,
+                         type: dto.transaction_type as TransactionType,
+                         date: dto.occurred_date,
                          // description: dto.description, // Assuming schema handles optional description potentially
                      };
                  }
@@ -78,7 +78,7 @@ export class TransactionService {
      * @throws {DomainError} If the API call fails.
      */
     async updateTransaction(transactionId: string, payload: UpdateTransactionPayload): Promise<void> {
-        const url = `${this.baseUrl}/${transactionId}`;
+        const url = `${this.baseUrl}/${transactionId}/`;
         try {
             await $fetch(url, {
                 method: 'PUT',
@@ -100,7 +100,7 @@ export class TransactionService {
     * @throws {DomainError} If the API call fails.
     */
    async deleteTransaction(transactionId: string): Promise<void> {
-        const url = `${this.baseUrl}/${transactionId}`;
+        const url = `${this.baseUrl}/${transactionId}/`;
         try {
             await $fetch(url, {
                 method: 'DELETE',
@@ -125,7 +125,7 @@ export class TransactionService {
     */
    async getRecentTransactions(
         limit: number = 3,
-        sort: string = 'date:desc'
+        sort: string = '-occurred_date'
     ): Promise<PaginatedItems<Transaction>> {
      try {
         // Use this.baseUrl which already includes the budgetId
@@ -150,8 +150,8 @@ export class TransactionService {
             categoryId: itemDto.category_id,
             userId: itemDto.user_id,
             amount: itemDto.amount,
-            type: itemDto.type,
-            date: itemDto.date,
+            type: itemDto.transaction_type as TransactionType,
+            date: itemDto.occurred_date,
             // description: itemDto.description, // Assume handled by schema or not present
         }));
 
