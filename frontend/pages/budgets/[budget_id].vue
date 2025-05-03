@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watchEffect } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { createError } from '#app'
 import BudgetSummaryCard from '@/components/budget/detail/BudgetSummaryCard.vue'
 import OverallStatsCard from '@/components/budget/detail/OverallStatsCard.vue'
 import CategorySpendingChart from '@/components/budget/detail/CategorySpendingChart.vue'
@@ -28,17 +27,6 @@ const budgetIdParam = computed(() => route.params.budget_id)
 // Added reactive state for controlling the Add/Edit Transaction modal
 const isTransactionModalOpen = ref(false)
 
-// Validate the budgetId when the param changes. Throw 400 error if invalid.
-// Use watchEffect to reactively check and throw error.
-watchEffect(() => {
-    const id = budgetIdParam.value;
-    if (typeof id !== 'string' || !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)) {
-        console.error('Invalid budget ID format in URL:', id)
-        // Throw a non-fatal 400 error to let Nuxt handle it (e.g., show error page)
-        throw createError({ statusCode: 400, statusMessage: 'Invalid Budget ID', fatal: true })
-    }
-})
-
 const budgetService = new BudgetService()
 const transactionService = new TransactionService(budgetIdParam.value as string)
 
@@ -47,6 +35,15 @@ const transactionService = new TransactionService(budgetIdParam.value as string)
 const { data: budgetData, pending, error, refresh } = useQuery(
   `budget-${budgetIdParam.value}`,
   () => budgetService.getBudgetById(budgetIdParam.value as string),
+  {
+    onError() {
+        throw createError({
+            statusCode: 404,
+            statusMessage: 'Budget not found',
+            fatal: true
+        })
+    },
+  }
 )
 
 const { data: recentTransactions, pending: pendingTransactions, refresh: refreshTransactions } = useQuery(
@@ -87,7 +84,6 @@ const { executeAction: executeRefreshStats } = useIntervalAction(
 
 
 
-// --- Computed ViewModels ---
 
 const categoryMap = computed(() => {
     const map = new Map<string, string>();
@@ -136,11 +132,9 @@ const categorySpendingChartData = computed((): ChartDataViewModel | null => {
     };
 });
 
-// Prepare data for CategoryList
 const categoryListViewModels = computed((): CategoryListItemViewModel[] => {
     if (!budgetData.value?.categories) return [];
 
-    // Create a map of category stats for quick lookup
     const statsMap = new Map<string, CategoryStatistics>();
     statisticsData.value?.categoriesStatistics?.forEach(stat => {
         statsMap.set(stat.categoryId, stat);

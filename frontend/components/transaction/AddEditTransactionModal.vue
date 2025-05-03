@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
 
 import {
   Dialog,
@@ -19,11 +19,10 @@ import type { Transaction } from '@/types/transaction';
 import type { InitialTransactionFormData } from '@/schemas/transactionFormSchema';
 import type {
     CreateTransactionPayload,
-    UpdateTransactionPayload,
 } from '@/types/dtos';
 
-import { useTransactionApi } from '@/composables/useTransactionApi';
 import { toast } from "vue-sonner"
+import { TransactionService } from '~/services/TransactionService';
 
 const props = withDefaults(defineProps<{
   isOpen: boolean;
@@ -39,37 +38,21 @@ const emit = defineEmits<{
   (e: 'close' | 'transactionSaved'): void;
 }>();
 
-// Use the refactored composable
+const transactionService = new TransactionService(props.budget.id);
+
 const {
-    createTransaction,
-    updateTransaction,
-    loadingCreate,
-    errorCreate,
-    loadingUpdate,
-    errorUpdate,
-} = useTransactionApi(computed(() => props.budget.id));
-
-// Determine loading state based on mode
-const isLoading = computed(() => props.mode === 'create' ? loadingCreate.value : loadingUpdate.value);
-
-// Use a local ref for displaying errors in the modal
-const displayError = ref<string | null>(null);
-
-// Watch for API errors from the composable and update local display error
-watch(errorCreate, (newError) => {
-  if (props.mode === 'create' && newError) {
-    displayError.value = newError.message || 'Failed to create transaction.';
-     toast({ variant: "destructive", title: "API Error", description: displayError.value });
+    execute: handleTransactionSubmit,
+    loading,
+    error,
+} = useCommand(async (payload: CreateTransactionPayload) => {
+  if (props.mode === 'create') {
+    await transactionService.createTransaction(payload);
+  } else if (props.mode === 'edit' && props.transactionData?.id) {
+    await transactionService.updateTransaction(props.transactionData.id, payload);
   }
-});
-watch(errorUpdate, (newError) => {
-  if (props.mode === 'edit' && newError) {
-    displayError.value = newError.message || 'Failed to update transaction.';
-    toast({ variant: "destructive", title: "API Error", description: displayError.value });
-  }
-});
+})
 
-// Convert budget dates to Date objects for the form
+
 const formBudget = computed(() => ({
   currency: props.budget.currency,
   startDate: new Date(props.budget.startDate),
@@ -95,14 +78,12 @@ const initialFormData = computed<InitialTransactionFormData>(() => {
 
 
 async function handleFormSubmit(formData: TransactionSubmitPayload) {
-  displayError.value = null;
 
   if (!formData.categoryId || formData.amount === undefined || formData.amount === null || !formData.occurredDate) {
-      displayError.value = "Missing required fields. Please check the form.";
       toast({
           variant: "destructive",
           title: "Validation Error",
-          description: displayError.value,
+          description: "Missing required fields. Please check the form.",
       })
       return;
   }
@@ -115,41 +96,16 @@ async function handleFormSubmit(formData: TransactionSubmitPayload) {
       description: formData.description || undefined,
   };
 
-  try {
-    if (props.mode === 'create') {
-        await createTransaction(apiPayloadBase as CreateTransactionPayload);
-        if (!errorCreate.value) {
-           toast({ title: "Success", description: "Transaction created successfully!" });
-           emit('transactionSaved');
-           emit('close');
-        }
-    } else if (props.mode === 'edit' && props.transactionData?.id) {
-        await updateTransaction({
-            transactionId: props.transactionData.id,
-            payload: apiPayloadBase as UpdateTransactionPayload
-        });
-         if (!errorUpdate.value) {
-            toast({ title: "Success", description: "Transaction updated successfully!" });
-            emit('transactionSaved');
-            emit('close');
-         }
-    } else {
-        throw new Error('Invalid mode or missing transaction ID for edit.');
-    }
+  await handleTransactionSubmit(apiPayloadBase as CreateTransactionPayload);
 
-  } catch (error) {
-      if (!displayError.value) {
-          const message = error instanceof Error ? error.message : 'An unexpected error occurred during submission.';
-          displayError.value = message;
-          toast({ variant: "destructive", title: "Submission Error", description: message });
-      }
-      console.error("Error during form submission:", error);
+  if (!error.value) {
+    toast({ title: "Success", description: "Transaction created successfully!" });
+    emit('transactionSaved');
   }
 }
 
 function handleOpenChange(open: boolean) {
   if (!open) {
-    displayError.value = null;
     emit('close');
   }
 }
@@ -170,19 +126,19 @@ function handleOpenChange(open: boolean) {
         :initial-data="initialFormData"
         :budget="formBudget"
         :available-categories="availableCategories"
-        :is-loading="isLoading"
+        :is-loading="loading"
         class="py-4"
         @submit="handleFormSubmit"
       />
 
        <!-- Display the local error state -->
-       <div v-if="displayError" class="text-destructive text-sm font-medium p-4 bg-destructive/10 rounded-md">
-         {{ displayError }}
+       <div v-if="error" class="text-destructive text-sm font-medium p-4 bg-destructive/10 rounded-md">
+         {{ error }}
        </div>
 
        <DialogFooter class="pt-4">
          <DialogClose as-child>
-           <Button type="button" variant="outline" :disabled="isLoading">Cancel</Button>
+           <Button type="button" variant="outline" :disabled="loading">Cancel</Button>
          </DialogClose>
          <!-- Submit button is handled within TransactionForm, it receives isLoading prop -->
          <!-- We don't need a separate submit button here -->
