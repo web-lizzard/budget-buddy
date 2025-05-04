@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import BudgetSummaryCard from '@/components/budget/detail/BudgetSummaryCard.vue'
 import OverallStatsCard from '@/components/budget/detail/OverallStatsCard.vue'
 import CategorySpendingChart from '@/components/budget/detail/CategorySpendingChart.vue'
