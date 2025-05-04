@@ -128,7 +128,7 @@ const formKey = computed(() =>
       </DialogHeader>
 
       <div class="py-4">
-        <Alert v-if="mode === 'create' && canAddCategory()" variant="default" class="mb-4">
+        <Alert v-if="mode === 'create' && !canAddCategory()" variant="default" class="mb-4">
           <AlertCircle class="h-4 w-4" />
           <AlertDescription>
             You've reached the maximum limit of 5 categories for this budget.

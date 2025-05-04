@@ -13,7 +13,7 @@ export const useBudgetService = () => {
 export const useTransactionService = () => {
     const route = useRoute()
 
-    const budgetId = computed(() => route.params.budget)
+    const budgetId = computed(() => route.params.budget_id)
 
     const service = new TransactionService(budgetId.value as string)
 
