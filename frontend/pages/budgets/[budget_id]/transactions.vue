@@ -30,8 +30,7 @@ const {
 } = useQuery<Budget | null, string>(
   computed(() => `budget-${budgetId.value}`),
   () => budgetId.value ? budgetService.getBudgetById(budgetId.value) : Promise.resolve(null),
-  {},
-  [budgetId]
+
 );
 
 const transactions = ref<Transaction[]>([]);
@@ -60,7 +59,6 @@ const {
     limit: pagination.value.limit
   }),
   {},
-  [budgetId]
 );
 
 watch(initialTransactionsData, (data) => {

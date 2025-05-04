@@ -9,7 +9,6 @@ type QueryFetcher<T> = () => Promise<T>;
 // Define options specific to useQuery, extending useAsyncData options
 interface UseQueryOptions<T> extends Omit<AsyncDataOptions<T>, 'watch'> {
   onError?: (error: DomainError) => void; // Using DomainError type from dtos
-  // Add other custom options if needed
 }
 
 /**
