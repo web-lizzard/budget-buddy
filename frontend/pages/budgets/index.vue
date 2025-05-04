@@ -61,17 +61,20 @@ function handleCreateClick() {
   isModalOpen.value = true; // Open the modal
 }
 
+function handleCloseModal() {
+  console.log('Closing modal');
+  isModalOpen.value = false;
+}
+
 </script>
 
 <template>
   <div class="container mx-auto p-4 space-y-6">
     <div class="flex justify-between items-center">
       <h1 class="text-3xl font-bold">My Budgets</h1>
-      <!-- Use CreateBudgetButton component -->
       <Button @click="handleCreateClick">Create Budget</Button>
     </div>
 
-    <!-- Use BudgetFilterTabs component -->
     <div class="pt-4">
         <BudgetFilterTabs :model-value="currentFilter" @update:model-value="handleFilterChange" />
     </div>
@@ -98,7 +101,7 @@ function handleCreateClick() {
     </Alert>
 
     <!-- Content: Table or Empty State -->
-    <div v-else>
+    <div v-else-if="!isLoading && !error">
       <!-- Show table only if there are budgets -->
       <BudgetListTable
          v-if="budgets.length > 0"
@@ -124,7 +127,7 @@ function handleCreateClick() {
     </div>
 
     <!-- Modal for Creating Budgets -->
-    <CreateBudgetModal v-model="isModalOpen" />
+    <CreateBudgetModal v-model="isModalOpen" @close-modal="handleCloseModal" />
 
   </div>
 </template>

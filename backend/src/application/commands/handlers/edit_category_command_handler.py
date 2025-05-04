@@ -2,6 +2,7 @@ from uuid import UUID
 
 from domain.events.category.category_edited import CategoryEdited
 from domain.ports.budget_repository import BudgetRepository
+from domain.ports.clock import Clock
 from domain.value_objects.category_name import CategoryName
 from domain.value_objects.limit import Limit
 from domain.value_objects.money import Money
@@ -23,16 +24,23 @@ class EditCategoryCommandHandler(CommandHandler[EditCategoryCommand]):
     5. Returning a CategoryEdited event
     """
 
-    def __init__(self, budget_repository: BudgetRepository, unit_of_work: UnitOfWork):
+    def __init__(
+        self,
+        budget_repository: BudgetRepository,
+        unit_of_work: UnitOfWork,
+        clock: Clock,
+    ):
         """
-        Initialize the EditCategoryCommandHandler with required repositories and unit of work.
+        Initialize the command handler with dependencies.
 
         Args:
-            budget_repository: Repository for budget aggregate operations
-            unit_of_work: Unit of work for managing transactions and event publishing
+            budget_repository: Repository for budget operations
+            unit_of_work: UnitOfWork for transaction management and event publishing
+            clock: Clock for getting current time
         """
         super().__init__(unit_of_work)
         self._budget_repository = budget_repository
+        self._clock = clock
 
     async def _handle(self, command: EditCategoryCommand) -> CategoryEdited:
         """
@@ -68,6 +76,7 @@ class EditCategoryCommandHandler(CommandHandler[EditCategoryCommand]):
             budget_id=str(budget.id),
             name=updated_category.name.value,
             limit=int(updated_category.limit.value.amount),
+            occurred_on=self._clock.now(),
         )
 
     def _get_category_name(self, command: EditCategoryCommand) -> CategoryName | None:

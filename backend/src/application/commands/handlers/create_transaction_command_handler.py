@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from domain.events.domain_event import DomainEvent
 from domain.events.transaction import TransactionAdded
 from domain.factories.transaction_factory import TransactionFactory
 from domain.ports.budget_repository import BudgetRepository
+from domain.ports.clock import Clock
 from domain.ports.transaction_repository import TransactionRepository
 from domain.value_objects import Money
 
@@ -20,6 +19,7 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
         budget_repository: BudgetRepository,
         transaction_repository: TransactionRepository,
         unit_of_work: UnitOfWork,
+        clock: Clock,
     ):
         """
         Initialize the command handler with dependencies.
@@ -28,10 +28,12 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
             budget_repository: Repository for budget operations
             transaction_repository: Repository for transaction operations
             unit_of_work: UnitOfWork for transaction management and event publishing
+            clock: Clock for getting current time
         """
         super().__init__(unit_of_work)
         self._budget_repository = budget_repository
         self._transaction_repository = transaction_repository
+        self._clock = clock
 
     async def _handle(self, command: CreateTransactionCommand) -> DomainEvent:
         """
@@ -60,7 +62,7 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
             transaction_type=command.transaction_type,
             budget_id=command.budget_id,
             user_id=command.user_id,
-            occurred_date=command.occurred_date or datetime.now(),
+            occurred_date=command.occurred_date or self._clock.now(),
             description=command.description,
         )
 
@@ -76,4 +78,5 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
             date=transaction.occurred_date,
             budget_id=str(command.budget_id),
             user_id=str(command.user_id),
+            occurred_on=self._clock.now(),
         )

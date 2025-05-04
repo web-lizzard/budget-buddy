@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 
 import pytest
+from adapters.outbound.clock.fixed_clock import FixedClock
 from domain.aggregates import Budget
 from domain.entities import Category
 from domain.exceptions import (
@@ -24,7 +25,7 @@ class TestBudget:
         budget_id = uuid.uuid4()
         user_id = uuid.uuid4()
         total_limit = Limit(Money(50000, "USD"))  # $500.00
-        start_date = datetime.now()
+        start_date = FixedClock().now()
         end_date = start_date + timedelta(days=30)
 
         return Budget(
@@ -268,8 +269,9 @@ class TestBudget:
 
     def test_deactivate_budget(self, valid_budget):
         """Test deactivating a budget."""
+        fixed_clock = FixedClock(datetime.now())  # Use FixedClock as argument
 
-        valid_budget.deactivate_budget()
+        valid_budget.deactivate_budget(fixed_clock.now())
 
         assert valid_budget.deactivation_date is not None
 
@@ -300,10 +302,10 @@ class TestBudget:
     ):
         """Test validating a transaction date after budget deactivation raises error."""
         # Deactivate the budget
-        valid_budget.deactivate_budget()
+        valid_budget.deactivate_budget(FixedClock().now() + timedelta(days=1))
 
         # Transaction date after deactivation
-        transaction_date = datetime.now() + timedelta(days=1)
+        transaction_date = FixedClock().now() + timedelta(days=2)
 
         with pytest.raises(CannotAddTransactionToDeactivatedBudgetError):
             valid_budget.validate_transaction_date(transaction_date)
@@ -311,8 +313,7 @@ class TestBudget:
     def test_validate_transaction_date_deactivated_budget_success(self, valid_budget):
         """Test validating a transaction date before budget deactivation succeeds."""
         # Deactivate the budget
-        valid_budget._start_date = datetime.now() - timedelta(days=1)
-        valid_budget.deactivate_budget()
+        valid_budget.deactivate_budget(FixedClock().now() + timedelta(days=20))
 
         # Transaction date before deactivation
         transaction_date = valid_budget.deactivation_date - timedelta(hours=1)

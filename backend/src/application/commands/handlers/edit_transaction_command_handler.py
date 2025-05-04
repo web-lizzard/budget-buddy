@@ -2,9 +2,10 @@ from uuid import UUID
 
 from domain.aggregates.budget import Budget
 from domain.aggregates.transaction import Transaction
-from domain.events.transaction_edited_event import TransactionEditedEvent
+from domain.events.transaction.transaction_updated import TransactionUpdated
 from domain.exceptions import CannotAddTransactionToDeactivatedBudgetError
 from domain.ports.budget_repository import BudgetRepository
+from domain.ports.clock import Clock
 from domain.ports.transaction_repository import TransactionRepository
 from domain.value_objects import Money
 
@@ -21,6 +22,7 @@ class EditTransactionCommandHandler(CommandHandler[EditTransactionCommand]):
         unit_of_work: UnitOfWork,
         transaction_repository: TransactionRepository,
         budget_repository: BudgetRepository,
+        clock: Clock,
     ):
         """Initialize the edit transaction command handler.
 
@@ -28,12 +30,14 @@ class EditTransactionCommandHandler(CommandHandler[EditTransactionCommand]):
             unit_of_work: Unit of work for managing transactions
             transaction_repository: Repository for accessing transactions
             budget_repository: Repository for accessing budgets
+            clock: Clock for getting current time
         """
         super().__init__(unit_of_work)
         self._transaction_repository = transaction_repository
         self._budget_repository = budget_repository
+        self._clock = clock
 
-    async def _handle(self, command: EditTransactionCommand) -> TransactionEditedEvent:
+    async def _handle(self, command: EditTransactionCommand) -> TransactionUpdated:
         """Handle the edit transaction command.
 
         Args:
@@ -84,14 +88,17 @@ class EditTransactionCommandHandler(CommandHandler[EditTransactionCommand]):
         await self._transaction_repository.save(transaction)
 
         # Return the event - use updated values from the transaction aggregate
-        return TransactionEditedEvent(
-            transaction_id=transaction.id,
-            budget_id=command.budget_id,
-            user_id=command.user_id,
-            category_id=transaction.category_id,
-            amount=transaction.amount,
-            transaction_type=transaction.transaction_type,
-            description=transaction.description,
+        return TransactionUpdated(
+            occurred_on=self._clock.now(),
+            transaction_id=str(transaction.id),  # Ensure transaction_id is a string
+            category_id=str(transaction.category_id),  # Ensure category_id is a string
+            amount=transaction.amount.amount,  # amount is already an int
+            type=str(
+                transaction.transaction_type
+            ),  # Corrected parameter name to 'type'
+            date=transaction.occurred_date,  # Corrected parameter name to 'date'
+            user_id=str(command.user_id),
+            budget_id=str(command.budget_id),
         )
 
     def _get_category_id(

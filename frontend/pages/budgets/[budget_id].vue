@@ -32,7 +32,7 @@ const transactionService = new TransactionService(budgetIdParam.value as string)
 
 
 
-const { data: budgetData, pending, error, refresh } = useQuery(
+const { data: budgetData, pending, error, refresh: refreshBudgetData } = useQuery(
   `budget-${budgetIdParam.value}`,
   () => budgetService.getBudgetById(budgetIdParam.value as string),
   {
@@ -187,16 +187,14 @@ const handleTransactionSaved = () => {
     // Called when the modal successfully saves a transaction
     isTransactionModalOpen.value = false;
     timestamp.value = new Date().toISOString();
-    refresh();
     executeRefreshStats();
     refreshTransactions();
 };
 
-const handleDeactivateBudget = () => {
+const handleDeactivateBudget = async () => {
     console.log('Action: Deactivate budget', budgetIdParam.value);
-    // TODO: Implement API call to PATCH /budgets/{id}/deactivate
-    // TODO: Show confirmation, handle loading/error state, refresh data
-    alert(`Placeholder: Deactivate budget ${budgetIdParam.value}`);
+    await budgetService.deactivateBudget(budgetIdParam.value as string);
+    refreshBudgetData();
 };
 
 
@@ -207,7 +205,7 @@ const handleDeactivateBudget = () => {
     <h1 class="text-2xl font-bold mb-4">Budget Detail</h1>
     <div v-if="error">
       <p class="text-red-500">Error: {{ error.message }}</p>
-      <button class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" @click="() => refresh()">Try Again</button>
+      <button class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" @click="refreshBudgetData()">Try Again</button>
     </div>
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-4">

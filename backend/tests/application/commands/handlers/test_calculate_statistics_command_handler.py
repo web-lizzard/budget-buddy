@@ -4,6 +4,7 @@ from typing import Optional
 
 import pytest
 from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
+from adapters.outbound.clock.fixed_clock import FixedClock
 from adapters.outbound.persistence.in_memory import (
     InMemoryBudgetRepository,
     InMemoryStatisticsRepository,
@@ -18,6 +19,7 @@ from domain.aggregates.budget import Budget
 from domain.aggregates.transaction import Transaction
 from domain.entities.category import Category
 from domain.events.statistics import StatisticsCalculated
+from domain.services.statistics_calculation_service import StatisticsCalculationService
 from domain.value_objects import (
     CategoryName,
     Limit,
@@ -161,11 +163,15 @@ def _get_deps(
     stats_repo = InMemoryStatisticsRepository({})
     publisher = InMemoryDomainPublisher()
     uow = InMemoryUnitOfWork(event_publisher=publisher)
+    clock = FixedClock(datetime(2024, 1, 15, 12, 0, 0))
+    statistics_calculation_service = StatisticsCalculationService(clock=clock)
     handler = CalculateStatisticsCommandHandler(
         unit_of_work=uow,
         budget_repository=budget_repo,
         transaction_repository=tx_repo,
         statistics_repository=stats_repo,
+        clock=clock,
+        statistics_calculation_service=statistics_calculation_service,
     )
     return handler, uow, stats_repo, publisher, budget_repo, tx_repo
 

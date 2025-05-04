@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pytest
 from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
+from adapters.outbound.clock.fixed_clock import FixedClock
 from adapters.outbound.persistence.in_memory.budget_repository import (
     InMemoryBudgetRepository,
 )
@@ -46,6 +47,7 @@ def _get_deps(
             ),
             budget_repository=repository,
             unit_of_work=unit_of_work,
+            clock=FixedClock(datetime(2023, 1, 1, 12, 0, 0)),
         ),
         repository,
         domain_publisher,

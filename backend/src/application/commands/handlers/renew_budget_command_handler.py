@@ -1,9 +1,8 @@
 from domain.events import BudgetRenewed
 from domain.events.domain_event import DomainEvent
-from domain.factories import BudgetFactory
 from domain.ports import BudgetRepository
+from domain.ports.clock import Clock
 from domain.services.budget_renewal_service import BudgetRenewalService
-from domain.strategies.budget_strategy.budget_strategy import BudgetStrategy
 
 from application.commands import RenewBudgetCommand
 from application.commands.handlers.command_handler import CommandHandler
@@ -16,20 +15,23 @@ class RenewBudgetCommandHandler(CommandHandler[RenewBudgetCommand]):
     def __init__(
         self,
         budget_repository: BudgetRepository,
+        budget_renewal_service: BudgetRenewalService,
         unit_of_work: UnitOfWork,
-        strategies: list[BudgetStrategy],
+        clock: Clock,
     ):
         """
         Initialize the command handler with dependencies.
 
         Args:
-            budget_repository: Repository for accessing budgets
+            budget_repository: Repository for budget operations
             budget_renewal_service: Service for renewing budgets
             unit_of_work: UnitOfWork for transaction management and event publishing
+            clock: Clock for getting current time
         """
         super().__init__(unit_of_work)
         self._budget_repository = budget_repository
-        self._strategies = strategies
+        self._budget_renewal_service = budget_renewal_service
+        self._clock = clock
 
     async def _handle(self, command: RenewBudgetCommand) -> DomainEvent:
         """
@@ -41,15 +43,13 @@ class RenewBudgetCommandHandler(CommandHandler[RenewBudgetCommand]):
         Returns:
             BudgetRenewed domain event
         """
-
-        renewal_service = BudgetRenewalService(BudgetFactory(self._strategies))
         # Find the original budget by ID and user ID
         version, old_budget = await self._budget_repository.find_by(
             budget_id=command.budget_id, user_id=command.user_id
         )
 
         # Renew the budget using the service
-        new_budget = await renewal_service.renew_budget(old_budget)
+        new_budget = await self._budget_renewal_service.renew_budget(old_budget)
 
         # Save the new budget
         await self._budget_repository.save(budget=new_budget, version=0)
@@ -61,4 +61,5 @@ class RenewBudgetCommandHandler(CommandHandler[RenewBudgetCommand]):
             user_id=str(new_budget.user_id),
             start_date=new_budget.start_date,
             end_date=new_budget.end_date,
+            occurred_on=self._clock.now(),
         )

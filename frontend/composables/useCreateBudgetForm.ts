@@ -3,9 +3,11 @@ import { useFieldArray, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import type { DateValue } from '@internationalized/date';
 
+import { getLocalTimeZone } from '@internationalized/date';
+
 import { useBudgetStore } from '@/stores/budgetStore';
 import { budgetFormSchema, type BudgetFormInput } from '@/schemas/createBudgetSchemas';
-import type { CreateBudgetRequestPayload, CreateCategoryRequestPayload, StrategyPayload } from '@/types/dtos';
+import type { CreateBudgetRequestPayload, CreateCategoryRequestPayload } from '@/types/dtos';
 
 // Supported currencies (consider moving to a config file)
 const CURRENCIES = ['PLN', 'EUR', 'USD', 'GBP']
@@ -37,7 +39,6 @@ export function useCreateBudgetForm() {
     };
 
     const mapFormToPayload = (values: BudgetFormInput): CreateBudgetRequestPayload => {
-        const startDate = values.startDate!.toDate('UTC');
         const totalLimitAmount = values.totalLimit!;
 
         const mappedCategories: CreateCategoryRequestPayload[] = (values.categories ?? []).map(cat => {
@@ -48,12 +49,17 @@ export function useCreateBudgetForm() {
             return categoryPayload as CreateCategoryRequestPayload;
         });
 
+        console.log(values.startDate)
+
         const payload: CreateBudgetRequestPayload = {
             name: values.name,
             total_limit: { amount: totalLimitAmount, currency: values.currency },
-            start_date: startDate.toISOString(),
+            start_date:  values.startDate.toDate(getLocalTimeZone()),
             categories: mappedCategories,
-            strategy: values.strategyType as unknown as StrategyPayload,
+            strategy: {
+                budget_strategy_type: values.strategyType,
+                parameters: {},
+            },
         };
 
         return payload;

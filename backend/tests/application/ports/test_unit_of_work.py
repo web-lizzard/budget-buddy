@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Callable
 
 import pytest
@@ -57,7 +58,7 @@ class TestInMemoryUnitOfWork:
         # Arrange
         publisher = MockDomainPublisher()
         uow = InMemoryUnitOfWork(publisher)
-        event = MockEvent()
+        event = MockEvent(occurred_on=datetime.now())
 
         # Act
         await uow.commit(event)

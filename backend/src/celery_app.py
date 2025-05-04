@@ -18,10 +18,6 @@ def get_celery_app() -> Celery:
     settings = get_settings()
     broker_url = settings.redis.celery_broker_url
 
-    print("--------------------------------")
-    print(f"Celery broker URL: {broker_url}")
-    print("--------------------------------")
-
     # Create Celery app
     app = Celery(
         "budget_buddy_tasks",
@@ -47,11 +43,6 @@ def get_celery_app() -> Celery:
             "visibility_timeout": 3600  # 1 godzina (w sekundach)
         },
     )
-
-    print("--------------------------------")
-    for task in app.tasks:
-        print(task)
-    print("--------------------------------")
 
     return app
 

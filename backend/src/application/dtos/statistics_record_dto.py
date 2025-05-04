@@ -1,7 +1,6 @@
 import uuid
-from datetime import datetime
 
-from pydantic import Field
+from pydantic import AwareDatetime, Field
 
 from .category_statistics_record_dto import CategoryStatisticsRecordDTO
 from .dto import DTO
@@ -16,7 +15,7 @@ class StatisticsRecordDTO(DTO):
     daily_available_amount: MoneyDTO
     daily_average: MoneyDTO
     used_limit: MoneyDTO
-    creation_date: datetime
+    creation_date: AwareDatetime
     categories_statistics: list[CategoryStatisticsRecordDTO] = Field(
         default_factory=list
     )

@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
+from adapters.outbound.clock.fixed_clock import FixedClock
 from adapters.outbound.persistence.in_memory.budget_repository import (
     InMemoryBudgetRepository,
 )
@@ -14,6 +15,7 @@ from application.commands.handlers.deactivate_budget_command_handler import (
 )
 from domain.aggregates.budget import Budget
 from domain.events import BudgetDeactivated
+from domain.services.budget_deactivation_service import BudgetDeactivationService
 from domain.value_objects import BudgetName, Limit, Money, MonthlyBudgetStrategyInput
 
 
@@ -50,10 +52,15 @@ def _get_deps(
     domain_publisher = InMemoryDomainPublisher()
     repository = _get_repository(user_id, budget_id, budget)
     unit_of_work = InMemoryUnitOfWork(domain_publisher)
+    clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
+    deactivation_service = BudgetDeactivationService(clock)
+
     return (
         DeactivateBudgetCommandHandler(
             budget_repository=repository,
+            budget_deactivation_service=deactivation_service,
             unit_of_work=unit_of_work,
+            clock=clock,
         ),
         repository,
         domain_publisher,
@@ -111,8 +118,9 @@ class TestDeactivateBudgetCommandHandler:
         """Test handling a command for an already deactivated budget."""
         # Arrange
         budget_id, budget = _create_budget(user_id)
+        clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
         # Deactivate the budget
-        budget.deactivate_budget()
+        budget.deactivate_budget(clock.now())
         assert not budget.is_active
 
         command = DeactivateBudgetCommand(
@@ -160,9 +168,17 @@ class TestDeactivateBudgetCommandHandler:
         mock_unit_of_work.commit = AsyncMock()
         mock_unit_of_work.rollback = AsyncMock()
 
+        # Create a mock clock
+        mock_clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
+
+        # Create a mock deactivation service
+        mock_deactivation_service = BudgetDeactivationService(mock_clock)
+
         command_handler = DeactivateBudgetCommandHandler(
             budget_repository=mock_repository,
+            budget_deactivation_service=mock_deactivation_service,
             unit_of_work=mock_unit_of_work,
+            clock=mock_clock,
         )
 
         # Act & Assert

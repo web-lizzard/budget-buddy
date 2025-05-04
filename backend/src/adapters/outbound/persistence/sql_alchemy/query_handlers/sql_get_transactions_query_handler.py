@@ -12,7 +12,7 @@ from domain.exceptions import BudgetNotFoundError
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models import BudgetModel, TransactionModel
+from ..models import BudgetModel, CategoryModel, TransactionModel
 
 
 class SQLGetTransactionsQueryHandler(
@@ -36,11 +36,27 @@ class SQLGetTransactionsQueryHandler(
                 f"Budget with id {query.budget_id} not found for user {query.user_id}."
             )
 
-        base_where = (TransactionModel.user_id == query.user_id,)
+        categories_stmt = select(CategoryModel.id).where(
+            CategoryModel.budget_id == query.budget_id
+        )
+        categories_result = await self._session.scalars(categories_stmt)
+        category_ids = categories_result.all()
 
-        stmt = select(TransactionModel).where(*base_where)
+        if not category_ids:
+            return PaginatedItemDTO(items=[], total=0, skip=skip, limit=query.limit)
+
+        stmt = select(TransactionModel).where(
+            TransactionModel.user_id == query.user_id,
+            TransactionModel.category_id.in_(category_ids),
+        )
+
         count_stmt = (
-            select(func.count(1)).select_from(TransactionModel).where(*base_where)
+            select(func.count(1))
+            .select_from(TransactionModel)
+            .where(
+                TransactionModel.user_id == query.user_id,
+                TransactionModel.category_id.in_(category_ids),
+            )
         )
 
         if query.date_from:

@@ -46,6 +46,8 @@ const {
     error,
 } = useCommand(async (payload: CreateTransactionPayload) => {
   if (props.mode === 'create') {
+    console.log('Creating transaction');
+    console.log(payload);
     await transactionService.createTransaction(payload);
   } else if (props.mode === 'edit' && props.transactionData?.id) {
     await transactionService.updateTransaction(props.transactionData.id, payload);
@@ -92,7 +94,7 @@ async function handleFormSubmit(formData: TransactionSubmitPayload) {
       category_id: formData.categoryId,
       amount: { amount: formData.amount },
       transaction_type: formData.type,
-      occurred_date: formData.occurredDate.toISOString(),
+      occurred_date: formData.occurredDate,
       description: formData.description || undefined,
   };
 

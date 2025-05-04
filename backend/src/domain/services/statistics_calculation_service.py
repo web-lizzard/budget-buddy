@@ -8,12 +8,16 @@ from domain.aggregates.statistics_record import (
     StatisticsRecord,
 )
 from domain.aggregates.transaction import Transaction
+from domain.ports.clock import Clock
 from domain.value_objects.money import Money
 from domain.value_objects.transaction_type import TransactionType
 
 
 class StatisticsCalculationService:
     """Calculates statistical data based on transactions for a budget."""
+
+    def __init__(self, clock: Clock) -> None:
+        self._clock = clock
 
     def calculate_statistics(
         self, budget: Budget, transactions: Sequence[Transaction]
@@ -22,24 +26,15 @@ class StatisticsCalculationService:
         Calculates statistics for a given budget based on the provided transactions.
         Uses datetime objects for calculations.
         """
-        # Debug: Print transactions list
-        print(f"DEBUG: Received {len(transactions)} transactions")
-        for i, tx in enumerate(transactions):
-            print(
-                f"DEBUG: Transaction {i+1}: {tx.id} - Type: {tx.transaction_type}, Amount: {tx.amount}"
-            )
 
         # Use datetime.now() instead of utcnow()
-        today = datetime.now()
+        today = self._clock.now()
         currency = budget.currency
         zero_money = Money(0, currency)
 
         # --- Calculate Date Ranges using datetime ---
         days_remaining = self._calculate_days_remaining(budget.end_date, today)
         num_days_in_tx_range = self._calculate_days_in_transaction_range(transactions)
-        print(
-            f"DEBUG: Days remaining: {days_remaining}, Days in tx range: {num_days_in_tx_range}"
-        )
 
         # --- Initialize Accumulators (no changes needed) ---
         total_income = zero_money
@@ -52,40 +47,25 @@ class StatisticsCalculationService:
             }
             for cat in budget.categories
         }
-        print(f"DEBUG: Initialized with {len(category_stats)} category stats")
 
         # --- Process Transactions ---
         for transaction in transactions:
-            print(f"DEBUG: Processing transaction: {transaction.id}")
-            print(
-                f"DEBUG: Transaction type: {transaction.transaction_type}, Amount: {transaction.amount}"
-            )
-            print(f"DEBUG: Category ID: {transaction.category_id}")
-
             if transaction.transaction_type == TransactionType.INCOME:
                 total_income = total_income.add(transaction.amount)
-                print(f"DEBUG: Added income, new total: {total_income}")
                 if transaction.category_id in category_stats:
                     category_stats[transaction.category_id]["income"] = category_stats[
                         transaction.category_id
                     ]["income"].add(transaction.amount)
-                    print(
-                        f"DEBUG: Updated category {transaction.category_id} income: {category_stats[transaction.category_id]['income']}"
-                    )
             elif transaction.transaction_type == TransactionType.EXPENSE:
                 # Expenses are stored as positive values in the system
                 # For expense transactions, add the amount directly to the used_limit/total_expenses
                 total_expenses = total_expenses.add(transaction.amount)
-                print(f"DEBUG: Added expense, new total expenses: {total_expenses}")
 
                 if transaction.category_id in category_stats:
                     category_stats[transaction.category_id]["expenses"] = (
                         category_stats[
                             transaction.category_id
                         ]["expenses"].add(transaction.amount)
-                    )
-                    print(
-                        f"DEBUG: Updated category {transaction.category_id} expenses: {category_stats[transaction.category_id]['expenses']}"
                     )
 
         overall_current_balance = total_income.subtract(total_expenses)
@@ -96,12 +76,6 @@ class StatisticsCalculationService:
         overall_daily_available = self._calculate_daily_available(
             budget.total_limit.value, overall_current_balance, days_remaining
         )
-
-        # Debug: Print final calculations
-        print(f"DEBUG: Total income: {total_income}")
-        print(f"DEBUG: Total expenses: {total_expenses}")
-        print(f"DEBUG: Overall current balance: {overall_current_balance}")
-        print(f"DEBUG: Overall used limit: {overall_used_limit}")
 
         category_statistics_records = []
         for category in budget.categories:
@@ -144,8 +118,6 @@ class StatisticsCalculationService:
             categories_statistics=category_statistics_records,
         )
 
-        print(f"DEBUG: Created statistics record: {stats_record}")
-        print(f"DEBUG: Used limit in record: {stats_record.used_limit}")
         return stats_record
 
     def _calculate_days_remaining(self, end_date_dt: datetime, today: datetime) -> int:

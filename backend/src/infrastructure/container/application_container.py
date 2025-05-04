@@ -131,7 +131,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
     # Command Handlers - korzystają z sesji command_session poprzez repositories
     command_handlers = providers.Dict(
         {
-            # Budget Commands
             CreateBudgetCommand: providers.Factory(
                 CreateBudgetCommandHandler,
                 budget_repository=persistence_container.provided.get_repository.call(
@@ -139,13 +138,16 @@ class ApplicationContainer(containers.DeclarativeContainer):
                 ),
                 budget_factory=domain_container.budget_factory,
                 unit_of_work=persistence_container.uow,
+                clock=domain_container.clock,
             ),
             DeactivateBudgetCommand: providers.Factory(
                 DeactivateBudgetCommandHandler,
                 budget_repository=persistence_container.provided.get_repository.call(
                     BudgetRepository
                 ),
+                budget_deactivation_service=domain_container.budget_deactivation_service,
                 unit_of_work=persistence_container.uow,
+                clock=domain_container.clock,
             ),
             RenewBudgetCommand: providers.Factory(
                 RenewBudgetCommandHandler,
@@ -153,9 +155,9 @@ class ApplicationContainer(containers.DeclarativeContainer):
                     BudgetRepository
                 ),
                 unit_of_work=persistence_container.uow,
-                strategies=domain_container.strategies,
+                budget_renewal_service=domain_container.budget_renewal_service,
+                clock=domain_container.clock,
             ),
-            # Transaction Commands
             CreateTransactionCommand: providers.Factory(
                 CreateTransactionCommandHandler,
                 budget_repository=persistence_container.provided.get_repository.call(
@@ -165,6 +167,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
                     TransactionRepository
                 ),
                 unit_of_work=persistence_container.uow,
+                clock=domain_container.clock,
             ),
             EditTransactionCommand: providers.Factory(
                 EditTransactionCommandHandler,
@@ -175,6 +178,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
                 budget_repository=persistence_container.provided.get_repository.call(
                     BudgetRepository
                 ),
+                clock=domain_container.clock,
             ),
             DeleteTransactionCommand: providers.Factory(
                 DeleteTransactionCommandHandler,
@@ -185,14 +189,15 @@ class ApplicationContainer(containers.DeclarativeContainer):
                 budget_repository=persistence_container.provided.get_repository.call(
                     BudgetRepository
                 ),
+                clock=domain_container.clock,
             ),
-            # Category Commands
             AddCategoryCommand: providers.Factory(
                 AddCategoryCommandHandler,
                 budget_repository=persistence_container.provided.get_repository.call(
                     BudgetRepository
                 ),
                 unit_of_work=persistence_container.uow,
+                clock=domain_container.clock,
             ),
             EditCategoryCommand: providers.Factory(
                 EditCategoryCommandHandler,
@@ -200,6 +205,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
                     BudgetRepository
                 ),
                 unit_of_work=persistence_container.uow,
+                clock=domain_container.clock,
             ),
             RemoveCategoryCommand: providers.Factory(
                 RemoveCategoryCommandHandler,
@@ -210,6 +216,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
                 transaction_repository=persistence_container.provided.get_repository.call(
                     TransactionRepository
                 ),
+                clock=domain_container.clock,
             ),
             CalculateStatisticsCommand: providers.Factory(
                 CalculateStatisticsCommandHandler,
@@ -223,6 +230,8 @@ class ApplicationContainer(containers.DeclarativeContainer):
                 statistics_repository=persistence_container.provided.get_repository.call(
                     StatisticsRepository
                 ),
+                clock=domain_container.clock,
+                statistics_calculation_service=domain_container.statistics_calculation_service,
             ),
         }
     )

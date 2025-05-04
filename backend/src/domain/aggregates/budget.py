@@ -224,10 +224,10 @@ class Budget:
 
         return existing_category
 
-    def deactivate_budget(self) -> None:
-        """Deactivate the budget."""
+    def deactivate_budget(self, deactivation_time: datetime) -> None:
+        """Deactivate the budget at the specified time."""
         if self._deactivation_date is None:
-            self._deactivation_date = datetime.now()
+            self._deactivation_date = deactivation_time
 
     def validate_transaction_date(self, transaction_date: datetime) -> None:
         """Validate if transaction date is within budget period.
@@ -239,7 +239,7 @@ class Budget:
             TransactionDateError: When transaction date is not within budget period
             DeactivatedBudgetError: When budget is deactivated and transaction date is after deactivation date
         """
-        # Check if transaction date is within budget period
+
         if transaction_date < self._start_date or transaction_date > self._end_date:
             raise TransactionOutsideBudgetPeriodError()
 

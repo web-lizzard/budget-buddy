@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pytest
 from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
+from adapters.outbound.clock.fixed_clock import FixedClock
 from adapters.outbound.persistence.in_memory.budget_repository import (
     InMemoryBudgetRepository,
 )
@@ -17,7 +18,7 @@ from application.commands.handlers.delete_transaction_command_handler import (
 from domain.aggregates.budget import Budget
 from domain.aggregates.transaction import Transaction
 from domain.entities.category import Category
-from domain.events.transaction_deleted_event import TransactionDeletedEvent
+from domain.events import TransactionRemoved
 from domain.exceptions import (
     CannotAddTransactionToDeactivatedBudgetError,
     TransactionNotFoundError,
@@ -70,46 +71,51 @@ def _get_test_category(budget_id, category_id):
     )
 
 
-def _get_dependencies(
-    user_id: uuid.UUID,
-    budget_id: uuid.UUID,
-    transaction_id: uuid.UUID,
-    category_id: uuid.UUID,
-    is_budget_active: bool = True,
-):
-    """Get dependencies for testing."""
-    # Create category and budget
+def _get_budget_repository(user_id, budget_id, category_id):
+    """Create a budget repository with a single budget containing one category."""
     category = _get_test_category(budget_id, category_id)
     budget = _create_test_budget(budget_id, user_id, [category])
 
-    # Handle deactivated budget case
-    if not is_budget_active:
-        budget.deactivate_budget()
+    return InMemoryBudgetRepository(
+        budgets={budget_id: (0, budget)},
+        users={user_id: {"id": user_id, "name": "Test User"}},
+    )
 
-    # Create transaction
+
+def _get_transaction_repository(user_id, budget_id, category_id, transaction_id):
+    """Create a transaction repository with a single transaction."""
     transaction = _create_test_transaction(transaction_id, category_id, user_id)
 
-    # Setup repositories
-    budget_repository = InMemoryBudgetRepository(
-        budgets={budget_id: (0, budget)},
-        users={user_id: {"id": user_id, "name": "Test User"}},
-    )
-
-    transaction_repository = InMemoryTransactionRepository(
+    return InMemoryTransactionRepository(
         transactions={transaction_id: transaction},
         users={user_id: {"id": user_id, "name": "Test User"}},
-        budgets={budget_id: (0, budget)},
+        budgets={budget_id: (0, _create_test_budget(budget_id, user_id))},
     )
 
-    # Setup event publisher and unit of work
-    domain_publisher = InMemoryDomainPublisher()
-    unit_of_work = InMemoryUnitOfWork(domain_publisher)
 
-    # Create handler
+def _get_deps(
+    user_id, budget_id, category_id, transaction_id, is_budget_active: bool = True
+):
+    """Get dependencies for testing."""
+    domain_publisher = InMemoryDomainPublisher()
+    budget_repository = _get_budget_repository(user_id, budget_id, category_id)
+    transaction_repository = _get_transaction_repository(
+        user_id, budget_id, category_id, transaction_id
+    )
+    unit_of_work = InMemoryUnitOfWork(domain_publisher)
+    clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
+
+    # Handle deactivated budget case
+    if not is_budget_active:
+        budget = budget_repository._budgets[budget_id][1]
+        budget.deactivate_budget(clock.now())
+        budget_repository._budgets[budget_id] = (0, budget)
+
     handler = DeleteTransactionCommandHandler(
-        unit_of_work=unit_of_work,
         transaction_repository=transaction_repository,
         budget_repository=budget_repository,
+        unit_of_work=unit_of_work,
+        clock=clock,
     )
 
     return (
@@ -118,8 +124,8 @@ def _get_dependencies(
         transaction_repository,
         unit_of_work,
         domain_publisher,
-        budget,
-        transaction,
+        budget_repository._budgets[budget_id][1],  # budget
+        transaction_repository._transactions.get(transaction_id),  # transaction
     )
 
 
@@ -164,7 +170,7 @@ class TestDeleteTransactionCommandHandler:
             domain_publisher,
             _,
             transaction,
-        ) = _get_dependencies(user_id, budget_id, transaction_id, category_id)
+        ) = _get_deps(user_id, budget_id, category_id, transaction_id)
 
         command = DeleteTransactionCommand(
             transaction_id=transaction_id,
@@ -178,7 +184,7 @@ class TestDeleteTransactionCommandHandler:
         def event_subscriber(event):
             captured_events.append(event)
 
-        domain_publisher.subscribe(TransactionDeletedEvent, event_subscriber)
+        domain_publisher.subscribe(TransactionRemoved, event_subscriber)
 
         # Act
         await handler.handle(command)
@@ -190,10 +196,9 @@ class TestDeleteTransactionCommandHandler:
         # Check that event was published
         assert len(captured_events) == 1
         event = captured_events[0]
-        assert isinstance(event, TransactionDeletedEvent)
-        assert event.transaction_id == transaction_id
-        assert event.budget_id == budget_id
-        assert event.user_id == user_id
+        assert isinstance(event, TransactionRemoved)
+        assert event.transaction_id == str(transaction_id)
+        assert event.category_id == str(category_id)
 
         # Check UoW was committed
         assert unit_of_work.is_committed
@@ -213,9 +218,7 @@ class TestDeleteTransactionCommandHandler:
             _,
             _,
             _,
-        ) = _get_dependencies(
-            user_id, budget_id, transaction_id, category_id, is_budget_active=False
-        )
+        ) = _get_deps(user_id, budget_id, category_id, transaction_id, False)
 
         command = DeleteTransactionCommand(
             transaction_id=transaction_id,
@@ -243,7 +246,7 @@ class TestDeleteTransactionCommandHandler:
             _,
             _,
             _,
-        ) = _get_dependencies(user_id, budget_id, category_id, category_id)
+        ) = _get_deps(user_id, budget_id, category_id, transaction_id, True)
 
         command = DeleteTransactionCommand(
             transaction_id=nonexistent_transaction_id,

@@ -1,5 +1,6 @@
 import uuid
-from datetime import datetime
+
+from pydantic import AwareDatetime
 
 from .budget_strategy_dto import BudgetStrategyDTO
 from .category_dto import CategoryDTO
@@ -12,9 +13,9 @@ class BudgetDTO(DTO):
     user_id: uuid.UUID
     total_limit: MoneyDTO
     currency: str
-    start_date: datetime
-    end_date: datetime
+    start_date: AwareDatetime
+    end_date: AwareDatetime
     strategy: BudgetStrategyDTO
     name: str
-    deactivation_date: datetime | None = None
+    deactivation_date: AwareDatetime | None = None
     categories: list[CategoryDTO] = []

@@ -41,7 +41,7 @@ class MonthlyBudgetStrategy(BudgetStrategy):
             year += 1
         last_day_of_next_month = calendar.monthrange(year, month)[1]
         day = min(start_date.day, last_day_of_next_month)
-        end_date_raw = datetime(year, month, day)
+        end_date_raw = datetime(year, month, day, tzinfo=start_date.tzinfo)
         end_date = end_date_raw - timedelta(seconds=1)
 
         return end_date

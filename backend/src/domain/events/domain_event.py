@@ -6,7 +6,7 @@ import pydantic
 
 class DomainEvent(pydantic.BaseModel):
     event_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4)
-    occurred_on: datetime = pydantic.Field(default_factory=datetime.now)
+    occurred_on: datetime
     version: int = 1
 
     def to_dict(self) -> dict:

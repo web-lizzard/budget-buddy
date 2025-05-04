@@ -1,6 +1,7 @@
-from domain.events.transaction_deleted_event import TransactionDeletedEvent
+from domain.events.transaction.transaction_removed import TransactionRemoved
 from domain.exceptions import CannotAddTransactionToDeactivatedBudgetError
 from domain.ports.budget_repository import BudgetRepository
+from domain.ports.clock import Clock
 from domain.ports.transaction_repository import TransactionRepository
 
 from application.commands.delete_transaction_command import DeleteTransactionCommand
@@ -13,24 +14,26 @@ class DeleteTransactionCommandHandler(CommandHandler[DeleteTransactionCommand]):
 
     def __init__(
         self,
-        unit_of_work: UnitOfWork,
         transaction_repository: TransactionRepository,
         budget_repository: BudgetRepository,
+        unit_of_work: UnitOfWork,
+        clock: Clock,
     ):
-        """Initialize the delete transaction command handler.
+        """
+        Initialize the command handler with dependencies.
 
         Args:
-            unit_of_work: Unit of work for managing transactions
-            transaction_repository: Repository for accessing transactions
-            budget_repository: Repository for accessing budgets
+            transaction_repository: Repository for transaction operations
+            budget_repository: Repository for budget operations
+            unit_of_work: UnitOfWork for transaction management and event publishing
+            clock: Clock for getting current time
         """
         super().__init__(unit_of_work)
         self._transaction_repository = transaction_repository
         self._budget_repository = budget_repository
+        self._clock = clock
 
-    async def _handle(
-        self, command: DeleteTransactionCommand
-    ) -> TransactionDeletedEvent:
+    async def _handle(self, command: DeleteTransactionCommand) -> TransactionRemoved:
         """Handle the delete transaction command.
 
         Args:
@@ -64,8 +67,10 @@ class DeleteTransactionCommandHandler(CommandHandler[DeleteTransactionCommand]):
         await self._transaction_repository.delete(transaction)
 
         # Return the event
-        return TransactionDeletedEvent(
-            transaction_id=command.transaction_id,
-            budget_id=command.budget_id,
-            user_id=command.user_id,
+        return TransactionRemoved(
+            transaction_id=str(command.transaction_id),
+            occurred_on=self._clock.now(),
+            category_id=str(transaction.category_id),
+            budget_id=str(command.budget_id),
+            user_id=str(command.user_id),
         )

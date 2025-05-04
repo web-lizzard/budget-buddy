@@ -3,6 +3,7 @@ from domain.events.domain_event import DomainEvent
 from domain.factories import BudgetFactory
 from domain.factories.budget_factory import CategoryInput
 from domain.ports import BudgetRepository
+from domain.ports.clock import Clock
 from domain.value_objects import BudgetName, CategoryName, Limit, Money
 
 from application.commands import CategoryData, CreateBudgetCommand
@@ -18,6 +19,7 @@ class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
         budget_repository: BudgetRepository,
         budget_factory: BudgetFactory,
         unit_of_work: UnitOfWork,
+        clock: Clock,
     ):
         """
         Initialize the command handler with dependencies.
@@ -30,6 +32,7 @@ class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
         super().__init__(unit_of_work)
         self._budget_repository = budget_repository
         self._budget_factory = budget_factory
+        self._clock = clock
 
     async def _handle(self, command: CreateBudgetCommand) -> DomainEvent:
         """
@@ -69,6 +72,7 @@ class CreateBudgetCommandHandler(CommandHandler[CreateBudgetCommand]):
             strategy=str(command.strategy_input.strategy_type),
             name=budget_name.value,
             end_date=budget.end_date,
+            occurred_on=self._clock.now(),
         )
 
     def _get_category_input(

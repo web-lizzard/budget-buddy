@@ -7,25 +7,18 @@ import type { CreateBudgetRequestPayload, BudgetDTO, BudgetStatisticsDTO, Domain
 import { BudgetSchema } from '@/schemas/budgetSchema';
 import { BudgetStatisticsSchema } from '@/schemas/statisticsSchema';
 
-// Define the shape returned by the createBudget API call (example)
-const CreateBudgetResponseSchema = z.object({
-  id: z.string(),
-});
 
-// Define schema for the expected paginated API response
-const PaginatedBudgetDTOSchema = z.object({ // Renamed for clarity
-  items: z.array(BudgetSchema), // Use the existing BudgetSchema for items
+const PaginatedBudgetDTOSchema = z.object({
+  items: z.array(BudgetSchema),
   total: z.number(),
   skip: z.number(),
   limit: z.number(),
 });
-
-// Interface for listBudgets parameters
 interface ListBudgetsParams {
     page?: number;
     limit?: number;
-    status?: 'active' | 'inactive' | 'expired' | 'all'; // Match filter values
-    sort?: string; // e.g., 'name', '-startDate'
+    status?: 'active' | 'inactive' | 'expired' | 'all';
+    sort?: string;
 }
 
 /**
@@ -130,20 +123,13 @@ export class BudgetService {
    */
   async createBudget(payload: CreateBudgetRequestPayload): Promise<void> {
      try {
-         const url = `${apiConfig.baseURL}/budgets/`;
-         const response = await $fetch<unknown>(url, {
+        const url = `${apiConfig.baseURL}/budgets/`;
+        await $fetch<unknown>(url, {
              method: 'POST',
              body: payload,
              responseType: 'json',
              ...apiConfig.commonOptions,
          });
-
-         const parsedResponse = CreateBudgetResponseSchema.safeParse(response);
-         if (!parsedResponse.success) {
-            console.error('Failed to parse create budget response:', parsedResponse.error, response);
-            throw { status: 'validation_error', message: 'Invalid API response after creating budget.' } as DomainError;
-         }
-
      } catch (error: unknown) {
         if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
             throw error as DomainError;
@@ -212,7 +198,51 @@ export class BudgetService {
            }
            throw mapToDomainError(error, 'Failed to fetch budgets');
        }
+
    }
+
+   /**
+    * Deactivate a budget by its ID.
+    * @param budgetId - The ID of the budget to deactivate.
+    * @throws {DomainError} If the API call fails or data validation fails.
+    */
+   async deactivateBudget(budgetId: string): Promise<void> {
+       try {
+           const url = `${apiConfig.baseURL}/budgets/${budgetId}/deactivate`;
+           await $fetch(url, {
+               method: 'PATCH',
+               responseType: 'json',
+               ...apiConfig.commonOptions,
+           });
+       } catch (error: unknown) {
+           if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+               throw error as DomainError;
+           }
+           throw mapToDomainError(error, 'Failed to deactivate budget');
+       }
+   }
+  /**
+   * Renew a budget by its ID.
+   * @param budgetId - The ID of the budget to renew.
+   * @throws {DomainError} If the API call fails or data validation fails.
+   */
+  async renewBudget(budgetId: string): Promise<void> {
+      try {
+          const url = `${apiConfig.baseURL}/budgets/${budgetId}/renew`;
+          await $fetch(url, {
+              method: 'POST',
+              responseType: 'json',
+              ...apiConfig.commonOptions,
+          });
+      } catch (error: unknown) {
+          if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+              throw error as DomainError;
+          }
+          throw mapToDomainError(error, 'Failed to renew budget');
+      }
+  }
+
+
 
   // TODO: Add instance methods for updateBudget, deleteBudget etc. as needed
 }

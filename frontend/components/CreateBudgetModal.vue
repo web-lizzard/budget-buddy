@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import CreateBudgetForm from '@/components/forms/CreateBudgetForm.vue';
 import {
@@ -11,47 +11,24 @@ import {
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useBudgetStore } from '@/stores/budgetStore';
-import { mapBudgetFormToRequestPayload } from '@/utils/mappers';
-import type { BudgetFormInput } from '@/schemas/createBudgetSchemas';
 
-// Define props using v-model pattern
 const props = defineProps<{ modelValue: boolean }>();
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  (e: 'close-modal'): void;
+}>();
 
 const budgetStore = useBudgetStore();
 const { isLoading, error: storeError } = storeToRefs(budgetStore);
 
 const mappingError = ref<string | null>(null);
 
-watch(() => props.modelValue, (newValue) => {
-  if (newValue) {
-      budgetStore.error = null;
-      mappingError.value = null;
-  }
-});
 
 function closeModal() {
   if (!isLoading.value) {
-     emit('update:modelValue', false);
+     emit('close-modal');
      budgetStore.error = null;
      mappingError.value = null;
   }
-}
-
-async function handleActualFormSubmit(formData: BudgetFormInput) {
-  mappingError.value = null;
-  budgetStore.error = null;
-
-  const payload = mapBudgetFormToRequestPayload(formData);
-
-  if (!payload) {
-      mappingError.value = "Internal error: Could not prepare data for submission.";
-      return;
-  }
-
-  await budgetStore.createBudget(payload);
-
-  emit('update:modelValue', false);
 }
 
 function handleCancel() {
@@ -77,7 +54,7 @@ function handleCancel() {
           </AlertDescription>
       </Alert>
 
-      <CreateBudgetForm @submit="handleActualFormSubmit" @cancel="handleCancel" />
+      <CreateBudgetForm  @cancel="handleCancel" @budget-created="closeModal" />
 
     </DialogContent>
   </Dialog>

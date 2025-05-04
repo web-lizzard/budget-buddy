@@ -57,7 +57,7 @@ export interface CreateTransactionPayload {
   category_id: string
   amount: AmountPayload
   transaction_type: 'INCOME' | 'EXPENSE'
-  occurred_date: string
+  occurred_date: Date
   description?: string
 }
 
@@ -76,7 +76,7 @@ export interface MoneyPayload {
 
 export interface StrategyPayload {
   budget_strategy_type: 'monthly' | 'yearly'
-  parameters?: Record<string, unknown>
+  parameters: Record<string, unknown>
 }
 
 export interface CreateCategoryRequestPayload {
@@ -87,7 +87,7 @@ export interface CreateCategoryRequestPayload {
 export interface CreateBudgetRequestPayload {
   name: string
   total_limit: MoneyPayload
-  start_date: string
+  start_date: Date
   categories: CreateCategoryRequestPayload[]
   strategy: StrategyPayload
 }

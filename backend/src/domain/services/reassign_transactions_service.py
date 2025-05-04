@@ -29,5 +29,8 @@ class ReassignTransactionsService:
         """
         target_category_id = policy.target_category_id
 
+        if target_category_id is None:
+            return
+
         for transaction in transactions:
             transaction.update_category(target_category_id)

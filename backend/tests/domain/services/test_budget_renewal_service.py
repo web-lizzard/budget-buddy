@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 
 import pytest
+from adapters.outbound.clock.fixed_clock import FixedClock
 from domain.aggregates.budget import Budget
 from domain.entities.category import Category
 from domain.exceptions import CannotRenewDeactivatedBudgetError
@@ -114,7 +115,7 @@ class TestBudgetRenewalService:
         """Test that renewing a deactivated budget raises an error."""
         # Arrange
         budget = _create_budget(user_id)
-        budget.deactivate_budget()
+        budget.deactivate_budget(FixedClock().now())
         assert not budget.is_active
 
         # Act & Assert

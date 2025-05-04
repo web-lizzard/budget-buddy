@@ -1,6 +1,7 @@
 import uuid
-from datetime import datetime
 from enum import Enum
+
+from pydantic import AwareDatetime
 
 from .dto import DTO
 from .money_dto import MoneyDTO
@@ -16,6 +17,6 @@ class TransactionDTO(DTO):
     category_id: uuid.UUID
     amount: MoneyDTO
     transaction_type: TransactionTypeEnum
-    occurred_date: datetime
+    occurred_date: AwareDatetime
     description: str | None = None
     user_id: uuid.UUID

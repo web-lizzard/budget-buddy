@@ -2,6 +2,7 @@ from uuid import UUID
 
 from domain.events.category.category_added import CategoryAdded
 from domain.ports.budget_repository import BudgetRepository
+from domain.ports.clock import Clock
 from domain.value_objects.category_name import CategoryName
 from domain.value_objects.limit import Limit
 from domain.value_objects.money import Money
@@ -22,7 +23,12 @@ class AddCategoryCommandHandler(CommandHandler[AddCategoryCommand]):
     4. Returning a CategoryAdded event
     """
 
-    def __init__(self, budget_repository: BudgetRepository, unit_of_work: UnitOfWork):
+    def __init__(
+        self,
+        budget_repository: BudgetRepository,
+        unit_of_work: UnitOfWork,
+        clock: Clock,
+    ):
         """
         Initialize the AddCategoryCommandHandler with required repositories and unit of work.
 
@@ -32,6 +38,7 @@ class AddCategoryCommandHandler(CommandHandler[AddCategoryCommand]):
         """
         super().__init__(unit_of_work)
         self._budget_repository = budget_repository
+        self._clock = clock
 
     async def _handle(self, command: AddCategoryCommand) -> CategoryAdded:
         """
@@ -65,4 +72,5 @@ class AddCategoryCommandHandler(CommandHandler[AddCategoryCommand]):
             budget_id=str(budget.id),
             name=category.name.value,
             limit=int(category.limit.value.amount),
+            occurred_on=self._clock.now(),
         )

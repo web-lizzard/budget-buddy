@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
+from adapters.outbound.clock.fixed_clock import FixedClock
 from adapters.outbound.persistence.in_memory.budget_repository import (
     InMemoryBudgetRepository,
 )
@@ -16,6 +17,8 @@ from domain.aggregates.budget import Budget
 from domain.entities.category import Category
 from domain.events import BudgetRenewed
 from domain.exceptions import CannotRenewDeactivatedBudgetError
+from domain.factories.budget_factory import BudgetFactory
+from domain.services.budget_renewal_service import BudgetRenewalService
 from domain.strategies.budget_strategy import (
     MonthlyBudgetStrategy,
     YearlyBudgetStrategy,
@@ -81,14 +84,17 @@ def _get_deps(
     domain_publisher = InMemoryDomainPublisher()
     repository = _get_repository(user_id, budget_id, budget)
     unit_of_work = InMemoryUnitOfWork(domain_publisher)
-    # Use real strategies
+    clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
     strategies = [MonthlyBudgetStrategy(), YearlyBudgetStrategy()]
+    budget_factory = BudgetFactory(strategies=strategies)
+    renewal_service = BudgetRenewalService(budget_factory)
 
     return (
         RenewBudgetCommandHandler(
             budget_repository=repository,
-            strategies=strategies,  # Pass strategies instead of service
+            budget_renewal_service=renewal_service,
             unit_of_work=unit_of_work,
+            clock=clock,
         ),
         repository,
         domain_publisher,
@@ -163,8 +169,9 @@ class TestRenewBudgetCommandHandler:
         """Test that handling the command for a deactivated budget raises an error."""
         # Arrange
         budget_id, budget = _create_budget(user_id)
+        clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
         # Deactivate the budget
-        budget.deactivate_budget()
+        budget.deactivate_budget(clock.now())
         assert not budget.is_active
 
         command = RenewBudgetCommand(
@@ -196,11 +203,19 @@ class TestRenewBudgetCommandHandler:
         mock_unit_of_work.commit = AsyncMock()
         mock_unit_of_work.rollback = AsyncMock()
 
+        # Create a mock clock
+        mock_clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
+
+        # Create a mock factory and service
+        strategies = [MonthlyBudgetStrategy(), YearlyBudgetStrategy()]
+        mock_factory = BudgetFactory(strategies=strategies)
+        mock_service = BudgetRenewalService(mock_factory)
+
         command_handler = RenewBudgetCommandHandler(
             budget_repository=mock_repository,
-            # Use real strategies
-            strategies=[MonthlyBudgetStrategy(), YearlyBudgetStrategy()],
+            budget_renewal_service=mock_service,
             unit_of_work=mock_unit_of_work,
+            clock=mock_clock,
         )
 
         # Act & Assert

@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
@@ -149,7 +148,7 @@ async def create_transaction(
         transaction_type=domain_transaction_type,  # Use domain enum
         budget_id=budget_id,
         user_id=user_id,
-        occurred_date=datetime.now(),
+        occurred_date=payload.occurred_date,
         description=payload.description,
     )
     await command_handler.handle(command)

@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pytest
 from adapters.inbound.in_memory_domain_publisher import InMemoryDomainPublisher
+from adapters.outbound.clock.fixed_clock import FixedClock
 from adapters.outbound.persistence.in_memory.budget_repository import (
     InMemoryBudgetRepository,
 )
@@ -17,7 +18,7 @@ from application.commands.handlers.edit_transaction_command_handler import (
 from domain.aggregates.budget import Budget
 from domain.aggregates.transaction import Transaction
 from domain.entities.category import Category
-from domain.events.transaction_edited_event import TransactionEditedEvent
+from domain.events import TransactionUpdated
 from domain.exceptions import (
     CannotAddTransactionToDeactivatedBudgetError,
     CategoryNotFoundError,
@@ -85,7 +86,7 @@ def _get_dependencies(
 
     # Handle deactivated budget case
     if not is_budget_active:
-        budget.deactivate_budget()
+        budget.deactivate_budget(datetime(2023, 1, 1))
 
     # Create transaction
     transaction = _create_test_transaction(transaction_id, category_id, user_id)
@@ -105,12 +106,14 @@ def _get_dependencies(
     # Setup event publisher and unit of work
     domain_publisher = InMemoryDomainPublisher()
     unit_of_work = InMemoryUnitOfWork(domain_publisher)
+    clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
 
     # Create handler
     handler = EditTransactionCommandHandler(
         unit_of_work=unit_of_work,
         transaction_repository=transaction_repository,
         budget_repository=budget_repository,
+        clock=clock,
     )
 
     return (
@@ -183,7 +186,7 @@ class TestEditTransactionCommandHandler:
         def event_subscriber(event):
             captured_events.append(event)
 
-        domain_publisher.subscribe(TransactionEditedEvent, event_subscriber)
+        domain_publisher.subscribe(TransactionUpdated, event_subscriber)
 
         # Act
         await handler.handle(command)
@@ -197,13 +200,12 @@ class TestEditTransactionCommandHandler:
         # Check that event was published
         assert len(captured_events) == 1
         event = captured_events[0]
-        assert isinstance(event, TransactionEditedEvent)
-        assert event.transaction_id == transaction_id
-        assert event.budget_id == budget_id
-        assert event.user_id == user_id
-        assert event.amount.amount == Money.mint(200.0, "USD").amount
-        assert event.transaction_type == TransactionType.INCOME
-        assert event.description == "Updated transaction"
+        assert isinstance(event, TransactionUpdated)
+        assert event.transaction_id == str(transaction_id)
+        assert event.budget_id == str(budget_id)
+        assert event.user_id == str(user_id)
+        assert event.amount == Money.mint(200.0, "USD").amount
+        assert event.type == str(TransactionType.INCOME)
 
         # Check UoW was committed
         assert unit_of_work.is_committed
@@ -232,7 +234,7 @@ class TestEditTransactionCommandHandler:
             budget_id=budget_id,
             user_id=user_id,
             category_id=category_id,
-            amount=Money.mint(200.0, "USD"),
+            amount=200.0,
             transaction_type=TransactionType.INCOME,
             description="Updated transaction",
         )
@@ -337,15 +339,14 @@ class TestEditTransactionCommandHandler:
         def event_subscriber(event):
             captured_events.append(event)
 
-        domain_publisher.subscribe(TransactionEditedEvent, event_subscriber)
+        domain_publisher.subscribe(TransactionUpdated, event_subscriber)
         await handler.handle(command)
         assert transaction.occurred_date == new_occurred_date
         assert transaction.amount.amount == Money.mint(150.0, "USD").amount
         assert transaction.description == "Updated transaction with new occurred date"
         assert len(captured_events) == 1
         event = captured_events[0]
-        assert event.transaction_id == transaction_id
-        assert event.budget_id == budget_id
-        assert event.user_id == user_id
-        assert event.description == "Updated transaction with new occurred date"
-        assert event.amount.amount == Money.mint(150.0, "USD").amount
+        assert event.transaction_id == str(transaction_id)
+        assert event.budget_id == str(budget_id)
+        assert event.user_id == str(user_id)
+        assert event.amount == Money.mint(150.0, "USD").amount

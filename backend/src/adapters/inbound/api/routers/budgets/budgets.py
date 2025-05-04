@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
@@ -128,7 +127,7 @@ async def create_budget(
         total_limit=payload.total_limit.amount,
         currency=payload.total_limit.currency,
         strategy_input=_map_strategy_to_input(payload.strategy),
-        start_date=datetime.combine(payload.start_date, datetime.min.time()),
+        start_date=payload.start_date,
         categories=[_map_category_create_to_data(cat) for cat in payload.categories],
         name=payload.name,
     )

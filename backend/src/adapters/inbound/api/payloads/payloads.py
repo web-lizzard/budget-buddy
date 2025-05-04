@@ -1,10 +1,9 @@
 import uuid
-from datetime import date, datetime
 from enum import Enum
 from typing import Literal
 
 from domain.value_objects import BudgetStrategyType
-from pydantic import BaseModel, Field
+from pydantic import AwareDatetime, BaseModel, Field
 
 
 # Local payload definition for Money (used for Budget total_limit)
@@ -42,7 +41,7 @@ class CreateCategoryRequestPayload(BaseModel):
 # Payload for creating a new budget.
 class CreateBudgetRequestPayload(BaseModel):
     total_limit: MoneyPayload
-    start_date: date
+    start_date: AwareDatetime
     name: str = Field(..., min_length=3, max_length=100)
     categories: list[CreateCategoryRequestPayload] = Field(default_factory=list)
     strategy: StrategyPayload
@@ -86,7 +85,7 @@ class CreateTransactionRequestPayload(BaseModel):
     amount: AmountPayload
     transaction_type: TransactionTypeEnumPayload
     description: str | None = None
-    occurred_date: datetime
+    occurred_date: AwareDatetime
 
 
 # Payload for updating a transaction.
@@ -94,5 +93,5 @@ class UpdateTransactionRequestPayload(BaseModel):
     category_id: uuid.UUID
     amount: AmountPayload
     transaction_type: TransactionTypeEnumPayload
-    occurred_date: datetime
+    occurred_date: AwareDatetime
     description: str | None = None

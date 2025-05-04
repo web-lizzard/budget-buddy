@@ -9,3 +9,5 @@ class TransactionUpdated(DomainEvent):
     amount: int
     type: str
     date: datetime
+    user_id: str
+    budget_id: str

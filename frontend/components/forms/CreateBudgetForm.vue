@@ -30,7 +30,9 @@ import {
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-vue-next';
 
 // Define emits for the component
-const emit = defineEmits(['submit', 'cancel', 'budgetCreated']);
+const emit = defineEmits<{
+  (e: 'cancel' | 'budgetCreated'): void;
+}>();
 
 // Use the composable to get form state and methods
 const {
@@ -166,6 +168,7 @@ function handleFormCancel() {
                  </FormControl>
                  <SelectContent>
                      <SelectItem value="monthly">Monthly</SelectItem>
+                     <!-- TODO: Add yearly strategy handling here -->
                      <SelectItem value="yearly">Yearly</SelectItem>
                  </SelectContent>
              </Select>

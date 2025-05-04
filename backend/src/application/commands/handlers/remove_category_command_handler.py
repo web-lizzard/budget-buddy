@@ -5,6 +5,7 @@ from domain.events.category.category_removed import CategoryRemoved
 from domain.events.domain_event import DomainEvent
 from domain.exceptions import InvalidTransferPolicyError
 from domain.ports.budget_repository import BudgetRepository
+from domain.ports.clock import Clock
 from domain.ports.transaction_repository import TransactionRepository
 from domain.services.reassign_transactions_service import ReassignTransactionsService
 from domain.value_objects import (
@@ -27,6 +28,7 @@ class RemoveCategoryCommandHandler(CommandHandler[RemoveCategoryCommand]):
         unit_of_work: UnitOfWork,
         budget_repository: BudgetRepository,
         transaction_repository: TransactionRepository,
+        clock: Clock,
     ):
         """Initialize the command handler.
 
@@ -34,11 +36,13 @@ class RemoveCategoryCommandHandler(CommandHandler[RemoveCategoryCommand]):
             unit_of_work: Unit of work to manage transactions
             budget_repository: Repository for budget operations
             transaction_repository: Repository for transaction operations
+            clock: Clock for getting current time
         """
         super().__init__(unit_of_work)
         self._budget_repository = budget_repository
         self._transaction_repository = transaction_repository
         self._reassign_transactions_service = ReassignTransactionsService()
+        self._clock = clock
 
     async def _handle(self, command: RemoveCategoryCommand) -> DomainEvent:
         """Handle the remove category command.
@@ -79,6 +83,7 @@ class RemoveCategoryCommandHandler(CommandHandler[RemoveCategoryCommand]):
             category_id=str(category_id),
             budget_id=str(budget_id),
             transfer_policy=str(transfer_policy),
+            occurred_on=self._clock.now(),
         )
 
     def _create_transfer_policy(
