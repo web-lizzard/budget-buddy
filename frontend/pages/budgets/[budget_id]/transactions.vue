@@ -8,13 +8,19 @@ import { useCommand } from '@/composables/useCommand';
 import type { Budget } from '@/types/budget';
 import type { Transaction } from '@/types/transaction';
 import type { DomainError, PaginatedItems } from '@/types/dtos';
-import type { TransactionViewModel } from '@/types/viewmodels';
 import TransactionList from '@/components/TransactionList.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 import AddEditTransactionModal from '@/components/transaction/AddEditTransactionModal.vue';
 import { toast } from "vue-sonner";
+import Skeleton from '~/components/ui/Skeleton.vue';
+import { useTransactionsViewModel } from '~/composables/useTransactionsViewModel';
 
 const DEFAULT_PAGE_SIZE = 20;
+
+const INITIAL_QUERY_PARAMS = {
+  page: 1,
+  limit: DEFAULT_PAGE_SIZE
+}
 
 const route = useRoute();
 const budgetId = computed(() => route.params.budget_id as string);
@@ -27,13 +33,11 @@ const {
   pending: isBudgetLoading,
   error: budgetError,
   refresh: refreshBudget
-} = useQuery<Budget | null, string>(
+} = useQuery<Budget | null>(
   computed(() => `budget-${budgetId.value}`),
   () => budgetId.value ? budgetService.getBudgetById(budgetId.value) : Promise.resolve(null),
-
 );
 
-const transactions = ref<Transaction[]>([]);
 const pagination = ref<{
   total: number;
   page: number;
@@ -45,64 +49,28 @@ const pagination = ref<{
   limit: DEFAULT_PAGE_SIZE,
   hasMore: true
 });
-const isLoadingMore = ref(false);
 
 const {
-  data: initialTransactionsData,
-  pending: isLoadingInitial,
+  data: transactionsData,
+  pending: isTransactionsLoading,
   error: transactionsError,
   refresh: refreshTransactions
-} = useQuery<PaginatedItems<Transaction>, string>(
-  computed(() => `transactions-initial-${budgetId.value}`),
-  () => transactionService.getTransactions({
-    page: 1,
-    limit: pagination.value.limit
-  }),
-  {},
+} = useQuery<PaginatedItems<Transaction>, GetTransactionsParams>(
+  computed(() => `transactions-${budgetId.value}`),
+  (params) => transactionService.getTransactions(params || INITIAL_QUERY_PARAMS),
+  { initialParams: INITIAL_QUERY_PARAMS },
 );
-
-watch(initialTransactionsData, (data) => {
-  if (data) {
-    transactions.value = data.items;
-    pagination.value = {
-      total: data.total,
-      page: 1,
-      limit: data.limit,
-      hasMore: data.skip + data.limit < data.total
-    };
-  }
-}, { immediate: true });
 
 const isDeleteModalOpen = ref(false);
 const transactionToDeleteId = ref<string | null>(null);
 const isEditModalOpen = ref(false);
 const transactionToEdit = ref<Transaction | null>(null);
 
-const categoryMap = computed(() => {
-  if (!budgetData.value) return new Map<string, string>();
-
-  const map = new Map<string, string>();
-  budgetData.value.categories.forEach(category => {
-    map.set(category.id, category.name);
-  });
-  return map;
-});
-
-const transactionViewModels = computed(() => {
-  return transactions.value.map(transaction => {
-    return {
-      id: transaction.id,
-      date: new Date(transaction.date),
-      categoryName: categoryMap.value.get(transaction.categoryId) || 'Unknown Category',
-      type: transaction.type,
-      amount: transaction.amount,
-    } as TransactionViewModel;
-  });
-});
+const { transactionViewModels } = useTransactionsViewModel(transactionsData.value?.items || [], budgetData.value);
 
 const originalTransactionToEdit = computed(() => {
   if (!transactionToEdit.value?.id) return null;
-  return transactions.value.find(t => t.id === transactionToEdit.value?.id) || null;
+  return transactionsData.value?.items.find(t => t.id === transactionToEdit.value?.id) || null;
 });
 
 const availableCategories = computed(() => {
@@ -117,9 +85,10 @@ const { execute: executeDelete, loading: isDeleting } = useCommand(
   {
     onSuccess: () => {
       toast.success('Transaction deleted successfully!');
-      if (transactionToDeleteId.value) {
-        transactions.value = transactions.value.filter(t => t.id !== transactionToDeleteId.value);
-      }
+      refreshTransactions({
+        page: pagination.value.page,
+        limit: pagination.value.limit
+      });
       isDeleteModalOpen.value = false;
       transactionToDeleteId.value = null;
     },
@@ -134,38 +103,26 @@ const { execute: executeDelete, loading: isDeleting } = useCommand(
 const handleTransactionSaved = () => {
   isEditModalOpen.value = false;
   transactionToEdit.value = null;
-  refreshTransactions();
+  refreshTransactions({
+    page: pagination.value.page,
+    limit: pagination.value.limit
+  });
 };
 
 const loadMoreTransactions = async () => {
-  if (!pagination.value.hasMore || isLoadingMore.value) return;
+  if (!pagination.value.hasMore || isTransactionsLoading.value) return;
 
-  isLoadingMore.value = true;
-  try {
     const nextPage = pagination.value.page + 1;
     const params: GetTransactionsParams = {
       page: nextPage,
       limit: pagination.value.limit
     };
 
-    const nextPageData = await transactionService.getTransactions(params);
-    transactions.value = [...transactions.value, ...nextPageData.items];
-
-    pagination.value = {
-      total: nextPageData.total,
-      page: nextPage,
-      limit: nextPageData.limit,
-      hasMore: nextPageData.skip + nextPageData.limit < nextPageData.total
-    };
-  } catch (error) {
-    console.error('Failed to load more transactions:', error);
-  } finally {
-    isLoadingMore.value = false;
-  }
+    await refreshTransactions(params);
 };
 
 const handleEditTransaction = (id: string) => {
-  const transaction = transactions.value.find(t => t.id === id);
+  const transaction = transactionsData.value?.items.find(t => t.id === id);
   if (transaction) {
     transactionToEdit.value = { ...transaction };
     isEditModalOpen.value = true;
@@ -204,18 +161,31 @@ const handleRetry = () => {
     refreshBudget();
   }
   if (transactionsError.value) {
-    refreshTransactions();
+    refreshTransactions({
+      page: pagination.value.page,
+      limit: pagination.value.limit
+    });
   }
 };
 
+watch(() => transactionsData.value, (newData) => {
+  if (newData) {
+    pagination.value = {
+      total: newData.total,
+      page: newData.skip ? Math.floor(newData.skip / newData.limit) + 1 : 1,
+      limit: newData.limit,
+      hasMore: (newData.skip || 0) + newData.limit < newData.total
+    };
+  }
+}, { immediate: true });
 </script>
 
 <template>
   <div class="container mx-auto py-6">
     <h1 class="text-2xl font-bold mb-6">Transaction History</h1>
 
-    <div v-if="isBudgetLoading || (isLoadingInitial && transactions.length === 0)" class="flex justify-center py-12">
-      <p>Loading transactions...</p>
+    <div v-if="isBudgetLoading || (!transactionsData && isTransactionsLoading)" class="flex justify-center py-12">
+      <Skeleton class="w-full h-48" />
     </div>
 
     <div v-else-if="hasError" class="rounded-md border border-destructive p-4 my-4">
@@ -233,7 +203,7 @@ const handleRetry = () => {
     </div>
 
     <div
-      v-else-if="!isLoadingInitial && transactions.length === 0 && !hasError"
+      v-else-if="!isTransactionsLoading && transactionsData && transactionsData.items.length === 0 && !hasError"
       class="rounded-md border border-border p-8 my-4 text-center"
     >
       <h3 class="text-lg font-medium">No transactions yet</h3>
@@ -242,10 +212,10 @@ const handleRetry = () => {
       </p>
     </div>
 
-    <div v-else-if="transactions.length > 0">
+    <div v-else-if="transactionsData && transactionsData.items.length > 0">
       <TransactionList
         :transactions="transactionViewModels"
-        :is-loading-more="isLoadingMore"
+        :is-loading-more="isTransactionsLoading"
         :has-more="pagination.hasMore"
         @edit-transaction="handleEditTransaction"
         @delete-transaction="handleDeleteTransaction"
