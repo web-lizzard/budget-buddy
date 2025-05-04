@@ -26,6 +26,8 @@ const budgetIdParam = computed(() => route.params.budget_id)
 
 // Added reactive state for controlling the Add/Edit Transaction modal
 const isTransactionModalOpen = ref(false)
+const selectedCategory = ref<Category | null>(null)
+const isCategoryModalOpen = ref(false)
 
 const budgetService = new BudgetService()
 const transactionService = new TransactionService(budgetIdParam.value as string)
@@ -165,21 +167,16 @@ const categoryListViewModels = computed((): CategoryListItemViewModel[] => {
 
 // --- Event Handlers ---
 
-const handleEditCategory = (categoryId: string) => {
-    console.log('Action: Edit category', categoryId);
-    // Example Navigation:
-    router.push(`/budgets/${budgetIdParam.value}/categories/${categoryId}/edit`);
+const handleOpenCategoryModal = (categoryId: string) => {
+    selectedCategory.value = budgetData.value?.categories.find(cat => cat.id === categoryId) ?? null;
+    isCategoryModalOpen.value = true;
 };
 
 const handleRemoveCategory = (categoryId: string) => {
     console.log('Action: Remove category', categoryId);
-    // TODO: Open RemoveCategoryModal - Requires state management for modal
-    alert(`Placeholder: Trigger remove modal for category ${categoryId}`);
 };
 
 const handleAddTransaction = () => {
-    console.log('Action: Add transaction');
-    // Open the Add/Edit Transaction modal instead of navigating
     isTransactionModalOpen.value = true;
 };
 
@@ -195,6 +192,18 @@ const handleDeactivateBudget = async () => {
     console.log('Action: Deactivate budget', budgetIdParam.value);
     await budgetService.deactivateBudget(budgetIdParam.value as string);
     refreshBudgetData();
+};
+
+
+const handleCategorySaved = () => {
+    isCategoryModalOpen.value = false;
+    selectedCategory.value = null;
+    refreshBudgetData();
+};
+
+const handleCloseCategory = () => {
+    isCategoryModalOpen.value = false;
+    selectedCategory.value = null;
 };
 
 
@@ -248,7 +257,8 @@ const handleDeactivateBudget = async () => {
             <CategoryList
               v-else-if="budgetData && categoryListViewModels.length"
               :categories="categoryListViewModels"
-              @edit-category="handleEditCategory"
+              @create-category="isCategoryModalOpen = true"
+              @edit-category="handleOpenCategoryModal"
               @remove-category="handleRemoveCategory"
             />
         </div>
@@ -262,6 +272,16 @@ const handleDeactivateBudget = async () => {
       :available-categories="budgetData?.categories || []"
       @close="isTransactionModalOpen = false"
       @transaction-saved="handleTransactionSaved"
+    />
+
+    <AddEditCategoryModal
+      v-if="budgetData"
+      :is-open="isCategoryModalOpen"
+      :mode="selectedCategory ? 'edit' : 'create'"
+      :budget="budgetData"
+      :category-data="selectedCategory"
+      @close="handleCloseCategory"
+      @category-saved="handleCategorySaved"
     />
   </div>
 </template>
