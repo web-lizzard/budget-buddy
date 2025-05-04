@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import * as z from 'zod';
@@ -20,11 +20,12 @@ export interface CategoryFormData {
 }
 
 const props = defineProps<{
-  initialData?: InitialCategoryFormData;
+  initialData: InitialCategoryFormData;
   budgetCurrency: string;
   existingCategoryNames: string[];
   remainingBudgetLimit: number;
   isSubmitting: boolean;
+  formKey: string;
 }>();
 
 const emit = defineEmits<{
@@ -53,38 +54,16 @@ const validationSchema = computed(() => {
 });
 
 // Initialize the form
-const { handleSubmit, values, resetForm, setFieldValue } = useForm<CategoryFormData>({
+const { handleSubmit } = useForm<CategoryFormData>({
   validationSchema,
   initialValues: {
-    name: props.initialData?.name ?? '',
-    limit: props.initialData?.limit ?? 0, // Default to 0 instead of undefined for number input
+    name: props.initialData.name ?? '',
+    limit: props.initialData.limit ?? 0,
   },
 });
 
-// Watch for changes in initialData and update form values accordingly
-watch(
-  () => props.initialData,
-  (newVal) => {
-    if (newVal) {
-      // Reset form with new values when initialData changes
-      setFieldValue('name', newVal.name ?? '');
-      setFieldValue('limit', newVal.limit ?? 0);
-    } else {
-      // Reset form when initialData is cleared
-      resetForm({
-        values: {
-          name: '',
-          limit: 0,
-        }
-      });
-    }
-  },
-  { deep: true, immediate: true }
-);
-
 // Form submission handler
 const onSubmit = handleSubmit((values) => {
-  console.log('Action: Submit category', values);
   emit('submit', {
     name: values.name,
     limit: values.limit
@@ -93,16 +72,16 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-  <form @submit.prevent="onSubmit" class="space-y-4">
+  <form class="space-y-4" @submit.prevent="onSubmit">
     <!-- Category Name Field -->
     <FormField v-slot="{ field, errorMessage }" name="name">
       <FormItem>
         <FormLabel>Category Name</FormLabel>
         <FormControl>
-          <Input 
-            v-bind="field" 
-            placeholder="e.g., Groceries" 
-            :disabled="isSubmitting" 
+          <Input
+            v-bind="field"
+            placeholder="e.g., Groceries"
+            :disabled="isSubmitting"
           />
         </FormControl>
         <FormMessage>{{ errorMessage }}</FormMessage>
@@ -115,13 +94,13 @@ const onSubmit = handleSubmit((values) => {
         <FormLabel>Category Limit</FormLabel>
         <div class="flex items-center gap-2">
           <FormControl>
-            <Input 
-              type="number" 
+            <Input
+              type="number"
               :value="field.value"
-              @input="(e: Event) => field.onChange(Number((e.target as HTMLInputElement).value))" 
-              placeholder="e.g., 500" 
+              placeholder="e.g., 500"
               step="0.01"
-              :disabled="isSubmitting" 
+              :disabled="isSubmitting"
+              @input="(e: Event) => field.onChange(Number((e.target as HTMLInputElement).value))"
             />
           </FormControl>
           <span class="text-muted-foreground">{{ budgetCurrency }}</span>
@@ -138,4 +117,4 @@ const onSubmit = handleSubmit((values) => {
       </Button>
     </div>
   </form>
-</template> 
+</template>

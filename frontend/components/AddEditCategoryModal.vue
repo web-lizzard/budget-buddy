@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 
-// Components
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
   DialogFooter,
   DialogClose
 } from '@/components/ui/dialog';
@@ -15,198 +14,127 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-vue-next';
 import CategoryForm from '@/components/CategoryForm.vue';
-import type { CategoryFormData, InitialCategoryFormData } from '@/components/CategoryForm.vue';
+import type { CategoryFormData } from '@/components/CategoryForm.vue';
 
-// Services & Utils
-import { BudgetService } from '@/services/BudgetService';
-import { useCommand } from '@/composables/useCommand';
-import { toast } from 'vue-sonner';
 
-// Types
 import type { Budget } from '@/types/budget';
 import type { Category } from '@/types/category';
+import { BudgetService } from '~/services/BudgetService';
+import { toast } from 'vue-sonner';
 
-export interface CategoryData {
-  id: string;
-  name: string;
-  limit: number;
-}
-
-// Props
 const props = defineProps<{
-  isOpen: boolean;
-  mode: 'create' | 'edit';
   budget: Budget;
-  categoryData?: Category | null;
+  isOpen: boolean;
+  selectedCategory: Category | null;
 }>();
 
 const emit = defineEmits<{
-  close: [];
-  categorySaved: [];
-  'update:isOpen': [boolean];
+  'close': [];
+  'submit': [];
 }>();
 
-// Local state for managing form data
-const localCategoryData = ref<CategoryData | null>(null);
+const closeModal = () => {
+  emit('close');
+};
 
-// Watch for changes in props.categoryData and mode to update local state
-watch(
-  [() => props.categoryData, () => props.mode, () => props.isOpen],
-  ([newCategoryData, newMode, isOpen]) => {
-    if (isOpen) {
-      if (newMode === 'edit' && newCategoryData) {
-        // Map Category to CategoryData format
-        localCategoryData.value = {
-          id: newCategoryData.id,
-          name: newCategoryData.name,
-          limit: newCategoryData.limit.amount,
-        };
-      } else {
-        // Reset for create mode
-        localCategoryData.value = null;
-      }
-    }
-  },
-  { immediate: true }
-);
+const mode = computed(() => props.selectedCategory ? 'edit' : 'create');
 
-// Services
-const budgetService = new BudgetService();
-
-// Computed properties
-const initialFormData = computed<InitialCategoryFormData>(() => {
-  if (props.mode === 'edit' && localCategoryData.value) {
+const initialFormData = computed(() => {
+  if (mode.value === 'edit' && props.selectedCategory) {
     return {
-      name: localCategoryData.value.name,
-      limit: localCategoryData.value.limit,
+      name: props.selectedCategory.name,
+      limit: props.selectedCategory.limit.amount,
     };
   }
-  // For create mode, always return empty values
+
   return {
     name: '',
     limit: 0,
   };
 });
 
-const existingCategoryNames = computed<string[]>(() => {
-  // For create mode: all category names
-  // For edit mode: all category names except the current one being edited
-  return props.budget.categories
-    .filter(cat => props.mode !== 'edit' || cat.id !== props.categoryData?.id)
-    .map(cat => cat.name);
-});
+const getExistingCategoryNames = (): string[] => {
+  if (!props.budget) return [];
 
-const remainingBudgetLimit = computed<number>(() => {
+  return props.budget.categories
+    .filter(cat => mode.value !== 'edit' || cat.id !== props.selectedCategory?.id)
+    .map(cat => cat.name);
+};
+
+const getRemainingBudgetLimit = (): number => {
+  if (!props.budget) return 0;
+
   const totalBudgetLimit = props.budget.totalLimit.amount;
   const sumOfOtherCategoryLimits = props.budget.categories
-    .filter(cat => props.mode !== 'edit' || cat.id !== props.categoryData?.id)
+    .filter(cat => mode.value !== 'edit' || cat.id !== props.selectedCategory?.id)
     .reduce((sum, cat) => sum + cat.limit.amount, 0);
 
   return totalBudgetLimit - sumOfOtherCategoryLimits;
-});
-
-const computedCanAddCategory = computed<boolean>(() => {
-  return props.budget.categories.length < 5;
-});
-
-// Reset error on modal open/close
-const clearErrorOnModalToggle = () => {
-  if (error.value) {
-    error.value = null;
-  }
 };
 
-watch(() => props.isOpen, clearErrorOnModalToggle);
+const canAddCategory = (): boolean => {
+  return props.budget.categories.length < 5;
+};
 
-// State management
-const { execute, loading, error } = useCommand<{
-  budgetId: string;
-  categoryId?: string;
-  data: CategoryFormData;
-}>(async (payload) => {
-  if (props.mode === 'create') {
-    await budgetService.createCategory(payload.budgetId, {
-      name: payload.data.name,
+const budgetService = new BudgetService();
+
+const { execute: submitCategory, loading: isSubmitting, error } = useCommand<CategoryFormData>(async (formData) => {
+  if (mode.value === 'create') {
+    await budgetService.createCategory(props.budget.id, {
+      name: formData.name,
       limit: {
-        amount: payload.data.limit
+        amount: formData.limit
       }
     });
-  } else if (props.mode === 'edit' && payload.categoryId) {
-    await budgetService.updateCategory(payload.budgetId, payload.categoryId, {
-      name: payload.data.name,
+  }
+
+  if (mode.value === 'edit' && props.selectedCategory) {
+    await budgetService.updateCategory(props.budget.id, props.selectedCategory.id, {
+      name: formData.name,
       limit: {
-        amount: payload.data.limit
+        amount: formData.limit
       }
     });
   }
 }, {
   onSuccess: () => {
-    toast({
-      title: props.mode === 'create' ? 'Category created' : 'Category updated',
-      description: `Category has been successfully ${props.mode === 'create' ? 'created' : 'updated'}.`,
-    });
-    emit('categorySaved');
-    emit('update:isOpen', false);
+    toast.success('Category updated successfully');
+    emit('submit');
+  },
+  onError: (error) => {
+    toast.error(error.message);
   }
 });
 
-// Event handlers
 const handleFormSubmit = (formData: CategoryFormData) => {
-  // For create mode, check if we can add more categories
-  if (props.mode === 'create' && !computedCanAddCategory.value) {
-    toast({
-      title: 'Cannot add category',
-      description: 'You have reached the maximum limit of 5 categories for this budget.',
-      variant: 'destructive',
-    });
-    return;
-  }
-
-  execute({
-    budgetId: props.budget.id,
-    categoryId: props.mode === 'edit' ? props.categoryData?.id : undefined,
-    data: formData
-  });
+  submitCategory(formData);
 };
 
-const handleClose = () => {
-  // Clear local data
-  localCategoryData.value = null;
-  emit('close');
-  emit('update:isOpen', false);
-};
-
-// Handle dialog update:open event
-const handleUpdateOpen = (open: boolean) => {
-  if (!open) {
-    handleClose();
-  }
-  emit('update:isOpen', open);
-};
+const formKey = computed(() =>
+  `${mode.value}-${props.selectedCategory?.id || 'new'}-${props.isOpen}`
+);
 </script>
 
 <template>
-  <Dialog :open="isOpen" @update:open="handleUpdateOpen">
+  <Dialog :open="isOpen" @update:open="(open) => !open && closeModal()">
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>{{ mode === 'create' ? 'Add Category' : 'Edit Category' }}</DialogTitle>
         <DialogDescription>
-          {{ mode === 'create' 
-              ? 'Create a new spending category for your budget.' 
+          {{ mode === 'create'
+              ? 'Create a new spending category for your budget.'
               : 'Update the details of your spending category.' }}
         </DialogDescription>
       </DialogHeader>
 
       <div class="py-4">
-        <!-- Display maximum categories warning -->
-        <Alert v-if="mode === 'create' && !computedCanAddCategory" variant="default" class="mb-4">
+        <Alert v-if="mode === 'create' && canAddCategory()" variant="default" class="mb-4">
           <AlertCircle class="h-4 w-4" />
           <AlertDescription>
             You've reached the maximum limit of 5 categories for this budget.
           </AlertDescription>
         </Alert>
 
-        <!-- Display API errors -->
         <Alert v-if="error" variant="destructive" class="mb-4">
           <AlertCircle class="h-4 w-4" />
           <AlertDescription>
@@ -214,25 +142,25 @@ const handleUpdateOpen = (open: boolean) => {
           </AlertDescription>
         </Alert>
 
-        <!-- Category Form -->
         <CategoryForm
-          :key="`${mode}-${props.categoryData?.id || 'new'}-${isOpen}`"
+          :key="formKey"
           :initial-data="initialFormData"
           :budget-currency="budget.currency"
-          :existing-category-names="existingCategoryNames"
-          :remaining-budget-limit="remainingBudgetLimit"
-          :is-submitting="loading"
+          :existing-category-names="getExistingCategoryNames()"
+          :remaining-budget-limit="getRemainingBudgetLimit()"
+          :is-submitting="isSubmitting"
+          :form-key="formKey"
           @submit="handleFormSubmit"
         />
       </div>
 
       <DialogFooter>
-        <DialogClose asChild>
-          <Button type="button" variant="outline" @click="handleClose" :disabled="loading">
+        <DialogClose as-child>
+          <Button type="button" variant="outline" :disabled="isSubmitting" @click="closeModal()">
             Cancel
           </Button>
         </DialogClose>
       </DialogFooter>
     </DialogContent>
   </Dialog>
-</template> 
+</template>

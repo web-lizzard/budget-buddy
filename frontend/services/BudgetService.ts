@@ -264,7 +264,7 @@ export class BudgetService {
          throw mapToDomainError(error, 'Failed to create category');
      }
    }
-   
+
    /**
     * Updates an existing category within a budget.
     * @param budgetId - The ID of the budget containing the category.
