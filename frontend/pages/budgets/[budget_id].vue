@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BudgetSummaryCard from '@/components/budget/detail/BudgetSummaryCard.vue'
 import OverallStatsCard from '@/components/budget/detail/OverallStatsCard.vue'
@@ -8,30 +8,39 @@ import RecentTransactionsTable from '@/components/budget/detail/RecentTransactio
 import CategoryList from '@/components/budget/detail/CategoryList.vue'
 import ActionButtons from '@/components/budget/detail/ActionButtons.vue'
 import AddEditTransactionModal from '@/components/transaction/AddEditTransactionModal.vue'
+import AddEditCategoryModal from '@/components/AddEditCategoryModal.vue'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ChartDataViewModel, TransactionViewModel, CategoryListItemViewModel } from '~/types/viewmodels'
 import type { TransactionType } from '~/types/transaction'
 import type { Category } from '~/types/category'
 import type { CategoryStatistics } from '~/types/statistics'
 import { useQuery } from '~/composables/useQuery'
-import { BudgetService } from '~/services/BudgetService'
-import { TransactionService } from '~/services/TransactionService'
 import { useIntervalAction } from '~/composables/useIntervalAction'
+import { useBudgetService, useTransactionService } from '~/composables/useServices'
+
 
 const route = useRoute()
-const router = useRouter()
+const { service: budgetService } = useBudgetService()
+const { service: transactionService } = useTransactionService()
 
 const budgetIdParam = computed(() => route.params.budget_id)
 
 
-// Added reactive state for controlling the Add/Edit Transaction modal
 const isTransactionModalOpen = ref(false)
-
-const budgetService = new BudgetService()
-const transactionService = new TransactionService(budgetIdParam.value as string)
-
+const selectedCategory = ref<Category | null>(null)
+const isCategoryModalOpen = ref(false)
 
 
+const openCategoryModal = () => {
+  isCategoryModalOpen.value = true
+}
+
+const closeCategoryModal = () => {
+  isCategoryModalOpen.value = false
+}
+
+
+/// Queries
 const { data: budgetData, pending, error, refresh: refreshBudgetData } = useQuery(
   `budget-${budgetIdParam.value}`,
   () => budgetService.getBudgetById(budgetIdParam.value as string),
@@ -52,7 +61,6 @@ const { data: recentTransactions, pending: pendingTransactions, refresh: refresh
     return (await transactionService.getRecentTransactions(3)).items
   },
 )
-
 
 const { data: statisticsData, pending: pendingStats, refresh: refreshStats } = useQuery(
   `budget-stats-${budgetIdParam.value}`,
@@ -82,9 +90,6 @@ const { executeAction: executeRefreshStats } = useIntervalAction(
   }
 )
 
-
-
-
 const categoryMap = computed(() => {
     const map = new Map<string, string>();
     budgetData.value?.categories.forEach(cat => map.set(cat.id, cat.name));
@@ -92,7 +97,6 @@ const categoryMap = computed(() => {
 });
 
 const transactionViewModels = computed((): TransactionViewModel[] => {
-
     if (!recentTransactions.value) return [];
     return recentTransactions.value.map((tx) => ({
         id: tx.id,
@@ -165,26 +169,30 @@ const categoryListViewModels = computed((): CategoryListItemViewModel[] => {
 
 // --- Event Handlers ---
 
-const handleEditCategory = (categoryId: string) => {
-    console.log('Action: Edit category', categoryId);
-    // Example Navigation:
-    router.push(`/budgets/${budgetIdParam.value}/categories/${categoryId}/edit`);
+const handleOpenCategoryModal = (categoryId?: string) => {
+    selectedCategory.value = null;
+    if (!categoryId) {
+        openCategoryModal();
+        return;
+    }
+
+    const category = budgetData.value?.categories.find(cat => cat.id === categoryId);
+    if (category) {
+        selectedCategory.value = category;
+    }
+    openCategoryModal();
+
 };
 
 const handleRemoveCategory = (categoryId: string) => {
     console.log('Action: Remove category', categoryId);
-    // TODO: Open RemoveCategoryModal - Requires state management for modal
-    alert(`Placeholder: Trigger remove modal for category ${categoryId}`);
 };
 
 const handleAddTransaction = () => {
-    console.log('Action: Add transaction');
-    // Open the Add/Edit Transaction modal instead of navigating
     isTransactionModalOpen.value = true;
 };
 
 const handleTransactionSaved = () => {
-    // Called when the modal successfully saves a transaction
     isTransactionModalOpen.value = false;
     timestamp.value = new Date().toISOString();
     executeRefreshStats();
@@ -192,11 +200,14 @@ const handleTransactionSaved = () => {
 };
 
 const handleDeactivateBudget = async () => {
-    console.log('Action: Deactivate budget', budgetIdParam.value);
     await budgetService.deactivateBudget(budgetIdParam.value as string);
     refreshBudgetData();
 };
 
+const handleCategorySaved = () => {
+    closeCategoryModal();
+    refreshBudgetData();
+}
 
 </script>
 
@@ -248,7 +259,8 @@ const handleDeactivateBudget = async () => {
             <CategoryList
               v-else-if="budgetData && categoryListViewModels.length"
               :categories="categoryListViewModels"
-              @edit-category="handleEditCategory"
+              @create-category="handleOpenCategoryModal"
+              @edit-category="handleOpenCategoryModal"
               @remove-category="handleRemoveCategory"
             />
         </div>
@@ -262,6 +274,15 @@ const handleDeactivateBudget = async () => {
       :available-categories="budgetData?.categories || []"
       @close="isTransactionModalOpen = false"
       @transaction-saved="handleTransactionSaved"
+    />
+
+    <AddEditCategoryModal
+      v-if="budgetData"
+      :budget="budgetData"
+      :is-open="isCategoryModalOpen"
+      :selected-category="selectedCategory"
+      @close="closeCategoryModal"
+      @submit="handleCategorySaved"
     />
   </div>
 </template>

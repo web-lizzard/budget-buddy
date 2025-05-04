@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { apiConfig, mapToDomainError } from '@/utils/apiUtils';
 import type { Budget } from '@/types/budget';
 import type { BudgetStatistics } from '@/types/statistics';
-import type { CreateBudgetRequestPayload, BudgetDTO, BudgetStatisticsDTO, DomainError, CategoryStatisticsDTO, CategoryDTO, PaginatedItems } from '@/types/dtos';
+import type { CreateBudgetRequestPayload, BudgetDTO, BudgetStatisticsDTO, DomainError, CategoryStatisticsDTO, CategoryDTO, PaginatedItems, CreateCategoryRequestPayload, UpdateCategoryRequestPayload } from '@/types/dtos';
 import { BudgetSchema } from '@/schemas/budgetSchema';
 import { BudgetStatisticsSchema } from '@/schemas/statisticsSchema';
 
@@ -242,7 +242,52 @@ export class BudgetService {
       }
   }
 
+  /**
+   * Creates a new category within a budget.
+   * @param budgetId - The ID of the budget to add the category to.
+   * @param payload - The data for the new category (conforming to CreateCategoryRequestPayload DTO).
+   * @throws {DomainError} If the API call fails or validation fails.
+   */
+  async createCategory(budgetId: string, payload: CreateCategoryRequestPayload): Promise<void> {
+     try {
+        const url = `${apiConfig.baseURL}/budgets/${budgetId}/categories`;
+        await $fetch<unknown>(url, {
+             method: 'POST',
+             body: payload,
+             responseType: 'json',
+             ...apiConfig.commonOptions,
+         });
+     } catch (error: unknown) {
+        if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+            throw error as DomainError;
+        }
+         throw mapToDomainError(error, 'Failed to create category');
+     }
+   }
 
+   /**
+    * Updates an existing category within a budget.
+    * @param budgetId - The ID of the budget containing the category.
+    * @param categoryId - The ID of the category to update.
+    * @param payload - The data to update in the category (conforming to UpdateCategoryRequestPayload DTO).
+    * @throws {DomainError} If the API call fails or validation fails.
+    */
+   async updateCategory(budgetId: string, categoryId: string, payload: UpdateCategoryRequestPayload): Promise<void> {
+       try {
+           const url = `${apiConfig.baseURL}/budgets/${budgetId}/categories/${categoryId}`;
+           await $fetch<unknown>(url, {
+               method: 'PUT',
+               body: payload,
+               responseType: 'json',
+               ...apiConfig.commonOptions,
+           });
+       } catch (error: unknown) {
+           if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+               throw error as DomainError;
+           }
+           throw mapToDomainError(error, 'Failed to update category');
+       }
+   }
 
   // TODO: Add instance methods for updateBudget, deleteBudget etc. as needed
 }

@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'edit-category' | 'remove-category', categoryId: string): void
+    (e: 'create-category'): void
 }>()
 
 const handleEdit = (categoryId: string) => {
@@ -18,6 +19,10 @@ const handleEdit = (categoryId: string) => {
 
 const handleRemove = (categoryId: string) => {
     emit('remove-category', categoryId)
+}
+
+const handleAddCategory = () => {
+    emit('create-category')
 }
 
 const hasCategories = computed(() => props.categories && props.categories.length > 0)
@@ -44,5 +49,8 @@ const hasCategories = computed(() => props.categories && props.categories.length
             <!-- Optional: Add button to add a category -->
         </div>
     </CardContent>
+    <CardFooter>
+        <Button @click="handleAddCategory">Add Category</Button>
+    </CardFooter>
  </Card>
 </template>
