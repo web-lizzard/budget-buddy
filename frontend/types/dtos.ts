@@ -81,7 +81,16 @@ export interface StrategyPayload {
 
 export interface CreateCategoryRequestPayload {
   name: string
-  limit: MoneyPayload
+  limit: {
+    amount: number
+  }
+}
+
+export interface UpdateCategoryRequestPayload {
+  name: string
+  limit: {
+    amount: number
+  }
 }
 
 export interface CreateBudgetRequestPayload {

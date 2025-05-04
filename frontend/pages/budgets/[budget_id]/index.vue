@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import BudgetSummaryCard from '@/components/budget/detail/BudgetSummaryCard.vue'
 import OverallStatsCard from '@/components/budget/detail/OverallStatsCard.vue'
 import CategorySpendingChart from '@/components/budget/detail/CategorySpendingChart.vue'
@@ -10,13 +10,13 @@ import ActionButtons from '@/components/budget/detail/ActionButtons.vue'
 import AddEditTransactionModal from '@/components/transaction/AddEditTransactionModal.vue'
 import AddEditCategoryModal from '@/components/AddEditCategoryModal.vue'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { ChartDataViewModel, TransactionViewModel, CategoryListItemViewModel } from '~/types/viewmodels'
-import type { TransactionType } from '~/types/transaction'
+import type { ChartDataViewModel, CategoryListItemViewModel } from '~/types/viewmodels'
 import type { Category } from '~/types/category'
 import type { CategoryStatistics } from '~/types/statistics'
 import { useQuery } from '~/composables/useQuery'
 import { useIntervalAction } from '~/composables/useIntervalAction'
 import { useBudgetService, useTransactionService } from '~/composables/useServices'
+import { useTransactionsViewModel } from '~/composables/useTransactionsViewModel'
 
 
 const route = useRoute()
@@ -69,12 +69,15 @@ const { data: statisticsData, pending: pendingStats, refresh: refreshStats } = u
   },
 )
 
+const { transactionViewModels, categoryMap } = useTransactionsViewModel(recentTransactions.value || [], budgetData.value);
+
+
 const statsTimestamp = computed(() => {
   if (!statisticsData.value) return null;
   return statisticsData.value.creationDate;
 })
 
-const timestamp = ref(new Date().toISOString()) // Store timestamp in UTC format
+const timestamp = ref(new Date())
 
 const { executeAction: executeRefreshStats } = useIntervalAction(
   () => refreshStats(),
@@ -90,22 +93,6 @@ const { executeAction: executeRefreshStats } = useIntervalAction(
   }
 )
 
-const categoryMap = computed(() => {
-    const map = new Map<string, string>();
-    budgetData.value?.categories.forEach(cat => map.set(cat.id, cat.name));
-    return map;
-});
-
-const transactionViewModels = computed((): TransactionViewModel[] => {
-    if (!recentTransactions.value) return [];
-    return recentTransactions.value.map((tx) => ({
-        id: tx.id,
-        date: new Date(tx.date), // Convert string date to Date object
-        categoryName: categoryMap.value.get(tx.categoryId) ?? 'Uncategorized', // Get name from map
-        type: tx.type.toUpperCase() as TransactionType,
-        amount: tx.amount,
-    }));
-});
 
 const categorySpendingChartData = computed((): ChartDataViewModel | null => {
     if (!statisticsData.value || !statisticsData.value.categoriesStatistics || statisticsData.value.categoriesStatistics.length === 0) {
@@ -194,7 +181,7 @@ const handleAddTransaction = () => {
 
 const handleTransactionSaved = () => {
     isTransactionModalOpen.value = false;
-    timestamp.value = new Date().toISOString();
+    timestamp.value = new Date();
     executeRefreshStats();
     refreshTransactions();
 };

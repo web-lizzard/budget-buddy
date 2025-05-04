@@ -13,6 +13,14 @@ const PaginatedTransactionDTOSchema = z.object({
   limit: z.number(),
 });
 
+// Define the type for pagination/filtering parameters
+export interface GetTransactionsParams {
+    page: number;
+    limit: number;
+    sort?: string;
+    // Add other potential filters like date_from, date_to if needed later
+}
+
 /**
  * Service class responsible for interacting with Transaction-related API endpoints
  * for a specific budget. Requires budgetId upon instantiation.
@@ -169,5 +177,64 @@ export class TransactionService {
      }
   }
 
-    // TODO: Add methods for getTransactionById, listTransactions etc. as needed
+   /**
+    * Fetches transactions for the specified budget with pagination.
+    * Maps the paginated DTO response to a paginated Domain model response.
+    * @param params - Pagination and filtering parameters.
+    * @returns A paginated response containing transactions (domain models).
+    * @throws {DomainError} If the API call fails or data validation fails.
+    */
+   async getTransactions(
+     params: GetTransactionsParams
+   ): Promise<PaginatedItems<Transaction>> {
+     try {
+       const apiParams: Record<string, string | number> = {
+         skip: (params.page - 1) * params.limit, // Convert page to skip
+         limit: params.limit,
+       };
+       if (params.sort) {
+         apiParams.sort = params.sort;
+       }
+       // Add other filters here if needed
+
+       const options: FetchOptions<'json'> = {
+         ...apiConfig.commonOptions,
+         params: apiParams,
+         responseType: 'json',
+       };
+
+       const rawData = await $fetch<z.infer<typeof PaginatedTransactionDTOSchema>>(this.baseUrl, options);
+       const parsed = PaginatedTransactionDTOSchema.safeParse(rawData);
+
+       if (!parsed.success) {
+         console.error('Failed to parse transactions structure:', parsed.error);
+         throw { status: 'validation_error', message: 'Invalid API response format for transactions.' } as DomainError;
+       }
+
+       // TODO: Move mapping to TransactionSchema.transform()
+       const domainItems = parsed.data.items.map(itemDto => ({
+         id: itemDto.id,
+         categoryId: itemDto.category_id,
+         userId: itemDto.user_id,
+         amount: itemDto.amount,
+         type: itemDto.transaction_type as TransactionType,
+         date: itemDto.occurred_date,
+         // description: itemDto.description, // Assume handled by schema
+       }));
+
+       return {
+         items: domainItems,
+         total: parsed.data.total,
+         skip: parsed.data.skip, // Keep skip and limit from API response
+         limit: parsed.data.limit,
+       };
+     } catch (error: unknown) {
+       if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+         throw error as DomainError;
+       }
+       throw mapToDomainError(error, `Failed to fetch transactions for budget ${this.budgetId}`);
+     }
+   }
+
+    // TODO: Add methods for getTransactionById etc. as needed
 }
