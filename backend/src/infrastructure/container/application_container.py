@@ -124,6 +124,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
             GetBudgetStatisticsQuery: providers.Factory(
                 SQLGetBudgetStatisticsQueryHandler,
                 session=persistence_container.query_session,
+                clock=domain_container.clock,
             ),
         }
     )

@@ -47,3 +47,10 @@ class StatisticsRepository(ABC):
     async def save(self, statistics_record: StatisticsRecord) -> None:
         """Saves (creates or updates) a statistics record."""
         pass
+
+    @abstractmethod
+    async def find_by_transaction_id(
+        self, transaction_id: uuid.UUID, user_id: uuid.UUID
+    ) -> StatisticsRecord:
+        """Finds the statistics record linked to a specific transaction ID."""
+        pass

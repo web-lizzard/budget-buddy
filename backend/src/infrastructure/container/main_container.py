@@ -21,12 +21,7 @@ class MainContainer(containers.DeclarativeContainer):
     # Configuration
     config = providers.Configuration()
 
-    # Database
     database_container = providers.Container(DatabaseContainer, config=config)
-
-    # Domain
-    domain_container = providers.Container(DomainContainer)
-
     # Publishers
     publisher_container = providers.Container(PublisherContainer, config=config)
 
@@ -35,6 +30,10 @@ class MainContainer(containers.DeclarativeContainer):
         PersistenceContainer,
         publisher_container=publisher_container,
         database_container=database_container,
+    )
+
+    domain_container = providers.Container(
+        DomainContainer, persistence_container=persistence_container
     )
 
     application_container = providers.Container(

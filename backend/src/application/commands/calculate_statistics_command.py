@@ -10,3 +10,4 @@ class CalculateStatisticsCommand(Command):
 
     user_id: uuid.UUID
     budget_id: uuid.UUID
+    transaction_id: uuid.UUID

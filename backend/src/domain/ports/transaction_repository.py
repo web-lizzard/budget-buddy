@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from uuid import UUID
 
 from domain.aggregates.transaction import Transaction
@@ -84,5 +85,21 @@ class TransactionRepository(ABC):
 
         Args:
             transactions: List of transactions to delete
+        """
+        pass
+
+    @abstractmethod
+    async def find_by_budget_id_and_date_range(
+        self, budget_id: UUID, user_id: UUID, end_date: datetime
+    ) -> list[Transaction]:
+        """Find transactions for a budget up to a specific date.
+
+        Args:
+            budget_id: ID of the budget.
+            user_id: ID of the user who owns the budget.
+            end_date: The end date (inclusive) for the transactions.
+
+        Returns:
+            List of transactions up to the end date.
         """
         pass

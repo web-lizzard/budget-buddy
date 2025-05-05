@@ -39,6 +39,7 @@ async def on_transaction_added_message(
             command = CalculateStatisticsCommand(
                 budget_id=uuid.UUID(event.budget_id),
                 user_id=uuid.UUID(event.user_id),
+                transaction_id=uuid.UUID(event.transaction_id),
             )
 
             await handler.handle(command)
