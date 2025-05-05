@@ -176,8 +176,9 @@ class TestEditTransactionCommandHandler:
             user_id=user_id,
             category_id=category_id,
             amount=200.0,
-            transaction_type=TransactionType.INCOME,
+            transaction_type="INCOME",  # Changed to string
             description="Updated transaction",
+            occurred_date=FixedClock().now(),  # Added occurred_date
         )
 
         # Setup event capture
@@ -235,8 +236,9 @@ class TestEditTransactionCommandHandler:
             user_id=user_id,
             category_id=category_id,
             amount=200.0,
-            transaction_type=TransactionType.INCOME,
+            transaction_type="INCOME",  # Changed to string
             description="Updated transaction",
+            occurred_date=FixedClock().now(),  # Added occurred_date
         )
 
         # Act & Assert
@@ -267,8 +269,9 @@ class TestEditTransactionCommandHandler:
             user_id=user_id,
             category_id=category_id,
             amount=200.0,
-            transaction_type=TransactionType.INCOME,
+            transaction_type="INCOME",  # Changed to string
             description="Updated transaction",
+            occurred_date=FixedClock().now(),  # Added occurred_date
         )
 
         # Act & Assert
@@ -301,8 +304,9 @@ class TestEditTransactionCommandHandler:
             user_id=user_id,
             category_id=nonexistent_category_id,  # This category doesn't exist
             amount=200.0,
-            transaction_type=TransactionType.INCOME,
+            transaction_type="INCOME",  # Changed to string
             description="Updated transaction",
+            occurred_date=FixedClock().now(),  # Added occurred_date
         )
 
         # Act & Assert
@@ -330,7 +334,7 @@ class TestEditTransactionCommandHandler:
             user_id=user_id,
             category_id=category_id,
             amount=150.0,
-            transaction_type=transaction.transaction_type,
+            transaction_type=str(transaction.transaction_type),
             description="Updated transaction with new occurred date",
             occurred_date=new_occurred_date,
         )

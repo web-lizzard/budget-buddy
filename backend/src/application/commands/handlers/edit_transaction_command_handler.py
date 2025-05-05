@@ -7,7 +7,7 @@ from domain.exceptions import CannotAddTransactionToDeactivatedBudgetError
 from domain.ports.budget_repository import BudgetRepository
 from domain.ports.clock import Clock
 from domain.ports.transaction_repository import TransactionRepository
-from domain.value_objects import Money
+from domain.value_objects import Money, TransactionType
 
 from application.commands.edit_transaction_command import EditTransactionCommand
 from application.commands.handlers.command_handler import CommandHandler
@@ -79,7 +79,10 @@ class EditTransactionCommandHandler(CommandHandler[EditTransactionCommand]):
                 if command.amount
                 else transaction.amount
             ),
-            transaction_type=(command.transaction_type or transaction.transaction_type),
+            transaction_type=(
+                self._get_transaction_type(command, transaction)
+                or transaction.transaction_type
+            ),
             description=(command.description or transaction.description),
             occurred_date=command.occurred_date or transaction.occurred_date,
         )
@@ -109,3 +112,11 @@ class EditTransactionCommandHandler(CommandHandler[EditTransactionCommand]):
 
         budget.get_category_by(command.category_id)
         return command.category_id
+
+    def _get_transaction_type(
+        self, command: EditTransactionCommand, transaction: Transaction
+    ) -> TransactionType:
+        if not command.transaction_type:
+            return transaction.transaction_type
+
+        return TransactionType(command.transaction_type)

@@ -11,8 +11,6 @@ from application.queries.get_transaction_by_id_query import GetTransactionByIdQu
 from application.queries.get_transactions_query import GetTransactionsQuery
 from application.queries.handlers.query_handler import QueryHandler
 from dependency_injector.wiring import Provide, inject
-from domain.value_objects.money import Money
-from domain.value_objects.transaction_type import TransactionType
 from fastapi import APIRouter, Depends, Query
 from fastapi import status as http_status
 from infrastructure.container.main_container import MainContainer
@@ -139,13 +137,10 @@ async def create_transaction(
     # user_id should come from payload or auth context
     user_id = DEFAULT_USER_ID
 
-    # Map payload enum string value to domain TransactionType enum
-    domain_transaction_type = TransactionType[payload.transaction_type.value]
-
     command = CreateTransactionCommand(
         category_id=payload.category_id,
         amount=payload.amount.amount,
-        transaction_type=domain_transaction_type,  # Use domain enum
+        transaction_type=payload.transaction_type,
         budget_id=budget_id,
         user_id=user_id,
         occurred_date=payload.occurred_date,
@@ -184,18 +179,15 @@ async def update_transaction(
     """
     user_id = DEFAULT_USER_ID
 
-    domain_transaction_type = TransactionType[payload.transaction_type.value]
-
-    money_amount = Money.mint(payload.amount.amount, payload.amount.currency)
-
     command = EditTransactionCommand(
         transaction_id=transaction_id,
         budget_id=budget_id,
         user_id=user_id,
         category_id=payload.category_id,
-        amount=money_amount,
-        transaction_type=domain_transaction_type,
+        amount=payload.amount.amount,
+        transaction_type=payload.transaction_type,
         description=payload.description,
+        occurred_date=payload.occurred_date,
     )
     await command_handler.handle(command)
 

@@ -4,7 +4,7 @@ from domain.factories.transaction_factory import TransactionFactory
 from domain.ports.budget_repository import BudgetRepository
 from domain.ports.clock import Clock
 from domain.ports.transaction_repository import TransactionRepository
-from domain.value_objects import Money
+from domain.value_objects import Money, TransactionType
 
 from application.commands import CreateTransactionCommand
 from application.commands.handlers.command_handler import CommandHandler
@@ -59,7 +59,7 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
         transaction = await transaction_factory.create_transaction(
             category_id=command.category_id,
             amount=amount,
-            transaction_type=command.transaction_type,
+            transaction_type=TransactionType(command.transaction_type),
             budget_id=command.budget_id,
             user_id=command.user_id,
             occurred_date=command.occurred_date or self._clock.now(),
