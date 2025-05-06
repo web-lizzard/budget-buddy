@@ -9,7 +9,11 @@ from domain.aggregates.budget import Budget
 from domain.aggregates.transaction import Transaction
 from domain.entities.category import Category
 from domain.exceptions import BudgetNotFoundError, TransactionOutsideBudgetPeriodError
-from domain.factories.transaction_factory import TransactionFactory
+from domain.factories.transaction_factory import (
+    CreateTransactionFactory,
+    TransactionCreateParameters,
+    TransactionFactory,
+)
 from domain.value_objects import (
     BudgetName,
     CategoryName,
@@ -100,7 +104,7 @@ def transaction_factory(
     budget_repository: InMemoryBudgetRepository,
 ) -> TransactionFactory:
     """Create a transaction factory with the test repository."""
-    return TransactionFactory(budget_repository)
+    return CreateTransactionFactory(budget_repository)
 
 
 class TestTransactionFactory:
@@ -116,7 +120,7 @@ class TestTransactionFactory:
         description: str,
     ):
         """Test creating a transaction successfully."""
-        transaction = await transaction_factory.create_transaction(
+        create_params = TransactionCreateParameters(
             category_id=category.id,
             amount=amount,
             transaction_type=TransactionType.EXPENSE,
@@ -125,6 +129,7 @@ class TestTransactionFactory:
             occurred_date=occurred_date,
             description=description,
         )
+        transaction = await transaction_factory.create(params=create_params)
 
         assert isinstance(transaction, Transaction)
         assert isinstance(transaction.id, UUID)
@@ -146,14 +151,16 @@ class TestTransactionFactory:
         occurred_date: datetime,
     ):
         """Test creating a transaction without description."""
-        transaction = await transaction_factory.create_transaction(
+        create_params = TransactionCreateParameters(
             category_id=category.id,
             amount=amount,
             transaction_type=TransactionType.EXPENSE,
             budget_id=budget_id,
             user_id=user_id,
             occurred_date=occurred_date,
+            description=None,
         )
+        transaction = await transaction_factory.create(params=create_params)
 
         assert isinstance(transaction, Transaction)
         assert transaction.description is None
@@ -169,16 +176,18 @@ class TestTransactionFactory:
     ):
         """Test creating a transaction with non-existent budget."""
         non_existent_budget_id = uuid4()
+        create_params = TransactionCreateParameters(
+            category_id=category.id,
+            amount=amount,
+            transaction_type=TransactionType.EXPENSE,
+            budget_id=non_existent_budget_id,
+            user_id=user_id,
+            occurred_date=occurred_date,
+            description="test",
+        )
 
         with pytest.raises(BudgetNotFoundError):
-            await transaction_factory.create_transaction(
-                category_id=category.id,
-                amount=amount,
-                transaction_type=TransactionType.EXPENSE,
-                budget_id=non_existent_budget_id,
-                user_id=user_id,
-                occurred_date=occurred_date,
-            )
+            await transaction_factory.create(params=create_params)
 
     @pytest.mark.asyncio
     async def test_create_transaction_wrong_user(
@@ -191,16 +200,18 @@ class TestTransactionFactory:
     ):
         """Test creating a transaction with wrong user ID."""
         wrong_user_id = uuid4()
+        create_params = TransactionCreateParameters(
+            category_id=category.id,
+            amount=amount,
+            transaction_type=TransactionType.EXPENSE,
+            budget_id=budget_id,
+            user_id=wrong_user_id,
+            occurred_date=occurred_date,
+            description="test",
+        )
 
         with pytest.raises(BudgetNotFoundError):
-            await transaction_factory.create_transaction(
-                category_id=category.id,
-                amount=amount,
-                transaction_type=TransactionType.EXPENSE,
-                budget_id=budget_id,
-                user_id=wrong_user_id,
-                occurred_date=occurred_date,
-            )
+            await transaction_factory.create(params=create_params)
 
     @pytest.mark.asyncio
     async def test_create_transaction_outside_budget_period(
@@ -213,16 +224,18 @@ class TestTransactionFactory:
     ):
         """Test creating a transaction with date outside budget period."""
         invalid_date = datetime(2025, 1, 1)  # After budget end date
+        create_params = TransactionCreateParameters(
+            category_id=category.id,
+            amount=amount,
+            transaction_type=TransactionType.EXPENSE,
+            budget_id=budget_id,
+            user_id=user_id,
+            occurred_date=invalid_date,
+            description="test",
+        )
 
         with pytest.raises(TransactionOutsideBudgetPeriodError):
-            await transaction_factory.create_transaction(
-                category_id=category.id,
-                amount=amount,
-                transaction_type=TransactionType.EXPENSE,
-                budget_id=budget_id,
-                user_id=user_id,
-                occurred_date=invalid_date,
-            )
+            await transaction_factory.create(params=create_params)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -239,13 +252,15 @@ class TestTransactionFactory:
         transaction_type: TransactionType,
     ):
         """Test creating transactions with different types."""
-        transaction = await transaction_factory.create_transaction(
+        create_params = TransactionCreateParameters(
             category_id=category.id,
             amount=amount,
             transaction_type=transaction_type,
             budget_id=budget_id,
             user_id=user_id,
             occurred_date=occurred_date,
+            description="test",
         )
+        transaction = await transaction_factory.create(params=create_params)
 
         assert transaction.transaction_type == transaction_type

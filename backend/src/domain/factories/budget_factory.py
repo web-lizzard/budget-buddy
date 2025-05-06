@@ -1,5 +1,7 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Generic, TypeVar
 from uuid import UUID, uuid4
 
 from domain.aggregates.budget import Budget
@@ -16,7 +18,36 @@ class CategoryInput:
     limit: Limit
 
 
-class BudgetFactory:
+@dataclass(frozen=True)
+class BudgetFactoryParams:
+    pass
+
+
+T = TypeVar("T", bound=BudgetFactoryParams)
+
+
+@dataclass(frozen=True)
+class BudgetCreateParameters(BudgetFactoryParams):
+    """Parameters for creating a Budget."""
+
+    user_id: UUID
+    total_limit: Limit
+    budget_strategy_input: BudgetStrategyInput
+    start_date: datetime
+    categories: list[CategoryInput]
+    name: BudgetName
+
+
+class BudgetFactory(ABC, Generic[T]):
+    """Abstract factory for creating Budget aggregates."""
+
+    @abstractmethod
+    async def create(self, params: T) -> Budget:
+        """Abstract method to create a budget."""
+        raise NotImplementedError
+
+
+class CreateBudgetFactory(BudgetFactory[BudgetCreateParameters]):
     """Factory for creating Budget aggregates."""
 
     def __init__(self, strategies: list[BudgetStrategy]):
@@ -28,48 +59,35 @@ class BudgetFactory:
         """
         self._strategies = strategies
 
-    async def create_budget(
-        self,
-        user_id: UUID,
-        total_limit: Limit,
-        budget_strategy_input: BudgetStrategyInput,
-        start_date: datetime,
-        categories: list[CategoryInput],
-        name: BudgetName,
-    ) -> Budget:
+    async def create(self, params: BudgetCreateParameters) -> Budget:
         """
-        Create a budget using the factory's strategy.
+        Create a budget using the factory's strategy based on provided parameters.
 
         Args:
-            user_id: User ID
-            total_limit: Total budget limit
-            budget_strategy_input: Strategy input parameters
-            start_date: Start date for the budget
-            categories: List of category inputs
-            name: Budget name
+            params: Budget creation parameters.
 
         Returns:
             A new Budget aggregate
         """
-
-        strategy = self._get_strategy(budget_strategy_input)
+        strategy = self._get_strategy(params.budget_strategy_input)
         # Calculate end date using strategy
         end_date = await strategy.calculate_budget_date(
-            budget_strategy_input=budget_strategy_input, start_date=start_date
+            budget_strategy_input=params.budget_strategy_input,
+            start_date=params.start_date,
         )
 
         # Create and return a new budget
         budget = Budget(
             id=uuid4(),
-            user_id=user_id,
-            total_limit=total_limit,
-            start_date=start_date,
+            user_id=params.user_id,
+            total_limit=params.total_limit,
+            start_date=params.start_date,
             end_date=end_date,
-            strategy_input=budget_strategy_input,
-            name=name,
+            strategy_input=params.budget_strategy_input,
+            name=params.name,
         )
 
-        for category_input in categories:
+        for category_input in params.categories:
             budget.add_category(
                 name=category_input.name,
                 limit=category_input.limit,

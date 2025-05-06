@@ -1,6 +1,10 @@
 from domain.aggregates.budget import Budget
 from domain.exceptions import CannotRenewDeactivatedBudgetError
-from domain.factories.budget_factory import BudgetFactory, CategoryInput
+from domain.factories.budget_factory import (
+    BudgetCreateParameters,
+    BudgetFactory,
+    CategoryInput,
+)
 
 
 class BudgetRenewalService:
@@ -36,7 +40,8 @@ class BudgetRenewalService:
             for category in budget.categories
         ]
 
-        new_budget = await self._budget_factory.create_budget(
+        # Create the parameters object
+        create_params = BudgetCreateParameters(
             user_id=budget.user_id,
             total_limit=budget.total_limit,
             budget_strategy_input=budget.strategy_input,
@@ -44,4 +49,8 @@ class BudgetRenewalService:
             categories=categories_data,
             name=budget.name,
         )
+
+        # Call the factory with the parameters object
+        new_budget = await self._budget_factory.create(params=create_params)
+
         return new_budget

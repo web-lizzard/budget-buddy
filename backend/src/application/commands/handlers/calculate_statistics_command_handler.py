@@ -1,10 +1,14 @@
+from domain.events.statistics import StatisticsCalculated
+from domain.factories.statistics_record_factory import (
+    StatisticsRecordCreateParameters,
+    StatisticsRecordFactory,
+)
+from domain.ports import StatisticsRepository
+from domain.ports.clock import Clock
+
 from application.commands import CalculateStatisticsCommand
 from application.commands.handlers.command_handler import CommandHandler
 from application.ports.uow import UnitOfWork
-from domain.events.statistics import StatisticsCalculated
-from domain.factories import StatisticsRecordFactory
-from domain.ports import StatisticsRepository
-from domain.ports.clock import Clock
 
 
 class CalculateStatisticsCommandHandler(CommandHandler[CalculateStatisticsCommand]):
@@ -39,12 +43,13 @@ class CalculateStatisticsCommandHandler(CommandHandler[CalculateStatisticsComman
         creates the StatisticsRecord using the factory, saves the result,
         and returns the StatisticsCalculated event.
         """
-
-        record = await self._statistics_record_factory.create_statistics_record(
-            command.user_id,
-            command.budget_id,
-            command.transaction_id,
+        create_params = StatisticsRecordCreateParameters(
+            user_id=command.user_id,
+            budget_id=command.budget_id,
+            transaction_id=command.transaction_id,
         )
+
+        record = await self._statistics_record_factory.create(params=create_params)
 
         await self._statistics_repository.save(record)
 
