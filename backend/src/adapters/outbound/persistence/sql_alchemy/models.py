@@ -8,8 +8,9 @@ from domain.value_objects.budget_strategy import (
     MonthlyBudgetStrategyInput,
     YearlyBudgetStrategyInput,
 )
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, text
+from sqlalchemy import DateTime
 from sqlalchemy import Enum as SQLAlchemyEnum
+from sqlalchemy import ForeignKey, Integer, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -316,6 +317,17 @@ class StatisticsRecordModel(Base):
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), nullable=False, index=True
+    )
+
+    # Link to the transaction that generated this record (optional)
+    transaction_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "transactions.id", ondelete="SET NULL"
+        ),  # Link to transaction, set NULL if transaction is deleted
+        nullable=True,
+        index=True,  # Index for faster lookups
+        unique=True,  # Assuming one stats record per transaction
     )
 
     # Composite mapping for current_balance - UPDATED

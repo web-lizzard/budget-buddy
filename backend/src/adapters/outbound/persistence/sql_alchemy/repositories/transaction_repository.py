@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import Sequence
 
 from domain.aggregates.transaction import Transaction
@@ -59,6 +60,26 @@ class SQLAlchemyTransactionRepository(TransactionRepository):
             .where(
                 TransactionModel.category_id == category_id,
                 TransactionModel.user_id == user_id,
+            )
+            .order_by(TransactionModel.occurred_date.desc())
+        )
+        result = await self._session.execute(stmt)
+        transaction_models = result.scalars().all()
+        return [map_transaction_model_to_domain(model) for model in transaction_models]
+
+    async def find_by_budget_id_and_date_range(
+        self, budget_id: uuid.UUID, user_id: uuid.UUID, end_date: datetime
+    ) -> list[Transaction]:
+        """Find transactions for a budget up to a specific date (inclusive)."""
+        stmt = (
+            select(TransactionModel)
+            .join(TransactionModel.category)
+            .join(CategoryModel.budget)
+            .where(
+                BudgetModel.id == budget_id,
+                TransactionModel.user_id == user_id,
+                BudgetModel.user_id == user_id,
+                TransactionModel.occurred_date <= end_date,
             )
             .order_by(TransactionModel.occurred_date.desc())
         )

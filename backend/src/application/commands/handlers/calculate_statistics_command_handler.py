@@ -1,7 +1,10 @@
 from domain.events.statistics import StatisticsCalculated
+from domain.factories.statistics_record_factory import (
+    StatisticsRecordCreateParameters,
+    StatisticsRecordFactory,
+)
 from domain.ports import BudgetRepository, StatisticsRepository, TransactionRepository
 from domain.ports.clock import Clock
-from domain.services.statistics_calculation_service import StatisticsCalculationService
 
 from application.commands import CalculateStatisticsCommand
 from application.commands.handlers.command_handler import CommandHandler
@@ -14,56 +17,59 @@ class CalculateStatisticsCommandHandler(CommandHandler[CalculateStatisticsComman
     def __init__(
         self,
         unit_of_work: UnitOfWork,
+        statistics_repository: StatisticsRepository,
+        statistics_record_factory: StatisticsRecordFactory,
+        clock: Clock,
         budget_repository: BudgetRepository,
         transaction_repository: TransactionRepository,
-        statistics_repository: StatisticsRepository,
-        statistics_calculation_service: StatisticsCalculationService,
-        clock: Clock,
     ):
         """
-        Initialize the command handler with dependencies.
+        Initializes the command handler with the necessary dependencies.
 
         Args:
-            unit_of_work: UnitOfWork for transaction management and event publishing
-            budget_repository: Repository for budget operations
-            transaction_repository: Repository for transaction operations
-            statistics_repository: Repository for statistics operations
-            clock: Clock for getting current time
+            unit_of_work (UnitOfWork): Manages transactions and event publishing.
+            statistics_repository (StatisticsRepository): Repository for performing statistics operations.
+            statistics_record_factory (StatisticsRecordFactory): Factory responsible for creating StatisticsRecord objects.
+            clock (Clock): Provides the current time.
+            budget_repository (BudgetRepository): Repository for managing budget data.
+            transaction_repository (TransactionRepository): Repository for managing transaction data.
         """
         super().__init__(unit_of_work)
+        self._statistics_repository = statistics_repository
         self._budget_repository = budget_repository
         self._transaction_repository = transaction_repository
-        self._statistics_repository = statistics_repository
-        self._statistics_calculation_service = statistics_calculation_service
+        self._statistics_record_factory = statistics_record_factory
         self._clock = clock
 
     async def _handle(
         self, command: CalculateStatisticsCommand
     ) -> StatisticsCalculated:
         """
-        Fetches budget and transactions, calculates statistics, saves the result,
+        Fetches budget and transactions, calculates statistics using the service,
+        creates the StatisticsRecord using the factory, saves the result,
         and returns the StatisticsCalculated event.
         """
         _, budget = await self._budget_repository.find_by(
             command.budget_id, command.user_id
         )
-
-        # Fetch transactions within the budget's date range
         transactions = await self._transaction_repository.find_by_budget_id(
             command.budget_id, command.user_id
         )
 
-        # Calculate statistics
-        statistics_record = self._statistics_calculation_service.calculate_statistics(
-            budget=budget, transactions=transactions
+        create_params = StatisticsRecordCreateParameters(
+            budget=budget,
+            transactions=transactions,
+            transaction_id=command.transaction_id,
         )
 
-        await self._statistics_repository.save(statistics_record)
+        record = await self._statistics_record_factory.create(params=create_params)
+
+        await self._statistics_repository.save(record)
 
         return StatisticsCalculated(
-            budget_id=budget.id,
-            user_id=command.user_id,
-            statistics_record_id=statistics_record.id,
-            calculated_at=self._clock.now(),
             occurred_on=self._clock.now(),
+            budget_id=command.budget_id,
+            user_id=command.user_id,
+            statistics_record_id=record.id,
+            calculated_at=record.creation_date,
         )

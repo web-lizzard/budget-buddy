@@ -130,3 +130,24 @@ class SQLAlchemyStatisticsRepository(StatisticsRepository):
         result = await self._session.execute(stmt)
         record_models = result.scalars().all()
         return [map_statistics_record_model_to_domain(model) for model in record_models]
+
+    async def find_by_transaction_id(
+        self, transaction_id: uuid.UUID, user_id: uuid.UUID
+    ) -> StatisticsRecord:
+        """Finds the statistics record linked to a specific transaction ID."""
+        stmt = (
+            select(StatisticsRecordModel)
+            .where(
+                StatisticsRecordModel.transaction_id == transaction_id,
+                StatisticsRecordModel.user_id == user_id,
+            )
+            .options(selectinload(StatisticsRecordModel.category_statistics))
+        )
+        result = await self._session.execute(stmt)
+        record_model = result.scalars().one_or_none()
+
+        if record_model is None:
+            raise StatisticsRecordNotFoundError(
+                f"Statistics record for transaction ID {transaction_id} not found"
+            )
+        return map_statistics_record_model_to_domain(record_model)

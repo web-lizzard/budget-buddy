@@ -16,6 +16,7 @@ from application.commands.handlers.create_transaction_command_handler import (
     CreateTransactionCommandHandler,
 )
 from domain.events.transaction import TransactionAdded
+from domain.factories.transaction_factory import CreateTransactionFactory
 from domain.value_objects import BudgetName, CategoryName, Limit, Money, TransactionType
 from domain.value_objects.budget_strategy import MonthlyBudgetStrategyInput
 
@@ -63,6 +64,9 @@ def _get_deps(user_id, budget_id, category_id):
             transaction_repository=transaction_repository,
             unit_of_work=unit_of_work,
             clock=clock,
+            transaction_factory=CreateTransactionFactory(
+                budget_repository=budget_repository
+            ),
         ),
         budget_repository,
         transaction_repository,
@@ -237,7 +241,7 @@ class TestCreateTransactionCommandHandler:
             category_id=category_id,
             user_id=user_id,
             amount=75.0,
-            transaction_type=TransactionType.EXPENSE,
+            transaction_type=TransactionType.EXPENSE.value,
             occurred_date=occurred_date,
             description=None,
         )

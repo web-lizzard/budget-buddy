@@ -57,7 +57,7 @@ Poniżej znajduje się lista głównych widoków oraz kluczowych modali/komponen
 *   **Główny cel:** Wyświetlenie pełnej listy transakcji dla danego budżetu z możliwością edycji i usuwania. (Realizuje częściowo US-008, US-009)
 *   **Kluczowe informacje do wyświetlenia:** Data transakcji, Opis, Kategoria, Kwota, Typ (Wydatek/Przychód).
 *   **Kluczowe komponenty widoku:**
-    *   Lista/Tabela Transakcji (`Shadcn Table` lub custom list): Wyświetla transakcje.
+    *   Tabela Transakcji (`Shadcn Table`): Wyświetla transakcje.
     *   Mechanizm Infinite Scroll: Automatyczne ładowanie kolejnych stron przy przewijaniu (Intersection Observer + Nuxt Query `useInfiniteQuery`).
     *   `Shadcn Spinner`: Wskaźnik ładowania kolejnych transakcji.
     *   Przyciski Akcji (`Shadcn Button`): "Edytuj transakcję", "Usuń transakcję" (przy każdej transakcji, uruchamia modal potwierdzający).
@@ -104,7 +104,7 @@ Poniżej znajduje się lista głównych widoków oraz kluczowych modali/komponen
 
 ---
 
-### Modal: Edycja Kategorii
+### Modal: Edycja/Dodanie Kategorii
 
 *   **Nazwa komponentu:** `EditCategoryModal`
 *   **Cel:** Zmiana nazwy i limitu istniejącej kategorii. (Realizuje US-005)

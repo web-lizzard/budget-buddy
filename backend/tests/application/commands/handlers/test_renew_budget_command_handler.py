@@ -17,7 +17,7 @@ from domain.aggregates.budget import Budget
 from domain.entities.category import Category
 from domain.events import BudgetRenewed
 from domain.exceptions import CannotRenewDeactivatedBudgetError
-from domain.factories.budget_factory import BudgetFactory
+from domain.factories.budget_factory import CreateBudgetFactory
 from domain.services.budget_renewal_service import BudgetRenewalService
 from domain.strategies.budget_strategy import (
     MonthlyBudgetStrategy,
@@ -86,7 +86,7 @@ def _get_deps(
     unit_of_work = InMemoryUnitOfWork(domain_publisher)
     clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
     strategies = [MonthlyBudgetStrategy(), YearlyBudgetStrategy()]
-    budget_factory = BudgetFactory(strategies=strategies)
+    budget_factory = CreateBudgetFactory(strategies=strategies)
     renewal_service = BudgetRenewalService(budget_factory)
 
     return (
@@ -208,7 +208,7 @@ class TestRenewBudgetCommandHandler:
 
         # Create a mock factory and service
         strategies = [MonthlyBudgetStrategy(), YearlyBudgetStrategy()]
-        mock_factory = BudgetFactory(strategies=strategies)
+        mock_factory = CreateBudgetFactory(strategies=strategies)
         mock_service = BudgetRenewalService(mock_factory)
 
         command_handler = RenewBudgetCommandHandler(

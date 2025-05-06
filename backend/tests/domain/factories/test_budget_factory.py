@@ -3,8 +3,11 @@ from datetime import datetime
 
 import pytest
 from domain.aggregates import Budget
-from domain.factories import BudgetFactory
-from domain.factories.budget_factory import CategoryInput
+from domain.factories.budget_factory import (
+    BudgetCreateParameters,
+    CategoryInput,
+    CreateBudgetFactory,
+)
 from domain.strategies.budget_strategy import create_strategy
 from domain.value_objects import (
     BudgetName,
@@ -31,7 +34,7 @@ class TestBudgetFactory:
     @pytest.fixture
     def budget_factory(self, monthly_strategy, yearly_strategy):
         """Fixture for a budget factory with both strategies."""
-        return BudgetFactory(strategies=[monthly_strategy, yearly_strategy])
+        return CreateBudgetFactory(strategies=[monthly_strategy, yearly_strategy])
 
     @pytest.mark.asyncio
     async def test_create_budget_with_monthly_strategy(self, budget_factory):
@@ -43,22 +46,23 @@ class TestBudgetFactory:
         start_date = datetime(2023, 5, 15)
         budget_name = BudgetName("Monthly Budget")
 
-        # Act
-        budget = await budget_factory.create_budget(
+        create_params = BudgetCreateParameters(
             user_id=user_id,
             total_limit=total_limit,
             budget_strategy_input=strategy_input,
             start_date=start_date,
-            categories=[],  # No categories
+            categories=[],
             name=budget_name,
         )
+
+        # Act
+        budget = await budget_factory.create(params=create_params)
 
         # Assert
         assert isinstance(budget, Budget)
         assert budget.user_id == user_id
         assert budget.total_limit == total_limit
         assert budget.start_date == start_date
-        # End date should be approximately one month later (14 June 23:59:59)
         expected_end_date = datetime(2023, 6, 14, 23, 59, 59)
         assert budget.end_date == expected_end_date
         assert budget.categories == []
@@ -74,22 +78,23 @@ class TestBudgetFactory:
         start_date = datetime(2023, 3, 15)
         budget_name = BudgetName("Yearly Budget")
 
-        # Act
-        budget = await budget_factory.create_budget(
+        create_params = BudgetCreateParameters(
             user_id=user_id,
             total_limit=total_limit,
             budget_strategy_input=strategy_input,
             start_date=start_date,
-            categories=[],  # No categories
+            categories=[],
             name=budget_name,
         )
+
+        # Act
+        budget = await budget_factory.create(params=create_params)
 
         # Assert
         assert isinstance(budget, Budget)
         assert budget.user_id == user_id
         assert budget.total_limit == total_limit
         assert budget.start_date == start_date
-        # Końcowa data powinna być rok później (14 marca 2024 23:59:59)
         expected_end_date = datetime(2024, 3, 14, 23, 59, 59)
         assert budget.end_date == expected_end_date
         assert budget.categories == []
@@ -105,7 +110,6 @@ class TestBudgetFactory:
         start_date = datetime(2023, 5, 1)
         budget_name = BudgetName("Categorized Budget")
 
-        # Create category inputs
         category_inputs = [
             CategoryInput(
                 name=CategoryName("Groceries"),
@@ -117,8 +121,7 @@ class TestBudgetFactory:
             ),
         ]
 
-        # Act
-        budget = await budget_factory.create_budget(
+        create_params = BudgetCreateParameters(
             user_id=user_id,
             total_limit=total_limit,
             budget_strategy_input=strategy_input,
@@ -126,6 +129,9 @@ class TestBudgetFactory:
             categories=category_inputs,
             name=budget_name,
         )
+
+        # Act
+        budget = await budget_factory.create(params=create_params)
 
         # Assert
         assert isinstance(budget, Budget)
@@ -150,8 +156,7 @@ class TestBudgetFactory:
         start_date = datetime(2023, 1, 1)
         budget_name = BudgetName("Strategy Test Budget")
 
-        # Act & Assert for monthly
-        monthly_budget = await budget_factory.create_budget(
+        monthly_params = BudgetCreateParameters(
             user_id=user_id,
             total_limit=total_limit,
             budget_strategy_input=monthly_input,
@@ -160,12 +165,7 @@ class TestBudgetFactory:
             name=budget_name,
         )
 
-        # End date should be end of January
-        assert monthly_budget.end_date == datetime(2023, 1, 31, 23, 59, 59)
-        assert monthly_budget.name == budget_name
-
-        # Act & Assert for yearly
-        yearly_budget = await budget_factory.create_budget(
+        yearly_params = BudgetCreateParameters(
             user_id=user_id,
             total_limit=total_limit,
             budget_strategy_input=yearly_input,
@@ -174,6 +174,14 @@ class TestBudgetFactory:
             name=budget_name,
         )
 
-        # End date should be end of the year
+        # Act & Assert for monthly
+        monthly_budget = await budget_factory.create(params=monthly_params)
+
+        assert monthly_budget.end_date == datetime(2023, 1, 31, 23, 59, 59)
+        assert monthly_budget.name == budget_name
+
+        # Act & Assert for yearly
+        yearly_budget = await budget_factory.create(params=yearly_params)
+
         assert yearly_budget.end_date == datetime(2023, 12, 31, 23, 59, 59)
         assert yearly_budget.name == budget_name

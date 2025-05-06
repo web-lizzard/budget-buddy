@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from domain.aggregates.transaction import Transaction
@@ -148,3 +149,37 @@ class InMemoryTransactionRepository(TransactionRepository):
         for transaction in transactions:
             if transaction.id in self._transactions:
                 del self._transactions[transaction.id]
+
+    async def find_by_budget_id_and_date_range(
+        self, budget_id: UUID, user_id: UUID, end_date: datetime
+    ) -> list[Transaction]:
+        """Find transactions by budget ID and date range.
+
+        Args:
+            budget_id: The ID of the budget
+            user_id: The ID of the user who owns the budget
+            end_date: The end date of the date range
+
+        Returns:
+            List of transactions
+        """
+        if budget_id not in self._budgets:
+            return []
+
+        budget_data = self._budgets[budget_id]
+        # Check if the budget data is a tuple (version, budget) or just a budget
+        if isinstance(budget_data, tuple):
+            _, budget = budget_data
+        else:
+            budget = budget_data
+
+        if budget.user_id != user_id:
+            return []
+
+        result = [
+            transaction
+            for transaction in self._transactions.values()
+            if transaction.user_id == user_id and transaction.date <= end_date
+        ]
+
+        return result

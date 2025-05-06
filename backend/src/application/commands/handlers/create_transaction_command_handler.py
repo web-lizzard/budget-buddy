@@ -1,6 +1,9 @@
 from domain.events.domain_event import DomainEvent
 from domain.events.transaction import TransactionAdded
-from domain.factories.transaction_factory import TransactionFactory
+from domain.factories.transaction_factory import (
+    TransactionCreateParameters,
+    TransactionFactory,
+)
 from domain.ports.budget_repository import BudgetRepository
 from domain.ports.clock import Clock
 from domain.ports.transaction_repository import TransactionRepository
@@ -18,6 +21,7 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
         self,
         budget_repository: BudgetRepository,
         transaction_repository: TransactionRepository,
+        transaction_factory: TransactionFactory,
         unit_of_work: UnitOfWork,
         clock: Clock,
     ):
@@ -33,6 +37,7 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
         super().__init__(unit_of_work)
         self._budget_repository = budget_repository
         self._transaction_repository = transaction_repository
+        self._transaction_factory = transaction_factory
         self._clock = clock
 
     async def _handle(self, command: CreateTransactionCommand) -> DomainEvent:
@@ -50,13 +55,11 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
             command.budget_id, command.user_id
         )
 
-        transaction_factory = TransactionFactory(self._budget_repository)
-
         # Convert amount to Money value object using budget's currency
         amount = Money.mint(command.amount, budget.currency)
 
-        # Create transaction (TransactionFactory or Budget should handle date/activation validation)
-        transaction = await transaction_factory.create_transaction(
+        # Prepare parameters for the factory
+        create_params = TransactionCreateParameters(
             category_id=command.category_id,
             amount=amount,
             transaction_type=TransactionType(command.transaction_type),
@@ -66,6 +69,9 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
             description=command.description,
         )
 
+        # Create transaction using the factory and parameters
+        transaction = await self._transaction_factory.create(params=create_params)
+
         # Save transaction to repository
         await self._transaction_repository.save(transaction)
 
@@ -73,7 +79,7 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
         return TransactionAdded(
             transaction_id=str(transaction.id),
             category_id=str(transaction.category_id),
-            amount=amount.amount,  # Use amount directly from Money object
+            amount=amount.amount,
             type=str(transaction.transaction_type),
             date=transaction.occurred_date,
             budget_id=str(command.budget_id),
