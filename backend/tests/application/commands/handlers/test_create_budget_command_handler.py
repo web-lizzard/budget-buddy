@@ -13,7 +13,7 @@ from application.commands.handlers.create_budget_command_handler import (
     CreateBudgetCommandHandler,
 )
 from domain.events import BudgetCreated
-from domain.factories.budget_factory import BudgetFactory
+from domain.factories.budget_factory import CreateBudgetFactory
 from domain.strategies.budget_strategy import (
     MonthlyBudgetStrategy,
     YearlyBudgetStrategy,
@@ -42,7 +42,7 @@ def _get_deps(
     unit_of_work = InMemoryUnitOfWork(domain_publisher)
     return (
         CreateBudgetCommandHandler(
-            budget_factory=BudgetFactory(
+            budget_factory=CreateBudgetFactory(
                 strategies=[MonthlyBudgetStrategy(), YearlyBudgetStrategy()]
             ),
             budget_repository=repository,

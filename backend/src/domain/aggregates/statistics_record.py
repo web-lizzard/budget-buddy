@@ -44,3 +44,9 @@ class StatisticsRecord:
         Sets the ID for the statistics record.
         """
         self.id = id
+
+    def set_creation_date(self, creation_date: datetime) -> None:
+        """
+        Sets the creation date for the statistics record.
+        """
+        self.creation_date = creation_date

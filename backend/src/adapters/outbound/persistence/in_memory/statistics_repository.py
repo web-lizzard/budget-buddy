@@ -84,3 +84,21 @@ class InMemoryStatisticsRepository(StatisticsRepository):
             if record.budget_id == budget_id
             and start_date <= record.creation_date.date() <= end_date
         ]
+
+    async def find_by_transaction_id(
+        self, transaction_id: uuid.UUID, user_id: uuid.UUID
+    ) -> StatisticsRecord:
+        """Finds a statistics record by its transaction ID for a specific user."""
+        record = next(
+            (
+                record
+                for record in self._records.values()
+                if record.transaction_id == transaction_id
+            ),
+            None,
+        )
+        if record is None:
+            raise StatisticsRecordNotFoundError(
+                f"Statistics record with transaction ID {transaction_id} not found for user {user_id}"
+            )
+        return record

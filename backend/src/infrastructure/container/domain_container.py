@@ -1,9 +1,11 @@
 from adapters.outbound.clock.time_aware_clock import TimeAwareClock
 from dependency_injector import containers, providers
-from domain.factories import StatisticsRecordFactory
 from domain.factories.budget_factory import BudgetFactory
-from domain.factories.statistics_record_update_factory import (
-    StatisticsRecordUpdateFactory,
+from domain.factories.statistics_record_factory import (
+    CreateNewStatisticsRecordFactory,
+    ReproduceStatisticsRecordFactory,
+    StatisticsRecordCreateParameters,
+    StatisticsRecordReproduceParameters,
 )
 from domain.ports.clock import Clock
 from domain.services import BudgetDeactivationService
@@ -15,6 +17,7 @@ from domain.strategies.budget_strategy.monthly_budget_strategy import (
 from domain.strategies.budget_strategy.yearly_budget_strategy import (
     YearlyBudgetStrategy,
 )
+
 from infrastructure.container.persistence_container import PersistenceContainer
 
 
@@ -53,21 +56,20 @@ class DomainContainer(containers.DeclarativeContainer):
         providers.Factory(StatisticsCalculationService, clock=clock)
     )
 
-    statistics_record_update_factory: providers.Factory[
-        StatisticsRecordUpdateFactory
-    ] = providers.Factory(
-        StatisticsRecordUpdateFactory,
-        statistics_calculation_service=statistics_calculation_service,
-        transaction_repository=persistence_container.transaction_repository,
-        budget_repository=persistence_container.budget_repository,
-        clock=clock,
+    statistics_factories = providers.Dict(
+        {
+            StatisticsRecordCreateParameters: providers.Factory(
+                CreateNewStatisticsRecordFactory,
+                statistics_calculation_service=statistics_calculation_service,
+            ),
+            StatisticsRecordReproduceParameters: providers.Factory(
+                ReproduceStatisticsRecordFactory,
+                statistics_calculation_service=statistics_calculation_service,
+            ),
+        }
     )
 
-    statistics_record_factory: providers.Factory[StatisticsRecordFactory] = (
-        providers.Factory(
-            StatisticsRecordFactory,
-            statistics_calculation_service=statistics_calculation_service,
-            transaction_repository=persistence_container.transaction_repository,
-            budget_repository=persistence_container.budget_repository,
-        )
+    get_statistics_record_factory = providers.Callable(
+        lambda params, factories: factories[params],
+        factories=statistics_factories,
     )

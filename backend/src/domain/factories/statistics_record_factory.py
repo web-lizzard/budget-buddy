@@ -1,11 +1,12 @@
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Generic, TypeVar
 
+from domain.aggregates.budget import Budget
 from domain.aggregates.statistics_record import StatisticsRecord
-from domain.ports.budget_repository import BudgetRepository
-from domain.ports.transaction_repository import TransactionRepository
+from domain.aggregates.transaction import Transaction
 from domain.services.statistics_calculation_service import StatisticsCalculationService
 
 
@@ -20,9 +21,19 @@ T = TypeVar("T", bound=StatisticsRecordFactoryParams)
 class StatisticsRecordCreateParameters(StatisticsRecordFactoryParams):
     """Parameters for creating a StatisticsRecord."""
 
-    user_id: uuid.UUID
-    budget_id: uuid.UUID
+    budget: Budget
+    transactions: list[Transaction]
     transaction_id: uuid.UUID
+
+
+@dataclass(frozen=True)
+class StatisticsRecordReproduceParameters(StatisticsRecordFactoryParams):
+    """Parameters for reproducing a StatisticsRecord."""
+
+    budget: Budget
+    transactions: list[Transaction]
+    occurred_date: datetime
+    record: StatisticsRecord
 
 
 class StatisticsRecordFactory(ABC, Generic[T]):
@@ -37,27 +48,21 @@ class StatisticsRecordFactory(ABC, Generic[T]):
 class CreateNewStatisticsRecordFactory(
     StatisticsRecordFactory[StatisticsRecordCreateParameters]
 ):
-    """Factory for creating StatisticsRecord domain objects.
+    """Factory for creating instances of StatisticsRecord domain objects.
 
-    This factory is responsible for creating instances of StatisticsRecord
-    by utilizing the provided services and repositories to calculate statistics
-    based on the user's budget and transactions.
+    This factory is responsible for creating StatisticsRecord objects
+    by leveraging the provided services to calculate statistics based
+    on the user's budget and transactions.
 
     Attributes:
-        statistics_calculation_service: Service for calculating statistics.
-        transaction_repository: Repository for transaction operations.
-        budget_repository: Repository for budget operations.
+        statistics_calculation_service: Service used for calculating statistics.
     """
 
     def __init__(
         self,
         statistics_calculation_service: StatisticsCalculationService,
-        transaction_repository: TransactionRepository,
-        budget_repository: BudgetRepository,
     ):
         self._statistics_calculation_service = statistics_calculation_service
-        self._transaction_repository = transaction_repository
-        self._budget_repository = budget_repository
 
     async def create(
         self, params: StatisticsRecordCreateParameters
@@ -71,16 +76,41 @@ class CreateNewStatisticsRecordFactory(
         Returns:
             A new StatisticsRecord object containing calculated statistics.
         """
-        _, budget = await self._budget_repository.find_by(
-            params.budget_id, params.user_id
-        )
-        transactions = await self._transaction_repository.find_by_budget_id(
-            params.budget_id, params.user_id
-        )
         record = self._statistics_calculation_service.calculate_statistics(
-            budget, transactions
+            params.budget, params.transactions
         )
-
         record.set_transaction_id(params.transaction_id)
 
+        return record
+
+
+class ReproduceStatisticsRecordFactory(
+    StatisticsRecordFactory[StatisticsRecordReproduceParameters]
+):
+    """Factory for reproducing a StatisticsRecord domain objects.
+
+    This factory is responsible for reproducing StatisticsRecord objects
+    by leveraging the provided services to calculate statistics based
+    on the user's budget and transactions.
+
+    Attributes:
+    """
+
+    def __init__(
+        self,
+        statistics_calculation_service: StatisticsCalculationService,
+    ):
+        self._statistics_calculation_service = statistics_calculation_service
+
+    async def create(
+        self, params: StatisticsRecordReproduceParameters
+    ) -> StatisticsRecord:
+        """
+        Creates a StatisticsRecord instance based on provided parameters.
+        """
+        record = self._statistics_calculation_service.calculate_statistics(
+            params.budget, params.transactions
+        )
+        record.set_creation_date(params.occurred_date)
+        record.set_id(params.record.id)
         return record

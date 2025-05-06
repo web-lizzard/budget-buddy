@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime  # Removed timedelta, date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Sequence
@@ -16,7 +17,10 @@ from domain.value_objects.transaction_type import TransactionType
 class StatisticsCalculationService:
     """Calculates statistical data based on transactions for a budget."""
 
-    def __init__(self, clock: Clock) -> None:
+    def __init__(
+        self,
+        clock: Clock,
+    ) -> None:
         self._clock = clock
 
     def calculate_statistics(
@@ -109,6 +113,7 @@ class StatisticsCalculationService:
 
         # --- Create Final Statistics Record ---
         stats_record = StatisticsRecord(
+            id=uuid.uuid4(),
             user_id=budget.user_id,
             budget_id=budget.id,
             current_balance=overall_current_balance,

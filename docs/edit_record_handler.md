@@ -45,7 +45,7 @@ Poniższe kroki należy wykonać, aby dokończyć implementację funkcjonalnośc
     *   **Plik do utworzenia:** `backend/src/application/commands/handlers/recalculate_statistics_after_update_command_handler.py`
     *   **Zadanie:**
         *   Zdefiniować klasę `RecalculateStatisticsAfterUpdateCommandHandler(CommandHandler[RecalculateStatisticsAfterUpdateCommand])`.
-        *   Wstrzyknąć zależności w `__init__`: `UnitOfWork`, `BudgetRepository`, `TransactionRepository`, `StatisticsRepository`, `StatisticsCalculationService`, `StatisticsRecordFactory`, `Clock`.
+        *   Wstrzyknąć zależności w `__init__`: `UnitOfWork`, `BudgetRepository`, `TransactionRepository`, `StatisticsRepository`, `StatisticsRecordFactory`, `Clock`.
         *   Zaimplementować metodę `async def _handle(self, command: RecalculateStatisticsAfterUpdateCommand)`:
             *   Pobrać **konkretny** rekord statystyk do aktualizacji używając `_statistics_repository.find_by_transaction_id(command.transaction_id, command.user_id)`.
             *   Pobrać budżet używając `_budget_repository.find_by(command.budget_id, command.user_id)`.

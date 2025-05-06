@@ -6,7 +6,7 @@ from adapters.outbound.clock.fixed_clock import FixedClock
 from domain.aggregates.budget import Budget
 from domain.entities.category import Category
 from domain.exceptions import CannotRenewDeactivatedBudgetError
-from domain.factories import BudgetFactory
+from domain.factories.budget_factory import CreateBudgetFactory
 from domain.services.budget_renewal_service import BudgetRenewalService
 from domain.strategies.budget_strategy import (
     MonthlyBudgetStrategy,
@@ -64,7 +64,7 @@ def user_id() -> uuid.UUID:
 def renewal_service() -> BudgetRenewalService:
     """Return a BudgetRenewalService instance for testing."""
     # Create a BudgetFactory with real strategies
-    factory = BudgetFactory(
+    factory = CreateBudgetFactory(
         strategies=[MonthlyBudgetStrategy(), YearlyBudgetStrategy()]
     )
     return BudgetRenewalService(budget_factory=factory)

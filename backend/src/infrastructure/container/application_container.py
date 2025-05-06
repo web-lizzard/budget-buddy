@@ -55,11 +55,17 @@ from application.commands.handlers.edit_category_command_handler import (
 from application.commands.handlers.edit_transaction_command_handler import (
     EditTransactionCommandHandler,
 )
+from application.commands.handlers.recalculate_statistics_after_update_command_handler import (
+    RecalculateStatisticsAfterUpdateCommandHandler,
+)
 from application.commands.handlers.remove_category_command_handler import (
     RemoveCategoryCommandHandler,
 )
 from application.commands.handlers.renew_budget_command_handler import (
     RenewBudgetCommandHandler,
+)
+from application.commands.recalculate_statistics_after_update_command import (
+    RecalculateStatisticsAfterUpdateCommand,
 )
 from application.queries import (
     GetBudgetByIdQuery,
@@ -71,6 +77,10 @@ from application.queries import (
     GetTransactionsQuery,
 )
 from dependency_injector import containers, providers
+from domain.factories.statistics_record_factory import (
+    StatisticsRecordCreateParameters,
+    StatisticsRecordReproduceParameters,
+)
 from domain.ports.budget_repository import BudgetRepository
 from domain.ports.outbound.statistics_repository import StatisticsRepository
 from domain.ports.transaction_repository import TransactionRepository
@@ -232,7 +242,26 @@ class ApplicationContainer(containers.DeclarativeContainer):
                     StatisticsRepository
                 ),
                 clock=domain_container.clock,
-                statistics_calculation_service=domain_container.statistics_calculation_service,
+                statistics_record_factory=domain_container.provided.get_statistics_record_factory.call(
+                    StatisticsRecordCreateParameters
+                ),
+            ),
+            RecalculateStatisticsAfterUpdateCommand: providers.Factory(
+                RecalculateStatisticsAfterUpdateCommandHandler,
+                unit_of_work=persistence_container.uow,
+                budget_repository=persistence_container.provided.get_repository.call(
+                    BudgetRepository
+                ),
+                transaction_repository=persistence_container.provided.get_repository.call(
+                    TransactionRepository
+                ),
+                statistics_repository=persistence_container.provided.get_repository.call(
+                    StatisticsRepository
+                ),
+                clock=domain_container.clock,
+                statistics_record_factory=domain_container.provided.get_statistics_record_factory.call(
+                    StatisticsRecordReproduceParameters
+                ),
             ),
         }
     )

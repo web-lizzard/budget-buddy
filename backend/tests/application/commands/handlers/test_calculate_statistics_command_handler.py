@@ -19,6 +19,10 @@ from domain.aggregates.budget import Budget
 from domain.aggregates.transaction import Transaction
 from domain.entities.category import Category
 from domain.events.statistics import StatisticsCalculated
+from domain.factories.statistics_record_factory import (
+    CreateNewStatisticsRecordFactory,
+    StatisticsRecordFactory,
+)
 from domain.services.statistics_calculation_service import StatisticsCalculationService
 from domain.value_objects import (
     CategoryName,
@@ -165,13 +169,18 @@ def _get_deps(
     uow = InMemoryUnitOfWork(event_publisher=publisher)
     clock = FixedClock(datetime(2024, 1, 15, 12, 0, 0))
     statistics_calculation_service = StatisticsCalculationService(clock=clock)
+    statistics_record_factory: StatisticsRecordFactory = (
+        CreateNewStatisticsRecordFactory(
+            statistics_calculation_service=statistics_calculation_service
+        )
+    )
     handler = CalculateStatisticsCommandHandler(
         unit_of_work=uow,
         budget_repository=budget_repo,
         transaction_repository=tx_repo,
         statistics_repository=stats_repo,
         clock=clock,
-        statistics_calculation_service=statistics_calculation_service,
+        statistics_record_factory=statistics_record_factory,
     )
     return handler, uow, stats_repo, publisher, budget_repo, tx_repo
 
@@ -213,7 +222,15 @@ class TestCalculateStatisticsCommandHandler:
             user_id, test_budget, test_transactions
         )
 
-        command = CalculateStatisticsCommand(user_id=user_id, budget_id=budget_id)
+        # Provide the transaction_id (using the last transaction in the list for this test)
+        last_transaction_id = (
+            test_transactions[-1].id
+            if test_transactions
+            else uuid.uuid4()  # Generate a dummy ID if no transactions exist
+        )
+        command = CalculateStatisticsCommand(
+            user_id=user_id, budget_id=budget_id, transaction_id=last_transaction_id
+        )
         captured_events = []
 
         def event_subscriber(event):
@@ -273,7 +290,11 @@ class TestCalculateStatisticsCommandHandler:
             user_id, test_budget, None
         )
 
-        command = CalculateStatisticsCommand(user_id=user_id, budget_id=budget_id)
+        # Provide the transaction_id (using a generated UUID for this test case)
+        dummy_transaction_id = uuid.uuid4()
+        command = CalculateStatisticsCommand(
+            user_id=user_id, budget_id=budget_id, transaction_id=dummy_transaction_id
+        )
         captured_events = []
 
         def event_subscriber(event):

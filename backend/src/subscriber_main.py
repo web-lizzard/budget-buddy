@@ -12,6 +12,9 @@ from adapters.inbound.subscribers.budget_created_subscriber import (
 from adapters.inbound.subscribers.transaction_added_subscriber import (
     register_transaction_added_subscriber,
 )
+from adapters.inbound.subscribers.transaction_updated_subscriber import (
+    register_transaction_updated_subscriber,
+)
 from aio_pika.abc import AbstractRobustConnection
 from infrastructure.container.main_container import MainContainer
 from infrastructure.settings import get_settings
@@ -65,6 +68,12 @@ async def main() -> None:
             channel, exchange
         )
         await transaction_subscriber()
+
+        # Transaction updated subscriber
+        transaction_updated_subscriber = register_transaction_updated_subscriber(
+            channel, exchange
+        )
+        await transaction_updated_subscriber()
 
         # Budget created subscriber
         budget_subscriber = register_budget_created_subscriber(channel, exchange)
