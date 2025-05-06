@@ -3,7 +3,6 @@ import { useFieldArray, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import type { DateValue } from '@internationalized/date';
 
-import { getLocalTimeZone } from '@internationalized/date';
 
 import { useBudgetStore } from '@/stores/budgetStore';
 import { budgetFormSchema, type BudgetFormInput } from '@/schemas/createBudgetSchemas';
@@ -54,7 +53,7 @@ export function useCreateBudgetForm() {
         const payload: CreateBudgetRequestPayload = {
             name: values.name,
             total_limit: { amount: totalLimitAmount, currency: values.currency },
-            start_date:  values.startDate.toDate(getLocalTimeZone()),
+            start_date:  values.startDate,
             categories: mappedCategories,
             strategy: {
                 budget_strategy_type: values.strategyType,

@@ -12,7 +12,7 @@ import TransactionList from '@/components/TransactionList.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 import AddEditTransactionModal from '@/components/transaction/AddEditTransactionModal.vue';
 import { toast } from "vue-sonner";
-import Skeleton from '~/components/ui/Skeleton.vue';
+import {Skeleton} from '@/components/ui/skeleton';
 import { useTransactionsViewModel } from '~/composables/useTransactionsViewModel';
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -66,7 +66,10 @@ const transactionToDeleteId = ref<string | null>(null);
 const isEditModalOpen = ref(false);
 const transactionToEdit = ref<Transaction | null>(null);
 
-const { transactionViewModels } = useTransactionsViewModel(transactionsData.value?.items || [], budgetData.value);
+const { transactionViewModels } = useTransactionsViewModel(
+  transactionsData,
+  budgetData
+);
 
 const originalTransactionToEdit = computed(() => {
   if (!transactionToEdit.value?.id) return null;

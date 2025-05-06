@@ -57,6 +57,7 @@ def _get_deps(user_id, budget_id, category_id):
     transaction_repository = InMemoryTransactionRepository(transactions={})
     unit_of_work = InMemoryUnitOfWork(domain_publisher)
     clock = FixedClock(datetime(2023, 1, 1, 12, 0, 0))
+    transaction_factory = CreateTransactionFactory()
 
     return (
         CreateTransactionCommandHandler(
@@ -64,9 +65,7 @@ def _get_deps(user_id, budget_id, category_id):
             transaction_repository=transaction_repository,
             unit_of_work=unit_of_work,
             clock=clock,
-            transaction_factory=CreateTransactionFactory(
-                budget_repository=budget_repository
-            ),
+            transaction_factory=transaction_factory,
         ),
         budget_repository,
         transaction_repository,
@@ -104,7 +103,7 @@ class TestCreateTransactionCommandHandler:
             category_id=category_id,
             user_id=user_id,
             amount=50.0,
-            transaction_type=TransactionType.EXPENSE,
+            transaction_type=str(TransactionType.EXPENSE),
             occurred_date=datetime(2023, 5, 1),
             description="Groceries",
         )
@@ -157,7 +156,7 @@ class TestCreateTransactionCommandHandler:
             (
                 100.0,
                 "USD",
-                TransactionType.INCOME,
+                str(TransactionType.INCOME),
                 datetime(2023, 5, 20),
                 "Salary",
                 "Salary",
@@ -215,7 +214,7 @@ class TestCreateTransactionCommandHandler:
         assert transaction.user_id == user_id
         assert transaction.category_id == category_id
         assert transaction.amount.amount == Money.mint(amount, currency).amount
-        assert transaction.transaction_type == transaction_type
+        assert str(transaction.transaction_type) == transaction_type
         assert transaction.occurred_date == occurred_date
         assert transaction.description == expected_description
 
@@ -226,7 +225,7 @@ class TestCreateTransactionCommandHandler:
         assert event.transaction_id == str(transaction_id)
         assert event.category_id == str(category_id)
         assert event.amount == Money.mint(amount, currency).amount
-        assert event.type == str(transaction_type)
+        assert event.type == transaction_type
         assert event.date == occurred_date
 
     @pytest.mark.asyncio
@@ -241,7 +240,7 @@ class TestCreateTransactionCommandHandler:
             category_id=category_id,
             user_id=user_id,
             amount=75.0,
-            transaction_type=TransactionType.EXPENSE.value,
+            transaction_type=str(TransactionType.EXPENSE),
             occurred_date=occurred_date,
             description=None,
         )

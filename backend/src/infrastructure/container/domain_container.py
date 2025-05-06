@@ -1,11 +1,15 @@
 from adapters.outbound.clock.time_aware_clock import TimeAwareClock
 from dependency_injector import containers, providers
-from domain.factories.budget_factory import BudgetFactory
+from domain.factories.budget_factory import BudgetCreateParameters, CreateBudgetFactory
 from domain.factories.statistics_record_factory import (
     CreateNewStatisticsRecordFactory,
     ReproduceStatisticsRecordFactory,
     StatisticsRecordCreateParameters,
     StatisticsRecordReproduceParameters,
+)
+from domain.factories.transaction_factory import (
+    CreateTransactionFactory,
+    TransactionCreateParameters,
 )
 from domain.ports.clock import Clock
 from domain.services import BudgetDeactivationService
@@ -17,7 +21,6 @@ from domain.strategies.budget_strategy.monthly_budget_strategy import (
 from domain.strategies.budget_strategy.yearly_budget_strategy import (
     YearlyBudgetStrategy,
 )
-
 from infrastructure.container.persistence_container import PersistenceContainer
 
 
@@ -35,9 +38,30 @@ class DomainContainer(containers.DeclarativeContainer):
 
     clock: providers.Singleton[Clock] = providers.Singleton(TimeAwareClock)
 
-    budget_factory: providers.Factory[BudgetFactory] = providers.Factory(
-        BudgetFactory,
-        strategies=strategies,
+    budget_factories = providers.Dict(
+        {
+            BudgetCreateParameters: providers.Factory(
+                CreateBudgetFactory, strategies=strategies
+            ),
+        }
+    )
+
+    get_budget_factory = providers.Callable(
+        lambda params_type, factories: factories[params_type],
+        factories=budget_factories,
+    )
+
+    transaction_factories = providers.Dict(
+        {
+            TransactionCreateParameters: providers.Factory(
+                CreateTransactionFactory,
+            ),
+        }
+    )
+
+    get_transaction_factory = providers.Callable(
+        lambda params_type, factories: factories[params_type],
+        factories=transaction_factories,
     )
 
     budget_deactivation_service: providers.Factory[BudgetDeactivationService] = (
@@ -49,7 +73,7 @@ class DomainContainer(containers.DeclarativeContainer):
 
     budget_renewal_service: providers.Factory[BudgetRenewalService] = providers.Factory(
         BudgetRenewalService,
-        budget_factory=budget_factory,
+        budget_factory=get_budget_factory(BudgetCreateParameters),
     )
 
     statistics_calculation_service: providers.Factory[StatisticsCalculationService] = (

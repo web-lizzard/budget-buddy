@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useBudgetStore } from '@/stores/budgetStore';
 import type { BudgetFilterValue, BudgetSortOption } from '@/types/budget';
@@ -32,12 +32,6 @@ const {
 // State for controlling the modal visibility
 const isModalOpen = ref(false);
 
-// Fetch budgets on mount
-onMounted(() => {
-  if (budgets.value.length === 0) {
-    budgetStore.fetchBudgets();
-  }
-});
 
 // Event Handlers
 function handleFilterChange(newFilter: BudgetFilterValue) { // Use imported type

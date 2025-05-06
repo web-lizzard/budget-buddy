@@ -1,3 +1,6 @@
+from application.commands import CreateTransactionCommand
+from application.commands.handlers.command_handler import CommandHandler
+from application.ports.uow import UnitOfWork
 from domain.events.domain_event import DomainEvent
 from domain.events.transaction import TransactionAdded
 from domain.factories.transaction_factory import (
@@ -7,11 +10,7 @@ from domain.factories.transaction_factory import (
 from domain.ports.budget_repository import BudgetRepository
 from domain.ports.clock import Clock
 from domain.ports.transaction_repository import TransactionRepository
-from domain.value_objects import Money, TransactionType
-
-from application.commands import CreateTransactionCommand
-from application.commands.handlers.command_handler import CommandHandler
-from application.ports.uow import UnitOfWork
+from domain.value_objects import TransactionType
 
 
 class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
@@ -31,6 +30,7 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
         Args:
             budget_repository: Repository for budget operations
             transaction_repository: Repository for transaction operations
+            transaction_factory: Factory for creating transactions
             unit_of_work: UnitOfWork for transaction management and event publishing
             clock: Clock for getting current time
         """
@@ -55,16 +55,15 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
             command.budget_id, command.user_id
         )
 
-        # Convert amount to Money value object using budget's currency
-        amount = Money.mint(command.amount, budget.currency)
+        # Get the category from the budget
+        category = budget.get_category_by(command.category_id)
 
         # Prepare parameters for the factory
         create_params = TransactionCreateParameters(
-            category_id=command.category_id,
-            amount=amount,
+            budget=budget,
+            category=category,
+            amount=command.amount,
             transaction_type=TransactionType(command.transaction_type),
-            budget_id=command.budget_id,
-            user_id=command.user_id,
             occurred_date=command.occurred_date or self._clock.now(),
             description=command.description,
         )
@@ -79,7 +78,7 @@ class CreateTransactionCommandHandler(CommandHandler[CreateTransactionCommand]):
         return TransactionAdded(
             transaction_id=str(transaction.id),
             category_id=str(transaction.category_id),
-            amount=amount.amount,
+            amount=transaction.amount.amount,
             type=str(transaction.transaction_type),
             date=transaction.occurred_date,
             budget_id=str(command.budget_id),

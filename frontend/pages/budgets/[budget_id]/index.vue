@@ -69,7 +69,7 @@ const { data: statisticsData, pending: pendingStats, refresh: refreshStats } = u
   },
 )
 
-const { transactionViewModels, categoryMap } = useTransactionsViewModel(recentTransactions.value || [], budgetData.value);
+const { transactionViewModels, categoryMap } = useTransactionsViewModel(recentTransactions, budgetData);
 
 
 const statsTimestamp = computed(() => {
@@ -201,10 +201,12 @@ const handleCategorySaved = () => {
 <template>
   <div class="container mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4">Budget Detail</h1>
+
     <div v-if="error">
       <p class="text-red-500">Error: {{ error.message }}</p>
       <button class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" @click="refreshBudgetData()">Try Again</button>
     </div>
+
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div class="lg:col-span-2 space-y-4">

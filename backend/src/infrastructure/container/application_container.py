@@ -77,10 +77,12 @@ from application.queries import (
     GetTransactionsQuery,
 )
 from dependency_injector import containers, providers
+from domain.factories.budget_factory import BudgetCreateParameters
 from domain.factories.statistics_record_factory import (
     StatisticsRecordCreateParameters,
     StatisticsRecordReproduceParameters,
 )
+from domain.factories.transaction_factory import TransactionCreateParameters
 from domain.ports.budget_repository import BudgetRepository
 from domain.ports.outbound.statistics_repository import StatisticsRepository
 from domain.ports.transaction_repository import TransactionRepository
@@ -105,7 +107,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
         DomainContainer
     )
 
-    # Query Handlers - korzystają z sesji query_session
     query_handlers = providers.Dict(
         {
             GetBudgetByIdQuery: providers.Factory(
@@ -139,7 +140,6 @@ class ApplicationContainer(containers.DeclarativeContainer):
         }
     )
 
-    # Command Handlers - korzystają z sesji command_session poprzez repositories
     command_handlers = providers.Dict(
         {
             CreateBudgetCommand: providers.Factory(
@@ -147,7 +147,9 @@ class ApplicationContainer(containers.DeclarativeContainer):
                 budget_repository=persistence_container.provided.get_repository.call(
                     BudgetRepository
                 ),
-                budget_factory=domain_container.budget_factory,
+                budget_factory=domain_container.provided.get_budget_factory.call(
+                    BudgetCreateParameters
+                ),
                 unit_of_work=persistence_container.uow,
                 clock=domain_container.clock,
             ),
@@ -179,6 +181,9 @@ class ApplicationContainer(containers.DeclarativeContainer):
                 ),
                 unit_of_work=persistence_container.uow,
                 clock=domain_container.clock,
+                transaction_factory=domain_container.provided.get_transaction_factory.call(
+                    TransactionCreateParameters
+                ),
             ),
             EditTransactionCommand: providers.Factory(
                 EditTransactionCommandHandler,
