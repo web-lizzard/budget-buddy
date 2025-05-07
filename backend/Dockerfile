@@ -63,4 +63,4 @@ WORKDIR /app
 COPY backend/src ./src
 COPY backend/alembic.ini .
 # Run celery worker for budget_buddy_tasks
-CMD ["celery", "-A", "src.celery_app.app", "flower", "--port=5555"]
+CMD ["celery", "-A", "src.celery_app.app", "worker", "--loglevel=info", "--queues=budget_renewal_queue"]
