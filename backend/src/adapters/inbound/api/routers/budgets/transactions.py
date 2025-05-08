@@ -15,15 +15,11 @@ from fastapi import APIRouter, Depends, Query
 from fastapi import status as http_status
 from infrastructure.container.main_container import MainContainer
 
+from adapters.inbound.api.dependencies.auth import get_current_user_id
 from adapters.inbound.api.payloads.payloads import (
     CreateTransactionRequestPayload,
     UpdateTransactionRequestPayload,
 )
-
-# Import the dependency for getting current user ID
-from backend.src.adapters.inbound.api.dependencies.auth import get_current_user_id
-
-# from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID # Removed
 
 router = APIRouter(tags=["transactions"])
 

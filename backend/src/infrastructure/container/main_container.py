@@ -1,5 +1,7 @@
 from dependency_injector import containers, providers
+
 from infrastructure.container.application_container import ApplicationContainer
+from infrastructure.container.auth_container import AuthContainer
 from infrastructure.container.domain_container import DomainContainer
 
 # Add import for containers
@@ -40,4 +42,10 @@ class MainContainer(containers.DeclarativeContainer):
         ApplicationContainer,
         persistence_container=persistence_container,
         domain_container=domain_container,
+    )
+
+    auth_container = providers.Container(
+        AuthContainer,
+        config=config,
+        persistence_container=persistence_container,
     )

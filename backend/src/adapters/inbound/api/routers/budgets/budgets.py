@@ -26,12 +26,12 @@ from fastapi import APIRouter, Depends, Query
 from fastapi import status as http_status
 from infrastructure.container.main_container import MainContainer
 
+from adapters.inbound.api.dependencies.auth import get_current_user_id
 from adapters.inbound.api.payloads.payloads import (
     CreateBudgetRequestPayload,
     CreateCategoryRequestPayload,
     StrategyPayload,
 )
-from backend.src.adapters.inbound.api.dependencies.auth import get_current_user_id
 
 router = APIRouter(tags=["budgets"])
 

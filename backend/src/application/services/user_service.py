@@ -6,10 +6,12 @@ from adapters.outbound.persistence.sql_alchemy.models import UserModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.security import get_password_hash, verify_password
-from application.services.unauthorized_user_error import UnauthorizedUserError
-from application.services.user_already_exists_error import UserAlreadyExistsError
-from application.services.user_not_found_error import UserNotFoundError
+from application.exceptions import (
+    UnauthorizedUserError,
+    UserAlreadyExistsError,
+    UserNotFoundError,
+)
+from application.services.security_service import SecurityService
 
 
 # Using TypedDict for user data structure for now,
@@ -22,7 +24,7 @@ class UserData(TypedDict):
 
 class UserService(ABC):
     @abstractmethod
-    async def create_user(self, email: str, password: str) -> None:
+    async def create_user(self, email: str, password: str) -> UserData:
         """
         Create a new user with the specified email and password.
 
@@ -71,23 +73,24 @@ class UserService(ABC):
 
 
 class SQLAlchemyUserService(UserService):
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    def __init__(self, session: AsyncSession, security_service: SecurityService):
+        self._session = session
+        self._security_service = security_service
 
-    async def create_user(self, email: str, password: str) -> None:
+    async def create_user(self, email: str, password: str) -> UserData:
         """
         Creates a new user in the database.
         Checks for email uniqueness.
         Hashes the password before storage.
         """
         stmt = select(UserModel).where(UserModel.email == email)
-        result = await self.session.execute(stmt)
+        result = await self._session.execute(stmt)
         existing_user = result.scalars().first()
 
         if existing_user:
             raise UserAlreadyExistsError(email)
 
-        hashed_password = await get_password_hash(password)
+        hashed_password = await self._security_service.get_password_hash(password)
 
         # Create new UserModel instance
         new_user = UserModel(
@@ -96,15 +99,16 @@ class SQLAlchemyUserService(UserService):
             hashed_password=hashed_password,
         )
 
-        self.session.add(new_user)
+        self._session.add(new_user)
         try:
-            await self.session.commit()
-            await self.session.refresh(
+            await self._session.commit()
+            await self._session.refresh(
                 new_user
             )  # To get the generated ID and other defaults
+            return UserData(id=str(new_user.id), email=new_user.email)
 
         except Exception as e:  # Catch potential DB errors
-            await self.session.rollback()
+            await self._session.rollback()
             print(f"Error creating user in DB: {e}")
             raise e
 
@@ -114,13 +118,15 @@ class SQLAlchemyUserService(UserService):
         Fetches a user by email and verifies the password.
         """
         stmt = select(UserModel).where(UserModel.email == email)
-        result = await self.session.execute(stmt)
+        result = await self._session.execute(stmt)
         user = result.scalars().first()
 
         if not user:
             raise UnauthorizedUserError(email)
 
-        if not await verify_password(password, user.hashed_password):
+        if not await self._security_service.verify_password(
+            password, user.hashed_password
+        ):
             raise UnauthorizedUserError(email)
 
         return UserData(id=str(user.id), email=user.email)
@@ -135,7 +141,7 @@ class SQLAlchemyUserService(UserService):
             raise UnauthorizedUserError(user_id) from exc
 
         stmt = select(UserModel).where(UserModel.id == user_uuid)
-        result = await self.session.execute(stmt)
+        result = await self._session.execute(stmt)
         user = result.scalars().first()
 
         if not user:
