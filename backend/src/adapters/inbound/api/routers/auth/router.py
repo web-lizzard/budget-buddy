@@ -4,6 +4,7 @@ from application.services.security_service import SecurityService  # Added
 from application.services.user_service import UserData, UserService
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from infrastructure.container.main_container import MainContainer
 
 from .schemas import (
@@ -11,12 +12,11 @@ from .schemas import (
     RefreshTokenRequest,
     TokenResponse,
     UserCreate,
-    UserLogin,
     UserResponse,
 )
 
 router = APIRouter(
-    prefix="auth",
+    prefix="/auth",
     tags=["Auth"],
     responses={404: {"description": "Not found"}},
 )
@@ -49,7 +49,7 @@ async def register_user(
 @router.post("/login", response_model=TokenResponse)
 @inject
 async def login_for_access_token(
-    form_data: UserLogin,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     user_service: UserService = Depends(
         Provide[MainContainer.auth_container.user_service]
     ),
@@ -59,7 +59,7 @@ async def login_for_access_token(
 ):
     """Logs in a user and returns access and refresh tokens."""
     authenticated_user = await user_service.authenticate_user(
-        email=form_data.email, password=form_data.password
+        email=form_data.username, password=form_data.password
     )
 
     # Use user's ID from authenticated_user for token subject (sub)

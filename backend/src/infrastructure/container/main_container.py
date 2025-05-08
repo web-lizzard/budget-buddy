@@ -48,4 +48,5 @@ class MainContainer(containers.DeclarativeContainer):
         AuthContainer,
         config=config,
         persistence_container=persistence_container,
+        database_container=database_container,
     )

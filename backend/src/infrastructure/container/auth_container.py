@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from infrastructure.container.database_container import DatabaseContainer
 from infrastructure.container.persistence_container import PersistenceContainer
+from infrastructure.settings import JWTSettings
 
 
 async def _get_session(
@@ -39,7 +40,7 @@ class AuthContainer(containers.DeclarativeContainer):
 
     security_service: providers.Factory[SecurityService] = providers.Factory(
         JWTSecurityService,
-        settings=config.security_settings,
+        settings=providers.Callable(lambda c: JWTSettings(**c["jwt"]), config),
         pwd_context=pwd_context,
     )
 
