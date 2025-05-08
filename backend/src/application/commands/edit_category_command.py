@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from .command import Command
 
@@ -16,8 +17,8 @@ class EditCategoryCommand(Command):
         limit: The new spending limit of the category
     """
 
-    category_id: str
-    budget_id: str
-    user_id: str
+    category_id: UUID
+    budget_id: UUID
+    user_id: UUID
     name: str | None = None
     limit: float | None = None

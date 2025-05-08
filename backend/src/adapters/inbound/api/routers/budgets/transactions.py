@@ -15,11 +15,11 @@ from fastapi import APIRouter, Depends, Query
 from fastapi import status as http_status
 from infrastructure.container.main_container import MainContainer
 
+from adapters.inbound.api.dependencies.auth import get_current_user_id
 from adapters.inbound.api.payloads.payloads import (
     CreateTransactionRequestPayload,
     UpdateTransactionRequestPayload,
 )
-from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID
 
 router = APIRouter(tags=["transactions"])
 
@@ -51,6 +51,7 @@ async def get_transactions(
     sort: str | None = Query(
         None, description="Field to sort by (e.g., 'occurred_date')"
     ),
+    user_id: UUID = Depends(get_current_user_id),  # Added user_id dependency
 ) -> PaginatedItemDTO[TransactionDTO]:
     """
     Retrieve a list of transactions for a specified budget.
@@ -64,8 +65,7 @@ async def get_transactions(
         limit: Number of items per page.
         sort: Field to sort results by.
     """
-    # TODO: Replace with actual authenticated user ID later
-    user_id = DEFAULT_USER_ID
+    print(f"Handling get_transactions for user_id: {user_id}, budget_id: {budget_id}")
     query = GetTransactionsQuery(
         budget_id=budget_id,
         user_id=user_id,
@@ -93,6 +93,7 @@ async def get_transaction_by_id(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),  # Added user_id dependency
 ) -> TransactionDTO:
     """
     Retrieve details for a specific transaction.
@@ -102,7 +103,9 @@ async def get_transaction_by_id(
         transaction_id: The UUID of the transaction to retrieve.
         query_handler: Injected query handler for retrieving transaction details.
     """
-    user_id = DEFAULT_USER_ID
+    print(
+        f"Handling get_transaction_by_id for user_id: {user_id}, budget_id: {budget_id}, transaction_id: {transaction_id}"
+    )
     query = GetTransactionByIdQuery(
         budget_id=budget_id, transaction_id=str(transaction_id), user_id=user_id
     )
@@ -124,6 +127,7 @@ async def create_transaction(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),  # Added user_id dependency
 ):
     """
     Create a new transaction in a budget category.
@@ -133,9 +137,7 @@ async def create_transaction(
         payload: Transaction creation data.
         command_handler: Injected handler for CreateTransactionCommand.
     """
-    # TODO: Replace with actual authenticated user ID later
-    # user_id should come from payload or auth context
-    user_id = DEFAULT_USER_ID
+    print(f"Handling create_transaction for user_id: {user_id}, budget_id: {budget_id}")
 
     command = CreateTransactionCommand(
         category_id=payload.category_id,
@@ -167,6 +169,7 @@ async def update_transaction(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),  # Added user_id dependency
 ):
     """
     Update an existing transaction.
@@ -177,7 +180,9 @@ async def update_transaction(
         payload: Updated transaction data.
         command_handler: Injected handler for EditTransactionCommand.
     """
-    user_id = DEFAULT_USER_ID
+    print(
+        f"Handling update_transaction for user_id: {user_id}, budget_id: {budget_id}, transaction_id: {transaction_id}"
+    )
 
     command = EditTransactionCommand(
         transaction_id=transaction_id,
@@ -209,6 +214,7 @@ async def delete_transaction(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),  # Added user_id dependency
 ):
     """
     Delete a transaction.
@@ -218,7 +224,9 @@ async def delete_transaction(
         transaction_id: The UUID of the transaction to delete.
         command_handler: Injected handler for DeleteTransactionCommand.
     """
-    user_id = DEFAULT_USER_ID
+    print(
+        f"Handling delete_transaction for user_id: {user_id}, budget_id: {budget_id}, transaction_id: {transaction_id}"
+    )
 
     command = DeleteTransactionCommand(
         transaction_id=transaction_id,

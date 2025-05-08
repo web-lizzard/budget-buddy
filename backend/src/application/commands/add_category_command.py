@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from application.commands.command import Command
 
@@ -15,7 +16,7 @@ class AddCategoryCommand(Command):
         limit: The spending limit of the category
     """
 
-    budget_id: str
-    user_id: str
+    budget_id: UUID
+    user_id: UUID
     name: str
     limit: float

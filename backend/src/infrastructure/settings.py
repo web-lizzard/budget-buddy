@@ -23,7 +23,7 @@ class APISettings(BaseModel):
 class LoggerSettings(BaseModel):
     """Logger configuration settings."""
 
-    level: str = "DEBUG"
+    level: str = "INFO"
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 
@@ -86,6 +86,15 @@ class RedisSettings(BaseModel):
         return self.url
 
 
+class JWTSettings(BaseModel):
+    """JWT configuration settings."""
+
+    secret_key: str = "your-secret-key"  # TODO: Change in production!
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30  # 30 minutes
+    refresh_token_expire_days: int = 7  # 7 days
+
+
 class Settings(BaseSettings):
     """Application settings."""
 
@@ -98,6 +107,7 @@ class Settings(BaseSettings):
     database: DatabaseSettings = DatabaseSettings()
     rabbitmq: RabbitMQSettings = RabbitMQSettings()
     redis: RedisSettings = RedisSettings()
+    jwt: JWTSettings = JWTSettings()
 
     model_config = SettingsConfigDict(
         env_file=".env",

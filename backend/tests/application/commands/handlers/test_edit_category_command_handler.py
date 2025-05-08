@@ -109,9 +109,9 @@ class TestEditCategoryCommandHandler:
         )
 
         command = EditCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             name="New Name",
             limit=500.0,
         )
@@ -164,9 +164,9 @@ class TestEditCategoryCommandHandler:
         )
 
         command = EditCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             name="New Name",
             limit=None,  # Not providing limit should keep the old one
         )
@@ -200,9 +200,9 @@ class TestEditCategoryCommandHandler:
         )
 
         command = EditCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             name=None,  # Not providing name should keep the old one
             limit=450.0,
         )
@@ -231,9 +231,9 @@ class TestEditCategoryCommandHandler:
         """Test that handling fails when category is not found."""
         # Arrange - empty budget
         command = EditCategoryCommand(
-            category_id=str(category_id),  # Non-existent category
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,  # Non-existent category
+            budget_id=budget_id,
+            user_id=user_id,
             name="New Name",
             limit=500.0,
         )
@@ -264,9 +264,9 @@ class TestEditCategoryCommandHandler:
         )
 
         command = EditCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             name="Category 2",  # Try to rename to existing name
             limit=150.0,
         )
@@ -298,9 +298,9 @@ class TestEditCategoryCommandHandler:
         )
 
         command = EditCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             name="Updated Category",
             limit=500.0,  # This plus other category (800) exceeds budget limit of 1000
         )
@@ -357,9 +357,9 @@ class TestEditCategoryCommandHandler:
         )
 
         command = EditCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             name="New Name",
             limit=500.0,
         )

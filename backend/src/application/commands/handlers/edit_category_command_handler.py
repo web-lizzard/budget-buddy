@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from domain.events.category.category_edited import CategoryEdited
 from domain.ports.budget_repository import BudgetRepository
 from domain.ports.clock import Clock
@@ -58,9 +56,9 @@ class EditCategoryCommandHandler(CommandHandler[EditCategoryCommand]):
             DuplicateCategoryNameError: If another category with the same name already exists
             CategoryLimitExceedsBudgetError: If the new category limit causes the total to exceed the budget limit
         """
-        budget_id = UUID(command.budget_id)
-        user_id = UUID(command.user_id)
-        category_id = UUID(command.category_id)
+        budget_id = command.budget_id
+        user_id = command.user_id
+        category_id = command.category_id
         version, budget = await self._budget_repository.find_by(budget_id, user_id)
 
         updated_category = budget.edit_category(

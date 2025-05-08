@@ -8,9 +8,8 @@ from domain.value_objects.budget_strategy import (
     MonthlyBudgetStrategyInput,
     YearlyBudgetStrategyInput,
 )
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, text
 from sqlalchemy import Enum as SQLAlchemyEnum
-from sqlalchemy import ForeignKey, Integer, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -107,7 +106,7 @@ class BudgetModel(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        ForeignKey("users.id"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
@@ -178,6 +177,7 @@ class BudgetModel(Base):
         back_populates="budget",
         cascade="all, delete-orphan",
     )
+    user: Mapped["UserModel"] = relationship(back_populates="budgets")
 
     __mapper_args__ = {"eager_defaults": True}
 
@@ -192,7 +192,7 @@ class CategoryModel(Base):
         ForeignKey("budgets.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        ForeignKey("users.id"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
@@ -239,6 +239,7 @@ class CategoryModel(Base):
             cascade="all, delete-orphan",
         )
     )
+    user: Mapped["UserModel"] = relationship(back_populates="categories")
 
     __mapper_args__ = {"eager_defaults": True}
 
@@ -253,7 +254,7 @@ class TransactionModel(Base):
         ForeignKey("categories.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        ForeignKey("users.id"), nullable=False, index=True
     )
 
     # Composite mapping for amount (Money value object) - UPDATED
@@ -302,6 +303,7 @@ class TransactionModel(Base):
     category: Mapped["CategoryModel"] = relationship(
         "CategoryModel", back_populates="transactions"
     )
+    user: Mapped["UserModel"] = relationship(back_populates="transactions")
 
     __mapper_args__ = {"eager_defaults": True}
 
@@ -316,7 +318,7 @@ class StatisticsRecordModel(Base):
         ForeignKey("budgets.id", ondelete="CASCADE"), nullable=False, index=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        ForeignKey("users.id"), nullable=False, index=True
     )
 
     # Link to the transaction that generated this record (optional)
@@ -399,6 +401,7 @@ class StatisticsRecordModel(Base):
         back_populates="statistics_record",
         cascade="all, delete-orphan",
     )
+    user: Mapped["UserModel"] = relationship(back_populates="statistics_records")
 
     __mapper_args__ = {"eager_defaults": True}
 
@@ -418,7 +421,7 @@ class CategoryStatisticsRecordModel(Base):
         ForeignKey("categories.id", ondelete="CASCADE"), nullable=False, index=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), nullable=False, index=True
+        ForeignKey("users.id"), nullable=False, index=True
     )
 
     # Composite mapping for current_balance - UPDATED
@@ -485,6 +488,39 @@ class CategoryStatisticsRecordModel(Base):
     )
     category: Mapped["CategoryModel"] = relationship(
         "CategoryModel", back_populates="category_statistics_records"
+    )
+    user: Mapped["UserModel"] = relationship(
+        back_populates="category_statistics_records"
+    )
+
+    __mapper_args__ = {"eager_defaults": True}
+
+
+class UserModel(Base):
+    __tablename__ = "users"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True
+    )
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, nullable=False, index=True
+    )
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )
+
+    # Relationships
+    budgets: Mapped[list["BudgetModel"]] = relationship(back_populates="user")
+    categories: Mapped[list["CategoryModel"]] = relationship(back_populates="user")
+    transactions: Mapped[list["TransactionModel"]] = relationship(back_populates="user")
+    statistics_records: Mapped[list["StatisticsRecordModel"]] = relationship(
+        back_populates="user"
+    )
+    category_statistics_records: Mapped[list["CategoryStatisticsRecordModel"]] = (
+        relationship(back_populates="user")
     )
 
     __mapper_args__ = {"eager_defaults": True}

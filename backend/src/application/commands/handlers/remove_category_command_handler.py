@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from domain.aggregates.transaction import Transaction
 from domain.events.category.category_removed import CategoryRemoved
 from domain.events.domain_event import DomainEvent
@@ -60,9 +58,9 @@ class RemoveCategoryCommandHandler(CommandHandler[RemoveCategoryCommand]):
         """
         transfer_policy = self._create_transfer_policy(command)
 
-        budget_id = UUID(command.budget_id)
-        user_id = UUID(command.user_id)
-        category_id = UUID(command.category_id)
+        budget_id = command.budget_id
+        user_id = command.user_id
+        category_id = command.category_id
 
         version, budget = await self._budget_repository.find_by(budget_id, user_id)
 
@@ -105,9 +103,7 @@ class RemoveCategoryCommandHandler(CommandHandler[RemoveCategoryCommand]):
         if command.handle_transactions == "move":
             return MoveToOtherCategoryTransferPolicyInput(
                 target_category_id=(
-                    UUID(command.target_category_id)
-                    if command.target_category_id
-                    else None
+                    command.target_category_id if command.target_category_id else None
                 )
             )
         raise InvalidTransferPolicyError(

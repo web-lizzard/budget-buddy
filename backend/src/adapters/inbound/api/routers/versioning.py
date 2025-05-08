@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from .auth.router import router as auth_router
 from .budgets import create_budget_router
 
 
@@ -15,5 +16,6 @@ def create_v0_router() -> APIRouter:
     )
 
     router.include_router(create_budget_router())
+    router.include_router(auth_router)
 
     return router

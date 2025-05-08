@@ -13,12 +13,12 @@ from fastapi import APIRouter, Depends
 from fastapi import status as http_status
 from infrastructure.container.main_container import MainContainer
 
+from adapters.inbound.api.dependencies.auth import get_current_user_id
 from adapters.inbound.api.payloads.payloads import (
     CreateCategoryRequestPayload,
     DeleteCategoryRequestPayload,
     UpdateCategoryRequestPayload,
 )
-from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID
 
 router = APIRouter(tags=["categories"])
 
@@ -38,6 +38,7 @@ async def get_category_by_id(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),
 ) -> CategoryDTO:
     """
     Retrieve details for a specific category in a budget.
@@ -47,7 +48,6 @@ async def get_category_by_id(
         category_id: The UUID of the category to retrieve.
         query_handler: Injected query handler for retrieving category details.
     """
-    user_id = DEFAULT_USER_ID
     query = GetCategoryByIdQuery(
         budget_id=budget_id, category_id=category_id, user_id=user_id
     )
@@ -69,6 +69,7 @@ async def create_category(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),
 ):
     """
     Create a new category within a given budget.
@@ -78,11 +79,9 @@ async def create_category(
         payload: Category creation data.
         command_handler: Injected handler for AddCategoryCommand.
     """
-    # TODO: Replace with actual authenticated user ID later
-    user_id = DEFAULT_USER_ID
     command = AddCategoryCommand(
-        user_id=str(user_id),
-        budget_id=str(budget_id),
+        user_id=user_id,
+        budget_id=budget_id,
         name=payload.name,
         limit=payload.limit.amount,
     )
@@ -107,6 +106,7 @@ async def update_category(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),
 ):
     """
     Update an existing category's details.
@@ -117,27 +117,23 @@ async def update_category(
         payload: Updated category data.
         command_handler: Injected handler for EditCategoryCommand.
     """
-    # TODO: Replace with actual authenticated user ID later
-    user_id = DEFAULT_USER_ID
     command = EditCategoryCommand(
-        user_id=str(user_id),
-        budget_id=str(budget_id),
-        category_id=str(category_id),
+        user_id=user_id,
+        budget_id=budget_id,
+        category_id=category_id,
         name=payload.name,
         limit=payload.limit.amount,
-        # Currency is handled by the domain based on budget
     )
     await command_handler.handle(command)
 
 
-@router.delete(
-    "/{budget_id}/categories/{category_id}", status_code=http_status.HTTP_200_OK
+@router.post(
+    "/{budget_id}/categories/{category_id}/delete", status_code=http_status.HTTP_200_OK
 )
 @inject
 async def delete_category(
     budget_id: UUID,
     category_id: UUID,
-    # Using payload instead of query param based on payloads.py and handler structure
     payload: DeleteCategoryRequestPayload,
     command_handler: Annotated[
         CommandHandler[RemoveCategoryCommand],
@@ -149,6 +145,7 @@ async def delete_category(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),
 ):
     """
     Delete a category from a budget.
@@ -161,20 +158,21 @@ async def delete_category(
         payload: Payload specifying the transfer policy for transactions.
         command_handler: Injected handler for RemoveCategoryCommand.
     """
-    # TODO: Replace with actual authenticated user ID later
-    # User ID from payload might be redundant if we use authenticated user context
-    user_id = DEFAULT_USER_ID  # Or use authenticated user ID
 
-    target_category_id_str = None
-    if payload.handle_transaction.type == "move":
-        # Make sure target_category_id is converted to string if handler expects it
-        target_category_id_str = str(payload.handle_transaction.target_category_id)
+    target_category_id_uuid = None
+    if (
+        payload.handle_transaction.type == "move"
+        and payload.handle_transaction.target_category_id
+    ):
+        target_category_id_uuid = UUID(
+            str(payload.handle_transaction.target_category_id)
+        )
 
     command = RemoveCategoryCommand(
-        user_id=str(user_id),
-        budget_id=str(budget_id),
-        category_id=str(category_id),
+        user_id=user_id,
+        budget_id=budget_id,
+        category_id=category_id,
         handle_transactions=payload.handle_transaction.type,
-        target_category_id=target_category_id_str,
+        target_category_id=target_category_id_uuid,
     )
     await command_handler.handle(command)

@@ -26,12 +26,12 @@ from fastapi import APIRouter, Depends, Query
 from fastapi import status as http_status
 from infrastructure.container.main_container import MainContainer
 
+from adapters.inbound.api.dependencies.auth import get_current_user_id
 from adapters.inbound.api.payloads.payloads import (
     CreateBudgetRequestPayload,
     CreateCategoryRequestPayload,
     StrategyPayload,
 )
-from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID
 
 router = APIRouter(tags=["budgets"])
 
@@ -77,6 +77,7 @@ async def get_budgets(
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(10, ge=1, le=100, description="Items per page"),
     sort: str | None = Query(None, description="Field to sort by"),
+    user_id: UUID = Depends(get_current_user_id),
 ) -> PaginatedItemDTO[BudgetDTO]:
     """
     Retrieve a list of budgets with pagination and filtering options.
@@ -88,7 +89,7 @@ async def get_budgets(
         sort: Field to sort results by
         query_handler: Injected query handler for retrieving budgets
     """
-    user_id = DEFAULT_USER_ID
+    print(f"Handling get_budgets for user_id: {user_id}")
     query = GetBudgetsQuery(
         status=status,
         page=page,
@@ -113,6 +114,7 @@ async def create_budget(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),
 ):
     """
     Create a new budget.
@@ -121,7 +123,7 @@ async def create_budget(
         payload: Budget creation data.
         command_handler: Injected handler for the CreateBudgetCommand.
     """
-    user_id = DEFAULT_USER_ID
+    print(f"Handling create_budget for user_id: {user_id}")
     command = CreateBudgetCommand(
         user_id=user_id,
         total_limit=payload.total_limit.amount,
@@ -148,6 +150,7 @@ async def get_budget_by_id(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),
 ) -> BudgetDTO:
     """
     Retrieve detailed information for a specific budget.
@@ -156,7 +159,7 @@ async def get_budget_by_id(
         budget_id: The UUID of the budget to retrieve.
         query_handler: Injected query handler for retrieving budget details.
     """
-    user_id = DEFAULT_USER_ID
+    print(f"Handling get_budget_by_id for user_id: {user_id}, budget_id: {budget_id}")
     query = GetBudgetByIdQuery(budget_id=budget_id, user_id=user_id)
     return await query_handler.handle(query)
 
@@ -175,6 +178,7 @@ async def deactivate_budget(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),
 ):
     """
     Deactivate a budget to prevent automatic renewal.
@@ -183,7 +187,7 @@ async def deactivate_budget(
         budget_id: The UUID of the budget to deactivate.
         command_handler: Injected handler for the DeactivateBudgetCommand.
     """
-    user_id = DEFAULT_USER_ID
+    print(f"Handling deactivate_budget for user_id: {user_id}, budget_id: {budget_id}")
     command = DeactivateBudgetCommand(user_id=user_id, budget_id=budget_id)
     await command_handler.handle(command)
 
@@ -202,6 +206,7 @@ async def renew_budget(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),
 ):
     """
     Manually trigger budget renewal based on the defined strategy.
@@ -210,7 +215,7 @@ async def renew_budget(
         budget_id: The UUID of the budget to renew.
         command_handler: Injected handler for the RenewBudgetCommand.
     """
-    user_id = DEFAULT_USER_ID
+    print(f"Handling renew_budget for user_id: {user_id}, budget_id: {budget_id}")
     command = RenewBudgetCommand(user_id=user_id, budget_id=budget_id)
     await command_handler.handle(command)
 
@@ -229,6 +234,7 @@ async def get_categories(
             ]
         ),
     ],
+    user_id: UUID = Depends(get_current_user_id),
 ) -> CategoryListDTO:
     """
     Retrieve all categories associated with a specific budget.
@@ -237,6 +243,6 @@ async def get_categories(
         budget_id: The UUID of the budget.
         query_handler: Injected query handler for retrieving categories.
     """
-    user_id = DEFAULT_USER_ID
+    print(f"Handling get_categories for user_id: {user_id}, budget_id: {budget_id}")
     query = GetCategoriesQuery(budget_id=budget_id, user_id=user_id)
     return await query_handler.handle(query)
