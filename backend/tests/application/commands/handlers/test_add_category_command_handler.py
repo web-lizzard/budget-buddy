@@ -89,8 +89,8 @@ class TestAddCategoryCommandHandler:
         """Test that handling the command adds a category to the budget."""
         # Arrange
         command = AddCategoryCommand(
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            budget_id=budget_id,
+            user_id=user_id,
             name="Groceries",
             limit=300.0,
         )
@@ -133,14 +133,14 @@ class TestAddCategoryCommandHandler:
         """Test that handling multiple commands adds multiple categories."""
         # Arrange
         command1 = AddCategoryCommand(
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            budget_id=budget_id,
+            user_id=user_id,
             name="Groceries",
             limit=300.0,
         )
         command2 = AddCategoryCommand(
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            budget_id=budget_id,
+            user_id=user_id,
             name="Entertainment",
             limit=200.0,
         )
@@ -176,8 +176,8 @@ class TestAddCategoryCommandHandler:
         )
 
         command = AddCategoryCommand(
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            budget_id=budget_id,
+            user_id=user_id,
             name="Groceries",  # Same name as existing category
             limit=200.0,
         )
@@ -202,8 +202,8 @@ class TestAddCategoryCommandHandler:
         ]
 
         command = AddCategoryCommand(
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            budget_id=budget_id,
+            user_id=user_id,
             name="One Too Many",
             limit=100.0,
         )
@@ -220,8 +220,8 @@ class TestAddCategoryCommandHandler:
         """Test that handling fails if category limit would exceed budget limit."""
         # Arrange
         command = AddCategoryCommand(
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            budget_id=budget_id,
+            user_id=user_id,
             name="Expensive Category",
             limit=2000.0,  # Exceeds budget limit of 1000 USD
         )

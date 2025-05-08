@@ -20,7 +20,7 @@ async def get_current_user_id(
     auth_service: SecurityService = Depends(
         MainContainer.auth_container.security_service
     ),
-) -> str:
+) -> UUID:
     """Dependency to get current user ID from a mandatory JWT access token."""
 
     user_id = auth_service.verify_token_and_extract_sub(
@@ -34,7 +34,7 @@ async def get_current_user_id(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return user_id
+    return UUID(user_id)
 
 
 async def get_current_user_id_optional(

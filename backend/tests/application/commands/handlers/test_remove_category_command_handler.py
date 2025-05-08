@@ -142,9 +142,9 @@ class TestRemoveCategoryCommandHandler:
         )
 
         command = RemoveCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             handle_transactions="delete",
         )
 
@@ -212,9 +212,9 @@ class TestRemoveCategoryCommandHandler:
         )
 
         command = RemoveCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             handle_transactions="delete",
         )
 
@@ -274,11 +274,11 @@ class TestRemoveCategoryCommandHandler:
         )
 
         command = RemoveCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             handle_transactions="move",
-            target_category_id=str(target_category_id),
+            target_category_id=target_category_id,
         )
 
         command_handler, _, transaction_repository, _ = _get_deps(
@@ -311,9 +311,9 @@ class TestRemoveCategoryCommandHandler:
         )
 
         command = RemoveCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             handle_transactions="invalid_policy",  # Invalid policy
         )
 
@@ -338,9 +338,9 @@ class TestRemoveCategoryCommandHandler:
         )
 
         command = RemoveCategoryCommand(
-            category_id=str(category_id),
-            budget_id=str(budget_id),
-            user_id=str(user_id),
+            category_id=category_id,
+            budget_id=budget_id,
+            user_id=user_id,
             handle_transactions="move",
             # Missing target_category_id
         )
