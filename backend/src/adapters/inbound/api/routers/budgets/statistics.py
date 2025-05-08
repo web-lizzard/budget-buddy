@@ -1,13 +1,14 @@
 from typing import Annotated
 from uuid import UUID
 
-from adapters.outbound.persistence.in_memory.database import DEFAULT_USER_ID
 from application.dtos.statistics_record_dto import StatisticsRecordDTO
 from application.queries.get_budget_statistics_query import GetBudgetStatisticsQuery
 from application.queries.handlers.query_handler import QueryHandler
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends
 from infrastructure.container.main_container import MainContainer
+
+from backend.src.adapters.inbound.api.dependencies.auth import get_current_user_id
 
 router = APIRouter(tags=["statistics"])
 
@@ -26,6 +27,7 @@ async def get_budget_statistics(
             ]
         ),
     ],
+    user_id_str: str = Depends(get_current_user_id),
 ) -> StatisticsRecordDTO:
     """
     Retrieve overall financial statistics for a budget.
@@ -34,8 +36,9 @@ async def get_budget_statistics(
         budget_id: The UUID of the budget.
         query_handler: Injected query handler for retrieving statistics.
     """
-    # TODO: Replace with actual authenticated user ID later
-    # User ID from payload might be redundant if we use authenticated user context
-    user_id = DEFAULT_USER_ID  # Or use authenticated user ID
+    user_id = UUID(user_id_str)
+    print(
+        f"Handling get_budget_statistics for user_id: {user_id}, budget_id: {budget_id}"
+    )
     query = GetBudgetStatisticsQuery(budget_id=budget_id, user_id=user_id)
     return await query_handler.handle(query)

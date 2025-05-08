@@ -18,6 +18,8 @@ dependencies = [
     "redis>=5.2.1",
     "sqlalchemy[asyncio]>=2.0.40",
     "uvicorn>=0.34.2",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
 ]
 
 [dependency-groups]
