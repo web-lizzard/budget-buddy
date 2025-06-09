@@ -35,7 +35,10 @@ export class BudgetService {
   async getBudgetById(budgetId: string): Promise<Budget> {
     try {
       const url = `${apiConfig.baseURL}/budgets/${budgetId}`;
-      const rawData = await $fetch<BudgetDTO>(url, { responseType: 'json', ...apiConfig.commonOptions });
+      const rawData = await $fetch<BudgetDTO>(url, {
+        responseType: 'json',
+        ...apiConfig.getAuthOptions()
+      });
       const parsed = BudgetSchema.safeParse(rawData);
 
       if (!parsed.success) {
@@ -76,7 +79,10 @@ export class BudgetService {
   async getBudgetStatistics(budgetId: string): Promise<BudgetStatistics | null> {
      const url = `${apiConfig.baseURL}/budgets/${budgetId}/statistics`;
     try {
-      const rawData = await $fetch<BudgetStatisticsDTO>(url, { responseType: 'json', ...apiConfig.commonOptions });
+      const rawData = await $fetch<BudgetStatisticsDTO>(url, {
+        responseType: 'json',
+        ...apiConfig.getAuthOptions()
+      });
       const parsed = BudgetStatisticsSchema.safeParse(rawData);
 
        if (!parsed.success) {
@@ -128,7 +134,7 @@ export class BudgetService {
              method: 'POST',
              body: payload,
              responseType: 'json',
-             ...apiConfig.commonOptions,
+             ...apiConfig.getAuthOptions(),
          });
      } catch (error: unknown) {
         if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
@@ -158,7 +164,7 @@ export class BudgetService {
                method: 'GET',
                responseType: 'json',
                params: queryParams, // Pass prepared query parameters
-               ...apiConfig.commonOptions,
+               ...apiConfig.getAuthOptions(),
            });
 
            // Validate the structure of the paginated response
@@ -212,7 +218,7 @@ export class BudgetService {
            await $fetch(url, {
                method: 'PATCH',
                responseType: 'json',
-               ...apiConfig.commonOptions,
+               ...apiConfig.getAuthOptions(),
            });
        } catch (error: unknown) {
            if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
@@ -232,7 +238,7 @@ export class BudgetService {
           await $fetch(url, {
               method: 'POST',
               responseType: 'json',
-              ...apiConfig.commonOptions,
+              ...apiConfig.getAuthOptions(),
           });
       } catch (error: unknown) {
           if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
@@ -255,7 +261,7 @@ export class BudgetService {
              method: 'POST',
              body: payload,
              responseType: 'json',
-             ...apiConfig.commonOptions,
+             ...apiConfig.getAuthOptions(),
          });
      } catch (error: unknown) {
         if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
@@ -279,7 +285,7 @@ export class BudgetService {
                method: 'PUT',
                body: payload,
                responseType: 'json',
-               ...apiConfig.commonOptions,
+               ...apiConfig.getAuthOptions(),
            });
        } catch (error: unknown) {
            if (error && typeof error === 'object' && 'status' in error && 'message' in error) {

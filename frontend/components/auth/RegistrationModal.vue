@@ -124,7 +124,7 @@ watch(() => props.isOpen, (newValue) => {
         </FormField>
 
         <DialogFooter class="pt-4">
-           <Button type="button" variant="outline" @click="handleCloseModal" :disabled="isSubmitting">
+           <Button type="button" variant="outline" :disabled="isSubmitting" @click="handleCloseModal">
             Anuluj
           </Button>
           <Button type="submit" :disabled="isSubmitting">

@@ -20,10 +20,12 @@ export interface UserCreate {
 /**
  * Represents the API response containing access and refresh tokens.
  */
+
+type TokenType = "bearer"
 export interface TokenResponse {
   access_token: string;
   refresh_token: string;
-  token_type?: string; // Typically "bearer"
+  token_type: TokenType;
 }
 
 /**
@@ -38,7 +40,7 @@ export interface RefreshTokenRequest {
  */
 export interface NewAccessTokenResponse {
   access_token: string;
-  token_type?: string; // Typically "bearer"
+  token_type: string; // Always "bearer"
 }
 
 /**
@@ -57,4 +59,4 @@ export interface AuthenticatedUser {
   id: string;
   email: string;
   // Add any other user-specific details needed in the frontend state
-} 
+}

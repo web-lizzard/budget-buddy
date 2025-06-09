@@ -1,4 +1,4 @@
-FROM node:20-alpine as build
+FROM node:20 as build
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # Development stage
-FROM node:20-alpine as development
+FROM node:20 as development
 
 WORKDIR /app
 
@@ -33,7 +33,7 @@ ENV NUXT_PORT=3000
 CMD ["npm", "run", "dev"]
 
 # Production stage
-FROM node:20-alpine as production
+FROM node:20 as production
 
 WORKDIR /app
 

@@ -17,7 +17,7 @@
       <LoginForm @submit="handleLoginSubmit" />
 
       <div class="mt-6 text-center">
-        <Button variant="link" @click="openRegistrationModal" class="text-indigo-600 hover:text-indigo-500">
+        <Button variant="link" class="text-indigo-600 hover:text-indigo-500" @click="openRegistrationModal">
           Nie masz konta? Zarejestruj się
         </Button>
       </div>
@@ -26,7 +26,7 @@
     <!-- Registration Modal -->
     <!-- Errors within the modal will be handled by its own form validation or if authStore.error is specifically for registration -->
     <RegistrationModal 
-      v-model:isOpen="isRegistrationModalOpen" 
+      v-model:is-open="isRegistrationModalOpen" 
       @submit="handleRegisterSubmit"
     />
     <!-- We can also pass authStore.isLoading to RegistrationModal if its submit button should be globally controlled -->
@@ -44,7 +44,10 @@ import { useAuthStore } from '@/stores/auth';
 import type { LoginFormValues } from '@/composables/useLoginForm'; // For login payload
 import type { RegistrationFormValues } from '@/composables/useRegistrationForm'; // For registration payload
 import { Button } from '@/components/ui/button'; // Shadcn button for "Zarejestruj się"
-import { Loader2 } from 'lucide-vue-next'; // For global loading indicator
+import { Loader2 } from 'lucide-vue-next';
+
+// Clear any auth errors when the component is unmounted (e.g., user navigates away)
+import { onUnmounted } from 'vue'; // For global loading indicator
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -89,9 +92,6 @@ watch(() => authStore.isAuthenticated, (newAuthStatus, oldAuthStatus) => {
     // unless you want to clear forms or show a message.
   }
 });
-
-// Clear any auth errors when the component is unmounted (e.g., user navigates away)
-import { onUnmounted } from 'vue';
 onUnmounted(() => {
   authStore.clearError();
 });
