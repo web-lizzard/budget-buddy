@@ -49,7 +49,7 @@ export class TransactionService {
                 method: 'POST',
                 body: payload,
                 responseType: 'json',
-                ...apiConfig.commonOptions,
+                ...apiConfig.getAuthOptions(),
             });
 
             if (response) {
@@ -92,7 +92,7 @@ export class TransactionService {
                 method: 'PUT',
                 body: payload,
                 responseType: 'json',
-                ...apiConfig.commonOptions,
+                ...apiConfig.getAuthOptions(),
             });
         } catch (error: unknown) {
              if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
@@ -113,7 +113,7 @@ export class TransactionService {
             await $fetch(url, {
                 method: 'DELETE',
                 responseType: 'json',
-                ...apiConfig.commonOptions,
+                ...apiConfig.getAuthOptions(),
             });
         } catch (error: unknown) {
              if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
@@ -138,7 +138,7 @@ export class TransactionService {
      try {
         // Use this.baseUrl which already includes the budgetId
         const options: FetchOptions = {
-            ...apiConfig.commonOptions,
+            ...apiConfig.getAuthOptions(),
             params: { limit, sort },
         };
         const rawData = await $fetch<z.infer<typeof PaginatedTransactionDTOSchema>>(this.baseUrl, {
@@ -198,7 +198,7 @@ export class TransactionService {
        // Add other filters here if needed
 
        const options: FetchOptions<'json'> = {
-         ...apiConfig.commonOptions,
+         ...apiConfig.getAuthOptions(),
          params: apiParams,
          responseType: 'json',
        };
