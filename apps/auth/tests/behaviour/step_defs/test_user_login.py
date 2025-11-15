@@ -16,7 +16,6 @@ def authentication_system_available():
     """Ensure the authentication system is ready."""
     assert False == True
 
-
 @given(parsers.parse('a user with email "{email}" and password "{password}" exists'))
 def user_exists(email, password):
     """Create a user for testing."""

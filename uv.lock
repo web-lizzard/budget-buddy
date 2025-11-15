@@ -41,6 +41,7 @@ source = { editable = "apps/auth" }
 dependencies = [
     { name = "core" },
     { name = "httpx" },
+    { name = "py-bcrypt" },
     { name = "pyjwt" },
 ]
 
@@ -48,6 +49,7 @@ dependencies = [
 requires-dist = [
     { name = "core", editable = "libs/core" },
     { name = "httpx", specifier = ">=0.28.1" },
+    { name = "py-bcrypt", specifier = ">=0.4" },
     { name = "pyjwt", specifier = ">=2.10.1" },
 ]
 
@@ -383,6 +385,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/a6/49/7845c2d7bf6474efd
 wheels = [
     { url = "https://files.pythonhosted.org/packages/27/11/574fe7d13acf30bfd0a8dd7fa1647040f2b8064f13f43e8c963b1e65093b/pre_commit-4.4.0-py2.py3-none-any.whl", hash = "sha256:b35ea52957cbf83dcc5d8ee636cbead8624e3a15fbfa61a370e42158ac8a5813", size = 226049, upload-time = "2025-11-08T21:12:10.228Z" },
 ]
+
+[[package]]
+name = "py-bcrypt"
+version = "0.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/68/b1/1c3068c5c4d2e35c48b38dcc865301ebfdf45f54507086ac65ced1fd3b3d/py-bcrypt-0.4.tar.gz", hash = "sha256:5fa13bce551468350d66c4883694850570f3da28d6866bb638ba44fe5eabda78", size = 27399, upload-time = "2013-08-25T00:37:06.141Z" }
 
 [[package]]
 name = "pydantic"

@@ -1,38 +1,50 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock
+import asyncio
+import functools
 
 import httpx
 import jwt
 import pytest
 
 
+def async_step(func):
+    """Decorator to make async functions work with pytest-bdd steps."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        return loop.run_until_complete(func(*args, **kwargs))
+    return wrapper
+
+
 @pytest.fixture
 def api_client():
-    """Fixture providing API client for testing."""
+    """Fixture providing API client for testing with async mocks."""
 
-    # This should be replaced with your actual API client
-    # For example: TestClient from FastAPI or requests.Session
     class MockAPIClient:
         def __init__(self):
             self.base_url = "http://localhost:8000"
-            self.client = httpx.Client(base_url=self.base_url)
-
             self.last_response = None
+            
+            # Create mock methods that raise NotImplementedError
+            self._post_mock = Mock(side_effect=NotImplementedError("API endpoint not implemented yet"))
+            self._get_mock = Mock(side_effect=NotImplementedError("API endpoint not implemented yet"))
 
         def post(self, endpoint: str, json: Dict[str, Any] = None, headers: Dict[str, str] = None):
-            # Mock implementation - replace with actual HTTP client
-            raise NotImplementedError("API endpoint not implemented yet")
+            """Mock POST request - raises NotImplementedError until implemented."""
+            return self._post_mock(endpoint, json=json, headers=headers)
 
         def get(self, endpoint: str, headers: Dict[str, str] = None):
-            # Mock implementation - replace with actual HTTP client
-            raise NotImplementedError("API endpoint not implemented yet")
-
-        def __del__(self):
-            self.client.close()
+            """Mock GET request - raises NotImplementedError until implemented."""
+            return self._get_mock(endpoint, headers=headers)
 
     client = MockAPIClient()
     yield client
-    del client
 
 
 @pytest.fixture
