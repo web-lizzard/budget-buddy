@@ -1,5 +1,5 @@
 target-version = "py311"
-line-length = 88
+line-length = 100
 
 src = ["apps", "libs"]
 
