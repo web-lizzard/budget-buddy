@@ -1,4 +1,4 @@
-from pydantic.utils import to_snake_lower
+from pydantic.alias_generators import to_snake
 
 
 class CoreError(Exception):
@@ -6,5 +6,5 @@ class CoreError(Exception):
 
     def __init__(self, message: str | None = None) -> None:
         self.message = message or "An unknown error occurred"
-        self.type = to_snake_lower(self.__class__.__name__.replace("Error", ""))
+        self.type = to_snake(self.__class__.__name__.replace("Error", ""))
         super().__init__(self.message)

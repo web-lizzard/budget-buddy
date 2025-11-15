@@ -13,7 +13,7 @@ select = [
 fixable = ["ALL"]
 
 [lint.isort]
-known-first-party = ["monetary", "budgets"]
+known-first-party = ["monetary", "budgets", "auth", "core"]
 
 [format]
 quote-style = "double"
