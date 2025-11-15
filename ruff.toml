@@ -1,7 +1,8 @@
 target-version = "py311"
 line-length = 100
 
-src = ["apps", "libs"]
+src = ["apps/*/src", "libs/*/src"]
+
 
 [lint]
 select = [
@@ -12,7 +13,7 @@ select = [
 fixable = ["ALL"]
 
 [lint.isort]
-known-first-party = ["apps", "libs"]
+known-first-party = ["monetary", "budgets"]
 
 [format]
 quote-style = "double"

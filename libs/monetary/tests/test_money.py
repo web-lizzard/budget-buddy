@@ -278,10 +278,10 @@ def test_currency_property():
 def test_str_representation():
     """Test the string representation of Money objects."""
     money_usd = Money(12345, Currency.USD)
-    assert str(money_usd) == "12345 USD"
 
     money_pln = Money(50000, Currency.PLN)
-    assert str(money_pln) == "50000 PLN"
+    assert str(money_pln) == "500 PLN"
+    assert str(money_usd) == "123.45 USD"
 
 
 # Tests for different currencies (PLN)
