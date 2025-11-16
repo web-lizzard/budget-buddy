@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+
 from auth.domain.exceptions.weak_password import WeakPasswordError
+
 
 @dataclass(frozen=True)
 class Password:

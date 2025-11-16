@@ -1,16 +1,16 @@
-from datetime import UTC, datetime, timedelta
-from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock
 import asyncio
 import functools
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict
+from unittest.mock import Mock
 
-import httpx
 import jwt
 import pytest
 
 
 def async_step(func):
     """Decorator to make async functions work with pytest-bdd steps."""
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -19,6 +19,7 @@ def async_step(func):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
         return loop.run_until_complete(func(*args, **kwargs))
+
     return wrapper
 
 
@@ -30,10 +31,14 @@ def api_client():
         def __init__(self):
             self.base_url = "http://localhost:8000"
             self.last_response = None
-            
+
             # Create mock methods that raise NotImplementedError
-            self._post_mock = Mock(side_effect=NotImplementedError("API endpoint not implemented yet"))
-            self._get_mock = Mock(side_effect=NotImplementedError("API endpoint not implemented yet"))
+            self._post_mock = Mock(
+                side_effect=NotImplementedError("API endpoint not implemented yet")
+            )
+            self._get_mock = Mock(
+                side_effect=NotImplementedError("API endpoint not implemented yet")
+            )
 
         def post(self, endpoint: str, json: Dict[str, Any] = None, headers: Dict[str, str] = None):
             """Mock POST request - raises NotImplementedError until implemented."""

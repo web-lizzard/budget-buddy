@@ -1,6 +1,7 @@
-from auth.domain.ports.user_repository import UserRepository
 from auth.domain.entities.user import User
+from auth.domain.ports.user_repository import UserRepository
 from auth.domain.value_objects.email import Email
+
 
 class InMemoryUserRepository(UserRepository):
     def __init__(self, users: list[User] | None = None):

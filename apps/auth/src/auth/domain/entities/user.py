@@ -12,6 +12,10 @@ class User:
         self._password = password
 
     @property
+    def user_id(self) -> str:
+        return self._id
+
+    @property
     def password(self) -> str:
         return self._password
 

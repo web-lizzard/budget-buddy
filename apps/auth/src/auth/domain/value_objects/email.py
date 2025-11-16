@@ -1,5 +1,7 @@
-from dataclasses import dataclass   
+from dataclasses import dataclass
+
 from auth.domain.exceptions.invalid_email import InvalidEmailError
+
 
 @dataclass(frozen=True)
 class Email:

@@ -1,5 +1,5 @@
 from core import CoreError
 
 
-class InvalidEmailError(CoreError):
+class UserNotFoundError(CoreError):
     pass
