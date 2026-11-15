@@ -1,0 +1,6 @@
+# Agent, Tab, Inline Edit, and @ mentions. Terminal and MCP tools are not covered.
+# .gitignore and the default ignore list only keep these files out of the index.
+**/.env
+**/.env.*
+!**/.env.example
+**/.devcontainer/devcontainer.env

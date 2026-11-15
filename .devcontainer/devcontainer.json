@@ -1,0 +1,64 @@
+{
+	"name": "Dev Container",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "22"
+		}
+	},
+	"remoteUser": "dev",
+	"shutdownAction": "none",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"eamodio.gitlens"
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"zsh": {
+						"path": "/usr/bin/zsh"
+					}
+				},
+				"files.exclude": {
+					"**/.ordo/worktrees": true
+				},
+				"search.exclude": {
+					"**/.ordo/worktrees": true
+				},
+				"files.watcherExclude": {
+					"**/.ordo/worktrees": true
+				}
+			}
+		}
+	},
+	"initializeCommand": "bash ${localWorkspaceFolder}/.devcontainer/initialize.sh",
+	"runArgs": [
+		"--hostname",
+		"devcontainer",
+		"--env-file",
+		"${localWorkspaceFolder}/.devcontainer/devcontainer.env",
+		"--env-file",
+		"${localWorkspaceFolder}/.devcontainer/git.env"
+	],
+	"mounts": [
+		"source=claude-code,target=/home/dev/.claude,type=volume",
+		"source=cursor-agent,target=/home/dev/.config/cursor,type=volume",
+		"source=codex,target=/home/dev/.codex,type=volume",
+		"source=${localEnv:HOME}/.config/tmux,target=/home/dev/.config/tmux,type=bind,readonly",
+		"source=${localEnv:HOME}/.config/nvim,target=/home/dev/.config/nvim,type=bind,readonly",
+		"source=${localEnv:HOME}/.local/state/omarchy/current/theme,target=/home/dev/.local/state/omarchy/current/theme,type=bind,readonly",
+		"source=nvim-data,target=/home/dev/.local/share/nvim,type=volume",
+		"source=${localEnv:HOME}/.config/lazygit,target=/home/dev/.config/lazygit,type=bind,readonly",
+		"source=${localEnv:HOME}/.config/starship.toml,target=/home/dev/.config/starship.toml,type=bind,readonly",
+		"source=${localEnv:XDG_RUNTIME_DIR}/gcr,target=/run/host-ssh,type=bind"
+	],
+	"containerEnv": {
+		"CLAUDE_CONFIG_DIR": "/home/dev/.claude",
+		"SHELL": "/usr/bin/zsh",
+		"SSH_AUTH_SOCK": "/run/host-ssh/ssh"
+	},
+	"postCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-create.sh"
+}

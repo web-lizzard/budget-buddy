@@ -1,0 +1,312 @@
+{
+  "artifacts": {
+    "archive": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.0.1",
+      "release": "v1.0.7",
+      "version": "1.3.0"
+    },
+    "blind-review": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "change-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.3",
+      "version": "1.1.0"
+    },
+    "change-scratchpad": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.2"
+    },
+    "commit-convention": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.5",
+      "version": "1.4.0"
+    },
+    "container-map": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.3",
+      "version": "1.1.0"
+    },
+    "core": {
+      "kind": "capability",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.8",
+      "version": "1.10.0"
+    },
+    "discover-contracts": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.1.0",
+      "release": "v1.0.6",
+      "version": "1.2.0"
+    },
+    "duck": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.1.0",
+      "release": "v1.0.6",
+      "version": "1.2.0"
+    },
+    "duck-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.3",
+      "version": "1.1.0"
+    },
+    "effort": {
+      "kind": "capability",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "effort-roadmap": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.2",
+      "version": "1.1.0"
+    },
+    "effort-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.3",
+      "version": "1.1.0"
+    },
+    "frame": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.1.0",
+      "release": "v1.0.6",
+      "version": "1.2.0"
+    },
+    "frame-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.5",
+      "version": "0.1.0"
+    },
+    "governance": {
+      "kind": "capability",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "ideation": {
+      "kind": "capability",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "impl-review": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.1.1",
+      "release": "v1.0.7",
+      "version": "1.5.0"
+    },
+    "impl-status": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.3.1"
+    },
+    "implement": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.1.0",
+      "release": "v1.0.7",
+      "version": "1.5.0"
+    },
+    "init": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.0.2",
+      "release": "v1.0.6",
+      "version": "1.1.0"
+    },
+    "lesson": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "lesson-format": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "lesson-reading": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "log-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.5",
+      "version": "1.0.0"
+    },
+    "model-tiers": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "new-container": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.1.0",
+      "release": "v1.0.6",
+      "version": "1.2.0"
+    },
+    "plan": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.3",
+      "version": "1.1.0"
+    },
+    "plan-appenders": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "plan-review": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.2.0"
+    },
+    "plan-review-format": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "prd": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.6",
+      "version": "1.1.0"
+    },
+    "proof-ritual": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.5",
+      "version": "1.2.0"
+    },
+    "rebase": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "research": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.1.0",
+      "release": "v1.0.6",
+      "version": "1.3.0"
+    },
+    "review-defence": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "review-evidence": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.1.0"
+    },
+    "roadmap": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.1.1",
+      "release": "v1.0.6",
+      "version": "1.2.0"
+    },
+    "stories-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.3",
+      "version": "1.1.0"
+    },
+    "testing-conventions": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.5",
+      "version": "0.1.0"
+    },
+    "testing-shape": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.1.0",
+      "release": "v1.0.6",
+      "version": "1.2.0"
+    },
+    "todos-format": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.7",
+      "version": "1.3.0"
+    },
+    "unit-test": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.3.0",
+      "release": "v1.0.6",
+      "version": "1.6.0"
+    },
+    "user-stories": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.6",
+      "version": "1.1.0"
+    },
+    "walk": {
+      "kind": "skill",
+      "pinned": false,
+      "previousVersion": "1.0.0",
+      "release": "v1.0.3",
+      "version": "1.1.0"
+    },
+    "worktree-prep": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.8",
+      "version": "0.2.0"
+    }
+  },
+  "capabilities": [
+    "core",
+    "effort",
+    "governance",
+    "ideation"
+  ]
+}
